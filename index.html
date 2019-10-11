@@ -1,72 +1,117 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+    <!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
-  <link href="https://gmpg.org/xfn/11" rel="profile">
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.58.3" />
-
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Globs&#39; blog</title>
-
-  
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/print.css" media="print">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/poole.css">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/syntax.css">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/hyde.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700">
-
-
-  
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
-  <link rel="shortcut icon" href="/favicon.png">
-
-  
-  <link href="https://globsguo.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Globs' blog" />
-  
+	<meta name="generator" content="Hugo 0.58.3" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> Globs&#39; blog &middot; Globs&#39; blog </title>
+    
+    <link rel="stylesheet" type="text/css" href="https://globsguo.github.io/css/uno.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://globsguo.github.io/css/lightGallery.css" />
+    
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <link href="https://globsguo.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Globs&#39; blog" />
+    
+    <script src="https://globsguo.github.io/js/jquery.min.js"></script>
+    <script src="https://globsguo.github.io/js/main.min.js">
+    </script>
 </head>
 
-  <body class=" ">
-  <aside class="sidebar">
-  <div class="container sidebar-sticky">
-    <div class="sidebar-about">
-      <a href="https://globsguo.github.io"><h1>Globs&#39; blog</h1></a>
-      <p class="lead">
-      An elegant open source and mobile first theme for <a href="http://hugo.spf13.com">hugo</a> made by <a href="http://twitter.com/mdo">@mdo</a>. Originally made for Jekyll.
-      </p>
-    </div>
-
-    <nav>
-      <ul class="sidebar-nav">
-        <li><a href="https://globsguo.github.io">Home</a> </li>
+    <body>
+        <div id="scriptHeader">
+    <span class="mobile btn-mobile-menu">
+            <i class="fa fa-bars btn-mobile-menu__icon"></i>
+            <i class="fa fa-times btn-mobile-close__icon hidden"> </i>
+    </span>
+    <header class="
         
-      </ul>
-    </nav>
-
-    <p>&copy; 2019. All rights reserved. </p>
-  </div>
-</aside>
-
-    <main class="content container">
-    <div class="posts">
-<article class="post">
-  <h1 class="post-title">
-    <a href="https://globsguo.github.io/printk/">printk函数</a>
-  </h1>
-  <time datetime="0001-01-01T00:00:00Z" class="post-date">Mon, Jan 1, 0001</time>
-  1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
-/* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1.1. struct printk_log 上述变量在 register_console 函数中都有涉及，printk日志系统中最重要的结构体是 struct printk_log ：
-struct printk_log { u64 ts_nsec; /* 时间戳，ns计 */ u16 len; /* 整条记录的长度 */ u16 text_len; /* 文本缓冲区的大小 */ u16 dict_len; /* 字典缓冲区的大小 */ u8 facility; /* syslog设备 */ u8 flags:5; /* 内部记录标志 */ u8 level:3; /* syslog等级 */ };  代码中对于 printk_log 的说明如下：
-  
-  <div class="read-more-link">
-    <a href="/printk/">Read More…</a>
-  </div>
-  
-</article>
+        
+                panel-cover
+        
+        " >
+    <div class="panel-main">
+        <div class="panel-main__inner panel-inverted">
+            <div class="panel-main__content"> 
+                <h1 class="panel-cover__title panel-title">
+                    <a href="https://globsguo.github.io/"  title="link to homepage for Globs&#39; blog">Globs&#39; blog</a>
+                </h1>
+                <hr class="panel-cover__divider" />
+                <p class="panel-cover__description">  This site is built using <a href="http://gohugo.io">hugo</a> and the theme is built by <a href="http://fredrikloch.me">Fredrik</a> if you enjoy it, it is available at <a href="https://github.com/SenjinDarashiva/hugo-uno">github</a>  </p>
+                <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                <div class="navigation-wrapper">
+                    <nav class="cover-navigation cover-navigation--primary">
+                        <ul class="navigation">
+                            <li class="navigation__item"><a href="https://globsguo.github.io#blog" title="link to Globs&#39; blog blog" class="blog-button">Blog</a> </li></br>
+                            
+                            
+                       </ul>
+                    </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation">    </br>    </ul>
+</nav>
+ </div>
+            </div>
+        </div>
+        <div class="panel-cover--overlay"></div>
+    </div>
+</header>
 </div>
-    </main>
+<noscript>
+    <style>
+        #scriptHeader {display:none;}
+        .navigation-wrapper{
+            display: block;
+            top: 0;
+        }
+    </style>
 
-    
-  </body>
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url()">
+        <div class="panel-main">
+            <div class="panel-main__inner panel-inverted">
+                <div class="panel-main__content"> 
+                    <h1 class="panel-cover__title panel-title">
+                        <a href="https://globsguo.github.io/"  title="link to homepage for Globs&#39; blog">Globs&#39; blog</a>
+                    </h1>
+                    <hr class="panel-cover__divider" />
+                    <p class="panel-cover__description">  This site is built using <a href="http://gohugo.io">hugo</a> and the theme is built by <a href="http://fredrikloch.me">Fredrik</a> if you enjoy it, it is available at <a href="https://github.com/SenjinDarashiva/hugo-uno">github</a>  </p>
+                    <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                    <div class="navigation-wrapper">
+                        <nav class="cover-navigation cover-navigation--primary">
+                            <ul class="navigation">
+                                <li class="navigation__item"><a href="https://globsguo.github.io/#blog" title="link to Globs&#39; blog blog" class="blog-button">Blog</a> </li></br>
+                                
+                                
+                           </ul>
+                        </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation">    </br>    </ul>
+</nav>
+ </div>
+                </div>
+            </div>
+            <div class="panel-cover--overlay"></div>
+        </div>
+    </header>
+</noscript>
+
+        <div class="content-wrapper">
+            <div class="content-wrapper__inner">
+                <section id="main">
+                    <div>
+                        
+                            
+                        
+                    </div>
+                    </br>
+                    <h4>
+                        <a href="https://globsguo.github.io/post/">Archive</a>
+                    </h4>
+                </section>
+            </div>
+        </div>
+        <footer class="footer"></footer>
+
+        
+    </body>
 </html>

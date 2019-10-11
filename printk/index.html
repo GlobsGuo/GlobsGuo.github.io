@@ -1,57 +1,103 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+    <!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
-  <link href="https://gmpg.org/xfn/11" rel="profile">
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="generator" content="Hugo 0.58.3" />
-
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>printk函数 &middot; Globs&#39; blog</title>
-
-  
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/print.css" media="print">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/poole.css">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/syntax.css">
-  <link type="text/css" rel="stylesheet" href="https://globsguo.github.iocss/hyde.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700">
-
-
-  
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
-  <link rel="shortcut icon" href="/favicon.png">
-
-  
-  
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title> printk函数 &middot; Globs&#39; blog </title>
+    
+    <link rel="stylesheet" type="text/css" href="https://globsguo.github.io/css/uno.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://globsguo.github.io/css/lightGallery.css" />
+    
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <link href="" rel="alternate" type="application/rss+xml" title="Globs&#39; blog" />
+    
+    <script src="https://globsguo.github.io/js/jquery.min.js"></script>
+    <script src="https://globsguo.github.io/js/main.min.js">
+    </script>
 </head>
 
-  <body class=" ">
-  <aside class="sidebar">
-  <div class="container sidebar-sticky">
-    <div class="sidebar-about">
-      <a href="https://globsguo.github.io"><h1>Globs&#39; blog</h1></a>
-      <p class="lead">
-      An elegant open source and mobile first theme for <a href="http://hugo.spf13.com">hugo</a> made by <a href="http://twitter.com/mdo">@mdo</a>. Originally made for Jekyll.
-      </p>
-    </div>
-
-    <nav>
-      <ul class="sidebar-nav">
-        <li><a href="https://globsguo.github.io">Home</a> </li>
+    <body>
+        <div id="scriptHeader">
+    <span class="mobile btn-mobile-menu">
+            <i class="fa fa-bars btn-mobile-menu__icon"></i>
+            <i class="fa fa-times btn-mobile-close__icon hidden"> </i>
+    </span>
+    <header class="
         
-      </ul>
-    </nav>
+            panel-cover panel-cover--collapsed
+        " >
+    <div class="panel-main">
+        <div class="panel-main__inner panel-inverted">
+            <div class="panel-main__content"> 
+                <h1 class="panel-cover__title panel-title">
+                    <a href="https://globsguo.github.io/"  title="link to homepage for Globs&#39; blog">Globs&#39; blog</a>
+                </h1>
+                <hr class="panel-cover__divider" />
+                <p class="panel-cover__description">  This site is built using <a href="http://gohugo.io">hugo</a> and the theme is built by <a href="http://fredrikloch.me">Fredrik</a> if you enjoy it, it is available at <a href="https://github.com/SenjinDarashiva/hugo-uno">github</a>  </p>
+                <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                <div class="navigation-wrapper">
+                    <nav class="cover-navigation cover-navigation--primary">
+                        <ul class="navigation">
+                            <li class="navigation__item"><a href="https://globsguo.github.io#blog" title="link to Globs&#39; blog blog" class="blog-button">Blog</a> </li></br>
+                            
+                            
+                       </ul>
+                    </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation">    </br>    </ul>
+</nav>
+ </div>
+            </div>
+        </div>
+        <div class="panel-cover--overlay"></div>
+    </div>
+</header>
+</div>
+<noscript>
+    <style>
+        #scriptHeader {display:none;}
+        .navigation-wrapper{
+            display: block;
+            top: 0;
+        }
+    </style>
 
-    <p>&copy; 2019. All rights reserved. </p>
-  </div>
-</aside>
+    <header class="panel-cover panel-cover--collapsed" style="background-image: url()">
+        <div class="panel-main">
+            <div class="panel-main__inner panel-inverted">
+                <div class="panel-main__content"> 
+                    <h1 class="panel-cover__title panel-title">
+                        <a href="https://globsguo.github.io/"  title="link to homepage for Globs&#39; blog">Globs&#39; blog</a>
+                    </h1>
+                    <hr class="panel-cover__divider" />
+                    <p class="panel-cover__description">  This site is built using <a href="http://gohugo.io">hugo</a> and the theme is built by <a href="http://fredrikloch.me">Fredrik</a> if you enjoy it, it is available at <a href="https://github.com/SenjinDarashiva/hugo-uno">github</a>  </p>
+                    <hr class="panel-cover__divider panel-cover__divider--secondary" />
+                    <div class="navigation-wrapper">
+                        <nav class="cover-navigation cover-navigation--primary">
+                            <ul class="navigation">
+                                <li class="navigation__item"><a href="https://globsguo.github.io/#blog" title="link to Globs&#39; blog blog" class="blog-button">Blog</a> </li></br>
+                                
+                                
+                           </ul>
+                        </nav> <nav class="cover-navigation navigation--social">
+    <ul class="navigation">    </br>    </ul>
+</nav>
+ </div>
+                </div>
+            </div>
+            <div class="panel-cover--overlay"></div>
+        </div>
+    </header>
+</noscript>
 
-    <main class="content container">
-    <div class="post">
-  <h1>printk函数</h1>
-  <time datetime=0001-01-01T00:00:00Z class="post-date">Mon, Jan 1, 0001</time>
-  
+        <div class="content-wrapper">
+            <div class="content-wrapper__inner">
+                <div class="post">
+                    <h1>printk函数</h1>
+                    <span class="post-date">Mon, Jan 1, 0001</span>
+                    
 
 <h1 id="1-printk-c中的重要变量">1. printk.c中的重要变量</h1>
 
@@ -1193,11 +1239,9 @@ out_restore_irqs:
 }
 </code></pre>
 
-</div>
-
-
-    </main>
-
+                </div>
+            </div>
+        </div>
+    </body>
     
-  </body>
 </html>
