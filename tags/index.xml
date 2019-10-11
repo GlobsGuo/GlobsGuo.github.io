@@ -6,37 +6,9 @@
     <description>Recent content in Tags on Globs&#39; blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>console_unlock</title>
-      <link>https://globsguo.github.io/tags/console_unlock/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/console_unlock/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>cont</title>
-      <link>https://globsguo.github.io/tags/cont/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/cont/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>printk</title>
-      <link>https://globsguo.github.io/tags/printk/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/printk/</guid>
-      <description></description>
-    </item>
     
   </channel>
 </rss>

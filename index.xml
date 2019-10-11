@@ -6,20 +6,9 @@
     <description>Recent content on Globs&#39; blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>printk函数</title>
-      <link>https://globsguo.github.io/posts/printk/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/posts/printk/</guid>
-      <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
-/* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1.</description>
-    </item>
     
   </channel>
 </rss>
