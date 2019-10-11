@@ -5,17 +5,16 @@
     <link>/</link>
     <description>Recent content on </description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>printk函数</title>
-      <link>/printk/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <link>/posts/printk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/printk/</guid>
+      <guid>/posts/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
 /* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1.1. struct printk_log 上述变量在 register_console 函数中都有涉及，printk日志系统中最重要的结构体是 struct printk_log ：
 struct printk_log { u64 ts_nsec; /* 时间戳，ns计 */ u16 len; /* 整条记录的长度 */ u16 text_len; /* 文本缓冲区的大小 */ u16 dict_len; /* 字典缓冲区的大小 */ u8 facility; /* syslog设备 */ u8 flags:5; /* 内部记录标志 */ u8 level:3; /* syslog等级 */ };  代码中对于 printk_log 的说明如下：</description>
