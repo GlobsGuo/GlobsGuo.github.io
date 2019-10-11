@@ -6,7 +6,7 @@
     <description>Recent content on Globs&#39; blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 11 Oct 2019 11:28:06 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>printk函数</title>
       <link>https://globsguo.github.io/posts/printk/</link>
-      <pubDate>Fri, 11 Oct 2019 11:28:06 +0800</pubDate>
+      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/posts/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
