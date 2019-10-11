@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head>
+  <link href="https://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="generator" content="Hugo 0.58.3" />
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>printk函数 &middot; My New Hugo Site</title>
+
+  
+  <link type="text/css" rel="stylesheet" href="https://github.com/globsguo.github.io/css/print.css" media="print">
+  <link type="text/css" rel="stylesheet" href="https://github.com/globsguo.github.io/css/poole.css">
+  <link type="text/css" rel="stylesheet" href="https://github.com/globsguo.github.io/css/syntax.css">
+  <link type="text/css" rel="stylesheet" href="https://github.com/globsguo.github.io/css/hyde.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700">
+
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  
+</head>
+
+  <body class=" ">
+  <aside class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <a href="https://github.com/globsguo.github.io/"><h1>My New Hugo Site</h1></a>
+      <p class="lead">
+      An elegant open source and mobile first theme for <a href="http://hugo.spf13.com">hugo</a> made by <a href="http://twitter.com/mdo">@mdo</a>. Originally made for Jekyll.
+      </p>
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li><a href="https://github.com/globsguo.github.io/">Home</a> </li>
+        
+      </ul>
+    </nav>
+
+    <p>&copy; 2019. All rights reserved. </p>
+  </div>
+</aside>
+
+    <main class="content container">
+    <div class="post">
+  <h1>printk函数</h1>
+  <time datetime=0001-01-01T00:00:00Z class="post-date">Mon, Jan 1, 0001</time>
+  
+
+<h1 id="1-printk-c中的重要变量">1. printk.c中的重要变量</h1>
+
+<p>首先介绍一些  <em>kernel/printk/printk.c</em>  中定义的一些十分重要的变量。</p>
+
+<pre><code class="language-C">/* console_sem用来保护对console_drivers列表的访问 */
+static DEFINE_SEMAPHORE(console_sem);
+/* console_drivers保存所有的控制台驱动，所有的控制台
+   驱动都调用register_console函数注册到console_drivers
+   列表中 */
+struct console *console_drivers;
+EXPORT_SYMBOL_GPL(console_drivers);
+
+/* 注释说这两个变量用来调试VT代码 */
+static int console_locked, console_suspended;
+
+/* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */
+static struct console *exclusive_console;
+
+/* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数
+   会向其中增加元素，数组长度为8 */
+static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES];
+
+/* 控制台代码可能会调用schedule()标志 */
+static int console_may_schedule;
+</code></pre>
+
+<h2 id="1-1-struct-printk-log">1.1. struct printk_log</h2>
+
+<p>上述变量在 <code>register_console</code>  函数中都有涉及，printk日志系统中最重要的结构体是 <strong>struct printk_log</strong>  ：</p>
+
+<pre><code class="language-C">struct printk_log {
+    u64 ts_nsec;    /* 时间戳，ns计 */
+    u16 len;    /* 整条记录的长度 */
+    u16 text_len;   /* 文本缓冲区的大小 */
+    u16 dict_len;   /* 字典缓冲区的大小 */
+    u8 facility;    /* syslog设备 */
+    u8 flags:5; /* 内部记录标志 */
+    u8 level:3; /* syslog等级 */
+};
+</code></pre>
+
+<p>代码中对于 <code>printk_log</code>  的说明如下：</p>
+
+<blockquote>
+<p>The printk log buffer consists of a chain of concatenated variable length records. Every record starts with a record header, containing the overall length of the record.</p>
+</blockquote>
+
+<p>printk日志缓冲区由一系列变长的记录组成，每条记录以一个记录首部信息（ <strong>struct printk_log</strong> ）开始，包含记录的所有长度。</p>
+
+<blockquote>
+<p>The heads to the first and last entry in the buffer, as well as the sequence numbers of these both entries are maintained when messages are stored..</p>
+</blockquote>
+
+<p>缓冲区的第一项和最后一项的首部信息，以及这两项的序列号都会在存储信息时更新。</p>
+
+<blockquote>
+<p>If the heads indicate available messages, the length in the header tells the start next message. A length == 0 for the next message indicates a wrap-around to the beginning of the buffer.</p>
+</blockquote>
+
+<p>如果首部信息显示有可用的信息，首部的长度信息显示了下一条信息的起始位置，length=0表示下一条信息的起始位置在缓冲区的开头。</p>
+
+<blockquote>
+<p>Every record carries the monotonic timestamp in microseconds, as well as the standard userspace syslog level and syslog facility. The usual kernel messages use LOG_KERN; userspace-injected messages always carry a matching syslog facility, by default LOG_USER. The origin of every message can be reliably determined that way.</p>
+</blockquote>
+
+<p>每条记录包含线性增加的时间戳信息，以及标准的用户空间syslog等级和syslog设备，普通的内核信息使用LOG_KERN，用户空间嵌入的信息通常携带一个匹配的syslog设备，通常为LOG_USER。每一条信息的源头可以通过这个信息判断。</p>
+
+<blockquote>
+<p>The human readable log message directly follows the message header. The length of the message text is stored in the header, the stored message is not terminated.</p>
+</blockquote>
+
+<p>可读的日志信息紧跟在信息的首部之后（因此， <code>log_text</code>  函数可以得到文本的地址），文本的长度保存在首部内，保存的信息没有终止符。</p>
+
+<blockquote>
+<p>Optionally, a message can carry a dictionary of properties (key/value pairs), to provide userspace with a machine-readable message context.</p>
+</blockquote>
+
+<p>一条信息可以按照key/value的信息携带一个属性值，向用户空间提供一条机器可读的信息。通常具有以下形式：</p>
+
+<blockquote>
+<p>Examples for well-defined, commonly used property names are:</p>
+</blockquote>
+
+<pre><code class="language-yaml">   DEVICE=b12:8               device identifier
+                                b12:8         block dev_t
+                                c127:3        char dev_t
+                                n8            netdev ifindex
+                                +sound:card0  subsystem:devname
+   SUBSYSTEM=pci              driver-core subsystem name
+</code></pre>
+
+<blockquote>
+<p>The &lsquo;struct printk_log&rsquo; buffer header must never be directly exported to userspace, it is a kernel-private implementation detail that might need to be changed in the future, when the requirements change.</p>
+</blockquote>
+
+<p>不能将缓冲区首部 <strong>struct printk_log</strong> 直接导出到用户空间，这个结构体包含的内核私有的实现细节可能会在未来发生改变。</p>
+
+<blockquote>
+<p>/dev/kmsg exports the structured data in the following line format: &ldquo;level,sequnum,timestamp;&lt;message_text&gt;\n&rdquo;</p>
+</blockquote>
+
+<p>和 <code>struct printk_log</code> 相关的变量有：</p>
+
+<pre><code class="language-C">/* logbuf_lock保护kmsg缓冲区，索引，计数器，可以在调度器内部的rq lock
+   持有，必须在调用console_unlock前或者任何可能唤起一个进程时释放 */
+static DEFINE_RAW_SPINLOCK(logbuf_lock);
+
+DECLARE_WAIT_QUEUE_HEAD(log_wait);
+/* 通过syslog(READ)和/proc/kmsg读取的下一个printk记录 */
+static u64 syslog_seq;
+static u32 syslog_idx;
+static enum log_flags syslog_prev;
+static size_t syslog_partial;
+
+/* 缓冲区中第一条记录的序列号和索引 */
+static u64 log_first_seq;
+static u32 log_first_idx;
+
+/* 缓冲区用于保存下一条记录的序列号和索引 */
+static u64 log_next_seq;
+static u32 log_next_idx;
+
+/* 要写到控制台的下一条printk记录 */
+static u64 console_seq;
+static u32 cosnole_idx;
+static enum log_flags console_prev;
+
+/* 执行过clear后的下一条要读取的printk记录 */
+static u64 clear_seq;
+static u32 clear_idx;
+
+enum log_flags {
+    LOG_NOCONS  = 1,    /* already flushed, do not print to console */
+    LOG_NEWLINE = 2,    /* text ended with a newline */
+    LOG_PREFIX  = 4,    /* text started with a prefix */
+    LOG_CONT    = 8,    /* text is a fragment of a continuation line */
+};
+</code></pre>
+
+<h2 id="1-2-控制台日志缓冲区">1.2. 控制台日志缓冲区</h2>
+
+<p><em>kernel/printk/printk.c</em>  中还定义了和保存日志的缓冲区相关的变量：</p>
+
+<pre><code class="language-C">/* 前缀的最大长度 */
+#define PREFIX_MAX  32
+/* 单行的最大长度 */
+#define LOG_LINE_MAX    1024 - PREFIX_MAX
+
+/* 缓冲区的长度，shift值默认为18，即缓冲区默认为256kb */
+#define __LOG_BUF_LEN   (1 &lt;&lt; CONFIG_LOG_BUF_SHIFT)
+/* 保存日志的缓冲区，__log_buf，log_buf */
+static char __log_buf[__LOG_BUF_LEN];
+static char *log_buf = __log_buf;
+static u32 log_buf_len = __LOG_BUF_LEN;
+</code></pre>
+
+<h3 id="1-2-1-控制台日志的相关操作">1.2.1. 控制台日志的相关操作</h3>
+
+<p><strong>log_buf</strong> 相关的函数有：</p>
+
+<ul>
+<li><code>log_buf_addr_get</code><br />
+获取 <strong>log_buf</strong> 的地址</li>
+<li><code>log_buf_len_get</code><br />
+获取 <strong>log_buf</strong> 的长度，即 <strong>log_buf_len</strong></li>
+<li><code>log_text(const struct printk_log *msg)</code><br />
+获取 <strong>msg</strong> 的 <strong>text</strong> 的索引</li>
+<li><code>log_dict(const struct printk_log *msg)</code><br />
+获取 <strong>msg</strong> 的 <strong>dict</strong> 的索引</li>
+<li><code>log_from_index(u32 idx)</code><br />
+返回索引 <strong>idx</strong> 指向的 <strong>printk_log</strong> 对象</li>
+<li><code>log_next(u32 idx)</code><br />
+返回索引 <strong>idx</strong> 指向的下一条记录</li>
+<li><code>logbuf_has_space(u32 msg_size, bool empty)</code><br />
+判断 <strong>log_buf</strong> 中是否有空间保存给定大小的 <strong>msg_size</strong> 记录</li>
+<li><code>log_make_free_space(u32 msg_size)</code><br />
+移动 <strong>log_first_idx</strong> ，直到 <strong>log_buf</strong> 中有大于 <strong>msg_size</strong> 的可用空间</li>
+<li><code>msg_used_size(u16 text_len, u16 dict_len, u32 *pad_len)</code><br />
+根据对齐值，文本的大小，字典的大小计算记录占用的空间大小</li>
+<li><code>truncate_msg(u16 *text_len, u16 *trunc_msg_len, u16 *dict_len, u32 *padlen)</code><br />
+计算切分后的文本的大小</li>
+</ul>
+
+<h1 id="2-console-cont-flush">2. console_cont_flush</h1>
+
+<p><code>console_unlock</code>  函数一开始，会先调用 <code>console_cont_flush</code>  函数，将保存在 <strong>static struct cont cont</strong> 中的内容输出到控制台。</p>
+
+<h2 id="2-1-struct-cont">2.1. struct cont</h2>
+
+<p><strong>struct cont cont</strong> 用来保存连续的多行数据，</p>
+
+<pre><code class="language-C">static struct cont {
+    char buf[LOG_LINE_MAX];
+    size_t len;         /* length == 0 means unused buffer */
+    size_t cons;            /* bytes written to console */
+    struct task_struct *owner;  /* task of first print*/
+    u64 ts_nsec;            /* time of first print */
+    u8 level;           /* log level of first message */
+    u8 facility;            /* log level of first message */
+    enum log_flags flags;       /* prefix, newline flags */
+    bool flushed:1;         /* buffer sealed and committed */
+} cont;
+</code></pre>
+
+<p>其中可能有部分数据已经输出到控制台，比如<strong>cont.leng=1024</strong>，<strong>cont.cons=2</strong>，表示 <strong>cont</strong> 中共有1024byte数据，都保存在<strong>cont.buf</strong>中，但真正需要输出到控制台的只有1024-2=1022byte数据。</p>
+
+<p><code>console_cont_flush</code>  函数执行时，根据 <strong>cont</strong> 的信息，将其中的数据复制到 <strong>text</strong> 参数中，然后调用控制台驱动将这些信息输出。</p>
+
+<p>传入的参数如下：</p>
+
+<pre><code class="language-C">/* text = &quot;&quot;
+    size = 1024 */
+static void console_cont_flush(char *text, size_t size)
+{
+    unsigned long flags;
+    size_t len;
+
+    raw_spin_lock_irqsave(&amp;logbuf_lock, flags);
+
+    if (!cont.len)
+        goto out;
+
+    /*
+     * We still queue earlier records, likely because the console was
+     * busy. The earlier ones need to be printed before this one, we
+     * did not flush any fragment so far, so just let it queue up.
+     */
+    if (console_seq &lt; log_next_seq &amp;&amp; !cont.cons)
+        goto out;
+    /* cont_print_text函数根据cont.len判断cont是否有数据，根据cont.cons判断
+        cont中的数据是否输出到控制台。如果没有，需要首先输出timestamp，这就
+        可能导致timestamp的长度加上需要输出的text的长度之和大于1024，即每
+        一行控制台信息的最大值，这时cont_print_text函数会将多余的数据留在cont
+        中，修改cont.cons，在下一次调用cont_print_text函数时再输出剩余数据 */
+    len = cont_print_text(text, size);
+    raw_spin_unlock(&amp;logbuf_lock);
+    stop_critical_timings();
+    /* 遍历console_drivers列表，使用开启的控制台驱动的write函数输出 */
+    call_console_drivers(cont.level, text, len);
+    start_critical_timings();
+    local_irq_restore(flags);
+    return;
+out:
+    raw_spin_unlock_irqrestore(&amp;logbuf_lock, flags);
+}
+</code></pre>
+
+<h1 id="3-console-unlock">3. console_unlock</h1>
+
+<p><em>kernel/printk/printk.c</em>  中的函数 <code>register_console</code>  执行到最后，会调用 <code>console_unlock</code>  ，根据代码的注释，这个函数会输出持有 <strong>console_lock</strong> 时通过 <code>printk</code>  输出的信息。</p>
+
+<blockquote>
+<p>console_unlock - unlock the console system
+Releases the console_lock which the caller holds on the console system and the console driver list.
+While the console_lock was held, console output may have been buffered by printk().  If this is the case, console_unlock(); emits the output prior to releasing the lock.
+If there is output waiting, we wake /dev/kmsg and syslog() users.
+console_unlock(); may be called from any context.</p>
+</blockquote>
+
+<pre><code class="language-C">void console_unlock(void)
+{
+    static char text[LOG_LINE_MAX + PREFIX_MAX];
+    static u64 seen_seq;
+    unsigned long flags;
+    bool wake_klogd = false;
+    bool retry;
+    //如果控制台已经挂起，释放console_sem信号量，直接返回
+    if (console_suspended) {
+        up_console_sem();
+        return;
+    }
+
+    console_may_schedule = 0;
+
+    /* flush buffered message fragment immediately to console */
+    console_cont_flush(text, sizeof(text));
+again:
+    for (;;) {
+        struct printk_log *msg;
+        size_t len;
+        int level;
+
+        raw_spin_lock_irqsave(&amp;logbuf_lock, flags);
+        /* 第一次执行时为真，之后为假 */
+        if (seen_seq != log_next_seq) {
+            wake_klogd = true;
+            seen_seq = log_next_seq;
+        }
+
+        /* 要输出到控制台的日志的序列号小于logbuf中第一条日志的序列号，
+            一般情况下不会满足，*/
+        if (console_seq &lt; log_first_seq) {
+            len = sprintf(text, &quot;** %u printk messages dropped ** &quot;,
+                      (unsigned)(log_first_seq - console_seq));
+            /* messages are gone, move to first one */
+            console_seq = log_first_seq;
+            console_idx = log_first_idx;
+            console_prev = 0;
+        } else {
+            len = 0;
+        }
+skip:
+        /* 已经输出到控制台的序列号已经为最新，退出循环的唯一途径 */
+        if (console_seq == log_next_seq)
+            break;
+
+        msg = log_from_idx(console_idx);
+        if (msg-&gt;flags &amp; LOG_NOCONS) {
+            /*
+             * Skip record we have buffered and already printed
+             * directly to the console when we received it.
+             */
+            console_idx = log_next(console_idx);
+            console_seq++;
+            /*
+             * We will get here again when we register a new
+             * CON_PRINTBUFFER console. Clear the flag so we
+             * will properly dump everything later.
+             */
+            msg-&gt;flags &amp;= ~LOG_NOCONS;
+            console_prev = msg-&gt;flags;
+            goto skip;
+        }
+
+        level = msg-&gt;level;
+        /* msg_print_text会将msg.text中的'\n'转化，添加prefix，
+            保存在text中 */
+        len += msg_print_text(msg, console_prev, false,
+                      text + len, sizeof(text) - len);
+        console_idx = log_next(console_idx);
+        console_seq++;
+        console_prev = msg-&gt;flags;
+        raw_spin_unlock(&amp;logbuf_lock);
+
+        stop_critical_timings();    /* don't trace print latency */
+        /* 调用控制台驱动输出信息 */
+        call_console_drivers(level, text, len);
+        start_critical_timings();
+        local_irq_restore(flags);
+    }
+    console_locked = 0;
+    /* Release the exclusive_console once it is used */
+    if (unlikely(exclusive_console))
+        exclusive_console = NULL;
+
+    raw_spin_unlock(&amp;logbuf_lock);
+
+    up_console_sem();
+
+    /*
+     * Someone could have filled up the buffer again, so re-check if there's
+     * something to flush. In case we cannot trylock the console_sem again,
+     * there's a new owner and the console_unlock() from them will do the
+     * flush, no worries.
+     */
+    raw_spin_lock(&amp;logbuf_lock);
+    retry = console_seq != log_next_seq;
+    raw_spin_unlock_irqrestore(&amp;logbuf_lock, flags);
+
+    if (retry &amp;&amp; console_trylock())
+        goto again;
+
+    if (wake_klogd)
+        wake_up_klogd();
+}
+</code></pre>
+
+<h1 id="4-con-printbuffer">4. CON_PRINTBUFFER</h1>
+
+<p>执行 <code>register_console</code>  函数时，要注册的 <strong>newcon</strong> 是否具有 <strong>CON_PRINTBUFFER</strong> 标志会影响程序的执行流程：</p>
+
+<pre><code class="language-C">...
+/* 如果grub没有提供console=uart类型的参数，这里的bcon为NULL，
+    if语句条件为假，不会执行清除CON_PRINTBUFFER的操作。
+    而serial8250_console设置了CON_PRINTBUFFER标志 */
+if (bcon &amp;&amp; ((newcon-&gt;flags &amp; (CON_CONSDEV | CON_BOOT)) == CON_CONSDEV))
+        newcon-&gt;flags &amp;= ~CON_PRINTBUFFER;
+...
+if (newcon-&gt;flags &amp; CON_PRINTBUFFER) {
+        /*
+         * console_unlock(); will print out the buffered messages
+         * for us.
+         */
+        raw_spin_lock_irqsave(&amp;logbuf_lock, flags);
+        /* 这里会对console_seq，console_idx，console_prev进行修改，
+           在执行console_unlock函数时，这三个变量会影响输出的信息 */
+        console_seq = syslog_seq;
+        console_idx = syslog_idx;
+        console_prev = syslog_prev;
+        raw_spin_unlock_irqrestore(&amp;logbuf_lock, flags);
+        /*
+         * We're about to replay the log buffer.  Only do this to the
+         * just-registered console to avoid excessive message spam to
+         * the already-registered consoles.
+         */
+        exclusive_console = newcon;
+    }
+    console_unlock();
+...
+</code></pre>
+
+<p><strong>syslog_seq</strong> ， <strong>syslog_idx</strong> ， <strong>syslog_prev</strong> 是定义在  <em>kernel/printk/printk.c</em>  中的static变量，只需要查看文件内部对三个变量的使用情况即可。</p>
+
+<h2 id="4-1-syslog-print">4.1. syslog_print</h2>
+
+<p>第一个修改 <strong>syslog_seq</strong> 的函数是 <code>syslog_print</code> ，函数接收两个参数，一个是来自用户空间的字符串，另一个是要拷贝的字符串的长度。函数执行期间，还会更新 <strong>syslog_seq</strong> ， <strong>syslog_idx</strong> ， <strong>syslog_prev</strong> 的值。</p>
+
+<pre><code class="language-C">static int syslog_print(char __user *buf, int size)
+{
+    char *text;
+    struct printk_log *msg;
+    int len = 0;
+
+    text = kmalloc(LOG_LINE_MAX + PREFIX_MAX, GFP_KERNEL);
+    if (!text)
+        return -ENOMEM;
+
+    while (size &gt; 0) {
+        size_t n;
+        size_t skip;
+
+        raw_spin_lock_irq(&amp;logbuf_lock);
+        if (syslog_seq &lt; log_first_seq) {
+            /* messages are gone, move to first one */
+            syslog_seq = log_first_seq;
+            syslog_idx = log_first_idx;
+            syslog_prev = 0;
+            syslog_partial = 0;
+        }
+        /* syslog_seq是最新的，没有日志需要输出，直接返回 */
+        if (syslog_seq == log_next_seq) {
+            raw_spin_unlock_irq(&amp;logbuf_lock);
+            break;
+        }
+
+        /* syslog_partial在@size小于msg中的txtlen时更新 */
+        skip = syslog_partial;
+        msg = log_from_idx(syslog_idx);
+        n = msg_print_text(msg, syslog_prev, true, text,
+                   LOG_LINE_MAX + PREFIX_MAX);
+        if (n - syslog_partial &lt;= size) {
+            /* message fits into buffer, move forward */
+            syslog_idx = log_next(syslog_idx);
+            syslog_seq++;
+            syslog_prev = msg-&gt;flags;
+            n -= syslog_partial;
+            syslog_partial = 0;
+        } else if (!len){
+            /* partial read(), remember position */
+            n = size;
+            syslog_partial += n;
+        } else
+        /* 这个分支只有在输出过若干msg之后，当前要输出的msg的txtlen
+            大于剩余的buf空闲空间，将n设置为0，可以通过下面的if代码退出
+            循环 */
+            n = 0;
+        raw_spin_unlock_irq(&amp;logbuf_lock);
+
+        if (!n)
+            break;
+        /* 将信息拷贝到用户空间buf */
+        if (copy_to_user(buf, text + skip, n)) {
+            if (!len)
+                len = -EFAULT;
+            break;
+        }
+
+        len += n;
+        size -= n;
+        buf += n;
+    }
+
+    kfree(text);
+    return len;
+}
+</code></pre>
+
+<h2 id="4-2-do-syslog">4.2. do_syslog</h2>
+
+<p>另一个会修改这三个变量的函数是 <code>do_syslog</code>  ，而且只有这个函数会调用 <code>syslog_print</code>  。</p>
+
+<p><code>do_syslog</code>  是系统调用 <strong>syslog</strong> 的主要实现，系统调用的实现代码执行 <code>do_syslog</code>  时，传入的 <strong>from_file</strong> 为 <strong>false</strong> 。</p>
+
+<pre><code class="language-C">int do_syslog(int type, char __user *buf, int len, bool from_file)
+{
+    bool clear = false;
+    static int saved_console_loglevel = -1;
+    int error;
+
+    error = check_syslog_permissions(type, from_file);
+    if (error)
+        goto out;
+
+    error = security_syslog(type);
+    if (error)
+        return error;
+
+    switch (type) {
+    case SYSLOG_ACTION_CLOSE:   /* Close log */
+        break;
+    case SYSLOG_ACTION_OPEN:    /* Open log */
+        break;
+    case SYSLOG_ACTION_READ:    /* Read from log */
+        error = -EINVAL;
+        if (!buf || len &lt; 0)
+            goto out;
+        error = 0;
+        if (!len)
+            goto out;
+        if (!access_ok(VERIFY_WRITE, buf, len)) {
+            error = -EFAULT;
+            goto out;
+        }
+        /* sleep直到syslog_seq!=log_next_seq，即有日志需要输出 */
+        error = wait_event_interruptible(log_wait,
+                         syslog_seq != log_next_seq);
+        if (error)
+            goto out;
+        error = syslog_print(buf, len);
+        break;
+    /* Read/clear last kernel messages */
+    case SYSLOG_ACTION_READ_CLEAR:
+        clear = true;
+        /* FALL THRU */
+    /* Read last kernel messages */
+    case SYSLOG_ACTION_READ_ALL:
+        error = -EINVAL;
+        if (!buf || len &lt; 0)
+            goto out;
+        error = 0;
+        if (!len)
+            goto out;
+        if (!access_ok(VERIFY_WRITE, buf, len)) {
+            error = -EFAULT;
+            goto out;
+        }
+                error = syslog_print_all(buf, len, clear);
+        break;
+    /* Clear ring buffer */
+    case SYSLOG_ACTION_CLEAR:
+syslog_print_all(NULL, 0, true);
+        break;
+    /* Disable logging to console */
+    case SYSLOG_ACTION_CONSOLE_OFF:
+        if (saved_console_loglevel == -1)
+            saved_console_loglevel = console_loglevel;
+        console_loglevel = minimum_console_loglevel;
+        break;
+    /* Enable logging to console */
+    case SYSLOG_ACTION_CONSOLE_ON:
+        if (saved_console_loglevel != -1) {
+            console_loglevel = saved_console_loglevel;
+            saved_console_loglevel = -1;
+        }
+        break;
+    /* Set level of messages printed to console */
+    case SYSLOG_ACTION_CONSOLE_LEVEL:
+        error = -EINVAL;
+        if (len &lt; 1 || len &gt; 8)
+            goto out;
+        if (len &lt; minimum_console_loglevel)
+            len = minimum_console_loglevel;
+        console_loglevel = len;
+        /* Implicitly re-enable logging to console */
+        saved_console_loglevel = -1;
+        error = 0;
+        break;
+    /* Number of chars in the log buffer */
+    case SYSLOG_ACTION_SIZE_UNREAD:
+        raw_spin_lock_irq(&amp;logbuf_lock);
+        if (syslog_seq &lt; log_first_seq) {
+            /* messages are gone, move to first one */
+            syslog_seq = log_first_seq;
+            syslog_idx = log_first_idx;
+            syslog_prev = 0;
+            syslog_partial = 0;
+        }
+        if (from_file) {
+            /*
+             * Short-cut for poll(/&quot;proc/kmsg&quot;) which simply checks
+             * for pending data, not the size; return the count of
+             * records, not the length.
+             */
+            error = log_next_idx - syslog_idx;
+        } else {
+            u64 seq = syslog_seq;
+            u32 idx = syslog_idx;
+            enum log_flags prev = syslog_prev;
+
+            error = 0;
+            while (seq &lt; log_next_seq) {
+                struct printk_log *msg = log_from_idx(idx);
+
+                error += msg_print_text(msg, prev, true, NULL, 0);
+                idx = log_next(idx);
+                seq++;
+                prev = msg-&gt;flags;
+            }
+            error -= syslog_partial;
+        }
+        raw_spin_unlock_irq(&amp;logbuf_lock);
+        break;
+    /* Size of the log buffer */
+    case SYSLOG_ACTION_SIZE_BUFFER:
+        error = log_buf_len;
+        break;
+    default:
+        error = -EINVAL;
+        break;
+    }
+out:
+    return error;
+}
+</code></pre>
+
+<h2 id="4-3-syslog-print-all">4.3. syslog_print_all</h2>
+
+<p><code>do_syslog</code>  函数的主要功能通过 <code>syslog_print</code>  和 <code>syslog_print_all</code>  实现，前者已经介绍过，下面介绍 <code>syslog_print_all</code>  。</p>
+
+<p><code>sysllog_print_all</code>  从 <strong>clear_seq</strong> 开始，到 <strong>log_next_seq</strong> 为止，将适合长度的msg拷贝到 <strong>@buf</strong>中。如果设置了clear标志，需要更新 <strong>clear_seq</strong> 和 <strong>clear_idx</strong> 为<strong>log_next_seq[idx]</strong> 。函数实现时，先统计从 <strong>clear_seq</strong> 到 <strong>log_next_seq</strong> 之间所有的msg的text的长度和len，然后再从 <strong>clear_seq</strong> 开始，用这个长度和减去每一个msg的textlen，直到len小于或者等于 <strong>@buf</strong> 的长度。然后再从这个位置开始，把每一个msg的text拷贝到 <strong>@buf</strong> 中。</p>
+
+<pre><code class="language-C">static int syslog_print_all(char __user *buf, int size, bool clear)
+{
+    char *text;
+    int len = 0;
+    /* text 大小为1024 */
+    text = kmalloc(LOG_LINE_MAX + PREFIX_MAX, GFP_KERNEL);
+    if (!text)
+        return -ENOMEM;
+
+    raw_spin_lock_irq(&amp;logbuf_lock);
+    if (buf) {
+        u64 next_seq;
+        u64 seq;
+        u32 idx;
+        enum log_flags prev;
+
+        if (clear_seq &lt; log_first_seq) {
+            /* messages are gone, move to first available one */
+            clear_seq = log_first_seq;
+            clear_idx = log_first_idx;
+        }
+
+        /*
+         * Find first record that fits, including all following records,
+         * into the user-provided buffer for this dump.
+         */
+        seq = clear_seq;
+        idx = clear_idx;
+        prev = 0;
+        /* 计算clear_seq到log_next_seq之间所有msg的txtlen和 */
+        while (seq &lt; log_next_seq) {
+            struct printk_log *msg = log_from_idx(idx);
+
+            /* 只需要计算txtlen，因此@buf=NULL */
+            len += msg_print_text(msg, prev, true, NULL, 0);
+            prev = msg-&gt;flags;
+            idx = log_next(idx);
+            seq++;
+        }
+         /* move first record forward until length fits into the buffer */
+        seq = clear_seq;
+        idx = clear_idx;
+        prev = 0;
+        while (len &gt; size &amp;&amp; seq &lt; log_next_seq) {
+            struct printk_log *msg = log_from_idx(idx);
+
+            len -= msg_print_text(msg, prev, true, NULL, 0);
+            prev = msg-&gt;flags;
+            idx = log_next(idx);
+            seq++;
+        }
+        /* 现在，seq到log_next_seq之间的所有msg的txtlen之和小于或
+            等于size，可以执行拷贝操作 */
+        /* last message fitting into this dump */
+        next_seq = log_next_seq;
+
+        len = 0;
+        /* 将seq到log_next_seq之间的所有msg的txt信息
+            拷贝到@buf中 */
+        while (len &gt;= 0 &amp;&amp; seq &lt; next_seq) {
+            struct printk_log *msg = log_from_idx(idx);
+            int textlen;
+
+            textlen = msg_print_text(msg, prev, true, text,
+                         LOG_LINE_MAX + PREFIX_MAX);
+            if (textlen &lt; 0) {
+                len = textlen;
+                break;
+            }
+            idx = log_next(idx);
+            seq++;
+            prev = msg-&gt;flags;
+
+            raw_spin_unlock_irq(&amp;logbuf_lock);
+            if (copy_to_user(buf + len, text, textlen))
+                len = -EFAULT;
+            else
+                len += textlen;
+            raw_spin_lock_irq(&amp;logbuf_lock);
+
+            if (seq &lt; log_first_seq) {
+                /* messages are gone, move to next one */
+                seq = log_first_seq;
+                idx = log_first_idx;
+                prev = 0;
+            }
+        }
+    }
+
+    if (clear) {
+        clear_seq = log_next_seq;
+        clear_idx = log_next_idx;
+    }
+    raw_spin_unlock_irq(&amp;logbuf_lock);
+
+    kfree(text);
+    return len;
+}
+</code></pre>
+
+<h1 id="5-printk">5. printk</h1>
+
+<p>内核打印函数 <code>printk</code>  定义在 <em>kernel/printk/printk.c</em>  中，函数的主要功能通过 <code>vprintk_emit</code>  实现：</p>
+
+<pre><code class="language-C">asmlinkage __visible int printk(const char *fmt, ...)
+{
+    /* char *args */
+    va_list args;
+    int r;
+
+#ifdef CONFIG_KGDB_KDB
+    if (unlikely(kdb_trap_printk)) {
+        va_start(args, fmt);
+        r = vkdb_printf(fmt, args);
+        va_end(args);
+        return r;
+    }
+#endif
+    va_start(args, fmt);
+    r = vprintk_emit(0, -1, NULL, 0, fmt, args);
+    va_end(args);
+
+    return r;
+}
+</code></pre>
+
+<h2 id="5-1-可变参数宏">5.1. 可变参数宏</h2>
+
+<p>这个函数使用了可变参数宏 <strong>va_list</strong> ， <strong>va_start</strong> ， <strong>va_end</strong> ，都定义在 <em>include/acpi/platform/acenv.h</em>  中，</p>
+
+<pre><code class="language-C">typedef char *va_list;
+/* 64位系统为7 */
+#define  _AUPBND    (sizeof (acpi_native_int) - 1)
+#define  _ADNBND    (sizeof (acpi_native_int) - 1)
+
+/* Variable argument list macro definitions */
+/* _bnd(fmt, _AUPBND) =&gt; ((sizeof(fmt) + 7) &amp; (0xf8)) = 8*/
+#define _bnd(X, bnd)            (((sizeof (X)) + (bnd)) &amp; (~(bnd)))
+#define va_arg(ap, T)           (*(T *)(((ap) += (_bnd (T, _AUPBND))) - (_bnd (T,_ADNBND))))
+#define va_end(ap)              (ap = (va_list) NULL)
+#define va_start(ap, A)         (void) ((ap) = (((char *) &amp;(A)) + (_bnd (A,_AUPBND))))
+</code></pre>
+
+<p>要理解这些宏，首先要知道函数调用时，需要通过栈来实现。比如代码 <code>printk(&quot;line%d\n&quot;, line);</code> ，执行时，编译器先将 <code>printk</code>  的参数 <strong>&ldquo;line%d\n&rdquo;</strong>,   <strong>line</strong> 都压入一个栈中，然后在跳转到 <code>pirntk</code>  函数的地址，执行 <code>pirntk</code>  函数。</p>
+
+<p><code>va_start(args, fmt);</code> 即 <code>(void)((args) = (((char *)&amp;(fmt)) + 8)))</code> ， 指向 <strong>fmt</strong> 之上的地址，即 <code>printk</code>  的第一个参数。 <code>va_end(args)</code> 只是将 <strong>args</strong> 赋值为 <strong>NULL</strong> 。</p>
+
+<p>至于 <code>va_args</code>  宏，执行的操作是将 <strong>ap</strong> 向后移动 <strong>T</strong> 类型占用的字节数的宽度，并返回一个 <strong>T</strong> 类型的值，类型 <strong>T</strong> 需要根据格式化字符串 <strong>fmt</strong> 的值进行判断。之后在 <code>vsnprintf</code>  函数中会用到。</p>
+
+<h2 id="5-2-vprintk-emit">5.2. vprintk_emit</h2>
+
+<p><code>vprintk_emit</code>  函数为：</p>
+
+<pre><code class="language-C">/* @facility = 0 ,STDOUT
+    @level = -1
+    @dict = NULL
+    @dictlen = 0
+    @fmt = fmt
+    @args = args */
+asmlinkage int vprintk_emit(int facility, int level,
+                const char *dict, size_t dictlen,
+                const char *fmt, va_list args)
+{
+    static int recursion_bug;
+    static char textbuf[LOG_LINE_MAX];
+    char *text = textbuf;
+    size_t text_len = 0;
+    enum log_flags lflags = 0;
+    unsigned long flags;
+    int this_cpu;
+    int printed_len = 0;
+    bool in_sched = false;
+    /* cpu currently holding logbuf_lock in this function */
+    static volatile unsigned int logbuf_cpu = UINT_MAX;
+
+    if (level == SCHED_MESSAGE_LOGLEVEL) {
+        level = -1;
+        in_sched = true;
+    }
+
+    boot_delay_msec(level);
+    printk_delay();
+
+    /* This stops the holder of console_sem just where we want him */
+    local_irq_save(flags);
+    this_cpu = smp_processor_id();
+
+    /*
+     * Ouch, printk recursed into itself!
+     */
+    /* logbuf_cpu会在之后的代码赋值为this_cpu */
+    if (unlikely(logbuf_cpu == this_cpu)) {
+        /*
+         * If a crash is occurring during printk() on this CPU,
+         * then try to get the crash message out but make sure
+         * we can't deadlock. Otherwise just return to avoid the
+         * recursion and return - but flag the recursion so that
+         * it can be printed at the next appropriate moment:
+         */
+         /* lockdep_recursing(current) =&gt; current-&gt;lockdep_recursion */
+        if (!oops_in_progress &amp;&amp; !lockdep_recursing(current)) {
+            recursion_bug = 1;
+            goto out_restore_irqs;
+        }
+        zap_locks();
+    }
+    /* current-&gt;lockdep_recursion ++，即增加lock的迭代深度。
+        推测：lock的迭代深度允许lock的嵌套使用，即每一层深度
+        都可以申请和释放lock */
+    lockdep_off();
+    raw_spin_lock(&amp;logbuf_lock);
+    logbuf_cpu = this_cpu;
+
+    if (unlikely(recursion_bug)) {
+        static const char recursion_msg[] =
+            &quot;BUG: recent printk recursion!&quot;;
+
+        recursion_bug = 0;
+        /* emit KERN_CRIT message */
+        /*  保存一条printk recursion信息到log_buf中 */
+        printed_len += log_store(0, 2, LOG_PREFIX|LOG_NEWLINE, 0,
+                     NULL, 0, recursion_msg,
+                     strlen(recursion_msg));
+    }
+
+    /*
+     * The printf needs to come first; we need the syslog
+     * prefix which might be passed-in as a parameter.
+     */
+    if (in_sched)
+        text_len = scnprintf(text, sizeof(textbuf),
+                     KERN_WARNING &quot;[sched_delayed] &quot;);
+    /* vscnprintf函数是真正进行格式化输出的函数，将格式化
+        后的字符串保存在text即textbuf中 */
+    text_len += vscnprintf(text + text_len,
+                   sizeof(textbuf) - text_len, fmt, args);
+
+    /* mark and strip a trailing newline */
+    if (text_len &amp;&amp; text[text_len-1] == '\n') {
+        text_len--;
+        lflags |= LOG_NEWLINE;
+    }
+
+    /* strip kernel syslog prefix and extract log level or control flags */
+    if (facility == 0) {
+        /* 从text[1] 获取log level 信息 */
+        int kern_level = printk_get_level(text);
+
+        if (kern_level) {
+            /* 如果text包含log level，跳过text中的log level信息 */
+            const char *end_of_header = printk_skip_level(text);
+            switch (kern_level) {
+            case '0' ... '7':
+                /*  从printk函数执行到这里，level = -1 */
+                if (level == -1)
+                    /* level = 0 ... 7 */
+                    level = kern_level - '0';
+            case 'd':   /* KERN_DEFAULT */
+                lflags |= LOG_PREFIX;
+            }
+            /*
+             * No need to check length here because vscnprintf
+             * put '\0' at the end of the string. Only valid and
+             * newly printed level is detected.
+             */
+            text_len -= end_of_header - text;
+            text = (char *)end_of_header;
+        }
+    }
+
+    if (level == -1)
+        level = default_message_loglevel;
+
+    if (dict)
+        lflags |= LOG_PREFIX|LOG_NEWLINE;
+
+    if (!(lflags &amp; LOG_NEWLINE)) {
+        /*
+         * Flush the conflicting buffer. An earlier newline was missing,
+         * or another task also prints continuation lines.
+         */
+        if (cont.len &amp;&amp; (lflags &amp; LOG_PREFIX || cont.owner != current))
+            cont_flush(LOG_NEWLINE);
+
+        /* buffer line if possible, otherwise store it right away */
+        if (cont_add(facility, level, text, text_len))
+            printed_len += text_len;
+        else
+            printed_len += log_store(facility, level,
+                         lflags | LOG_CONT, 0,
+                         dict, dictlen, text, text_len);
+    } else {
+        bool stored = false;
+
+        /*
+         * If an earlier newline was missing and it was the same task,
+         * either merge it with the current buffer and flush, or if
+         * there was a race with interrupts (prefix == true) then just
+         * flush it out and store this line separately.
+         * If the preceding printk was from a different task and missed
+         * a newline, flush and append the newline.
+         */
+        if (cont.len) {
+            if (cont.owner == current &amp;&amp; !(lflags &amp; LOG_PREFIX))
+                stored = cont_add(facility, level, text,
+                          text_len);
+            cont_flush(LOG_NEWLINE);
+        }
+
+        if (stored)
+            printed_len += text_len;
+        else
+            printed_len += log_store(facility, level, lflags, 0,
+                         dict, dictlen, text, text_len);
+    }
+
+    logbuf_cpu = UINT_MAX;
+    raw_spin_unlock(&amp;logbuf_lock);
+
+    /* If called from the scheduler, we can not call up(). */
+    if (!in_sched) {
+        /*
+         * Try to acquire and then immediately release the console
+         * semaphore.  The release will print out buffers and wake up
+         * /dev/kmsg and syslog() users.
+         */
+        if (console_trylock_for_printk(this_cpu))
+            console_unlock();
+    }
+
+    lockdep_on();
+out_restore_irqs:
+    local_irq_restore(flags);
+    return printed_len;
+}
+</code></pre>
+
+<h3 id="5-2-1-vscnprintf">5.2.1. vscnprintf</h3>
+
+<p>函数 <code>vprintk_emit</code>  的格式化输出功能通过 <code>vscnprintf</code>  实现，后者的主要功能通过 <code>vsnprintf</code>  函数实现。内核中 <code>vsnprintf</code>  的注释如下：</p>
+
+<blockquote>
+<p>vsnprintf - Format a string and place it in a buffer<br />
+@buf: The buffer to place the result into<br />
+@size: The size of the buffer, including the trailing null space<br />
+@fmt: The format string to use<br />
+@args: Arguments for the format string</p>
+</blockquote>
+
+<p>@buf保存转化后的字符串<br />
+ @size保存buf的长度<br />
+ @fmt保存格式化字符串<br />
+ @arg保存格式化字符串的参数</p>
+
+<blockquote>
+<p>The return value is the number of characters which would be generated for the given input, excluding the trailing &lsquo;\0&rsquo;, as per ISO C99. If you want to have the exact number of characters written into @buf as return value (not including the trailing &lsquo;\0&rsquo;), use vscnprintf(). If the return is greater than or equal to @size, the resulting string is truncated.</p>
+
+<p>If you&rsquo;re not already dealing with a va_list consider using snprintf().</p>
+</blockquote>
+
+<p>函数的返回值是根据输入生成的字符的长度，不包括结尾的&rsquo;\0&rsquo;。如果要返回值等于写入buf中的字符的数量，使用<code>vscvprintf()</code>函数。如果返回值大于或者等于size，说明生成的字符串被截断。</p>
+
+<p>以 <code>vprintk_emit</code>  函数中对 <code>vscnprintf</code>  的调用为例，<code>text_len += vscnprintf(text + text_len, sizeof(textbuf) - text_len, fmt, args);</code> ，传递给 <code>vsnprintf</code>  的参数为：</p>
+
+<pre><code class="language-C">/* @buf = text
+    @size = 1024 - 32
+    @fmt = fmt
+    @args = args */
+ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
+{
+    unsigned long long num;
+    char *str, *end;
+    struct printf_spec spec = {0};
+
+    /* Reject out-of-range values early.  Large positive sizes are
+       used for unknown buffer sizes. */
+    if (WARN_ON_ONCE((int) size &lt; 0))
+        return 0;
+
+    str = buf;
+    end = buf + size;
+
+    /* Make sure end is always &gt;= buf */
+    /* 这种情况只会发生在buf指向一个较大的地址，buf+size产生了溢出，
+        导致end &lt; buf。这种情况下，将end指向最大的地址，重新计算size。
+        后续的操作都会判断buf是否已经用尽，如果用尽，不会再将数据保存在
+        buf中，而只是增加str指针 */
+    if (end &lt; buf) {
+        end = ((void *)-1);
+        size = end - buf;
+    }
+
+    while (*fmt) {
+        const char *old_fmt = fmt;
+        /* 根据fmt填充spec信息，返回处理的格式化字符串的长度 */
+        int read = format_decode(fmt, &amp;spec);
+
+        fmt += read;
+
+        switch (spec.type) {
+        /* 普通的字符串，包括printk的日志等级，KERN_INFO等 */
+        case FORMAT_TYPE_NONE: {
+            int copy = read;
+            if (str &lt; end) {
+                /* buf的剩余空间不足以保存长度为read的字符串 */
+                if (copy &gt; end - str)
+                    copy = end - str;
+                memcpy(str, old_fmt, copy);
+            }
+            str += read;
+            break;
+        }
+        case FORMAT_TYPE_WIDTH:
+            /* 宽度值通过一个整型指明 */
+            spec.field_width = va_arg(args, int);
+            break;
+        case FORMAT_TYPE_PRECISION:
+            /* 精度值通过一个整型指明 */
+            spec.precision = va_arg(args, int);
+            break;
+
+        case FORMAT_TYPE_CHAR: {
+            char c;
+            /* 右对齐，补齐空格 */
+            if (!(spec.flags &amp; LEFT)) {
+                while (--spec.field_width &gt; 0) {
+                    if (str &lt; end)
+                        *str = ' ';
+                    ++str;
+                }
+            }
+            /* 这里也用的是整型，结合之后的代码，推测编译器将参数压
+                栈时，最小的对齐宽度是4字节 */
+            c = (unsigned char) va_arg(args, int);
+            if (str &lt; end)
+                *str = c;
+            ++str;
+            /* 左对齐，补齐空格；如果是右对齐，条件不会满足 */
+            while (--spec.field_width &gt; 0) {
+                if (str &lt; end)
+                    *str = ' ';
+                ++str;
+            }
+            break;
+        }
+        /* 字符串，char *类型 ，格式化后的字符串保存在str中 */
+        case FORMAT_TYPE_STR:
+            str = string(str, end, va_arg(args, char *), spec);
+            break;
+
+        case FORMAT_TYPE_PTR:
+            str = pointer(fmt+1, str, end, va_arg(args, void *),
+                      spec);
+            while (isalnum(*fmt))
+                fmt++;
+            break;
+
+        case FORMAT_TYPE_PERCENT_CHAR:
+            if (str &lt; end)
+                *str = '%';
+            ++str;
+            break;
+
+        default:
+            switch (spec.type) {
+            case FORMAT_TYPE_LONG_LONG:
+                num = va_arg(args, long long);
+                break;
+            case FORMAT_TYPE_ULONG:
+                num = va_arg(args, unsigned long);
+                break;
+            case FORMAT_TYPE_LONG:
+                num = va_arg(args, long);
+                break;
+            case FORMAT_TYPE_SIZE_T:
+                if (spec.flags &amp; SIGN)
+                    num = va_arg(args, ssize_t);
+                else
+                    num = va_arg(args, size_t);
+                break;
+            case FORMAT_TYPE_PTRDIFF:
+                num = va_arg(args, ptrdiff_t);
+                break;
+            case FORMAT_TYPE_UBYTE:
+                num = (unsigned char) va_arg(args, int);
+                break;
+            case FORMAT_TYPE_BYTE:
+                num = (signed char) va_arg(args, int);
+                break;
+            case FORMAT_TYPE_USHORT:
+                num = (unsigned short) va_arg(args, int);
+                break;
+            case FORMAT_TYPE_SHORT:
+                num = (short) va_arg(args, int);
+                break;
+            case FORMAT_TYPE_INT:
+                num = (int) va_arg(args, int);
+                break;
+            default:
+                num = va_arg(args, unsigned int);
+            }
+
+            str = number(str, end, num, spec);
+        }
+    }
+
+    if (size &gt; 0) {
+        if (str &lt; end)
+            *str = '\0';
+        else
+            end[-1] = '\0';
+    }
+
+    /* the trailing null byte doesn't count towards the total */
+    return str-buf;
+
+}
+</code></pre>
+
+</div>
+
+
+    </main>
+
+    
+  </body>
+</html>
