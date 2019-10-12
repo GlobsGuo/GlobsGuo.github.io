@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/post/</link>
+    <description>Recent content in Posts on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://globsguo.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>control group</title>
+      <link>https://globsguo.github.io/post/control_group/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/control_group/</guid>
+      <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的</description>
+    </item>
+    
+    <item>
+      <title>driver model</title>
+      <link>https://globsguo.github.io/post/driver_model/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/driver_model/</guid>
+      <description>1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型</description>
+    </item>
+    
+    <item>
+      <title>grub参数&#34;console=&#34;</title>
+      <link>https://globsguo.github.io/post/grub_parameters/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/grub_parameters/</guid>
+      <description>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。 grub参数中</description>
+    </item>
+    
+    <item>
+      <title>Linux Memory Policy</title>
+      <link>https://globsguo.github.io/post/memory_policy/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/memory_policy/</guid>
+      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-</description>
+    </item>
+    
+    <item>
+      <title>Memory Management Initialization</title>
+      <link>https://globsguo.github.io/post/memory_management/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/memory_management/</guid>
+      <description>本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-6</description>
+    </item>
+    
+    <item>
+      <title>mm-slab</title>
+      <link>https://globsguo.github.io/post/mm-slab/</link>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm-slab/</guid>
+      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 本文从常用的内核内存分配</description>
+    </item>
+    
+    <item>
+      <title>printk函数</title>
+      <link>https://globsguo.github.io/post/printk/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/printk/</guid>
+      <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 /* console_sem用来保护对console_drivers列表</description>
+    </item>
+    
+  </channel>
+</rss>
