@@ -18,7 +18,7 @@
       
       <guid>https://globsguo.github.io/posts/grub_parameters/</guid>
       <description>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
-grub参数中的console=有多种形式，根据Documentation/kernel-parameters.txt 文件，
+grub参数中的console=有多种形式，根据 Documentation/kernel-parameters.txt 文件，
  console= [KNL] Output console device and options.</description>
     </item>
     

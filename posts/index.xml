@@ -36,7 +36,7 @@
       
       <guid>https://globsguo.github.io/posts/grub_parameters/</guid>
       <description>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
-grub参数中的console=有多种形式，根据Documentation/kernel-parameters.txt 文件，
+grub参数中的console=有多种形式，根据 Documentation/kernel-parameters.txt 文件，
  console= [KNL] Output console device and options.</description>
     </item>
     
@@ -62,18 +62,9 @@ grub参数中的console=有多种形式，根据Documentation/kernel-parameters.
     </item>
     
     <item>
-      <title>MM-Buddy Allocator</title>
-      <link>https://globsguo.github.io/posts/mm-buddy_allocator/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/posts/mm-buddy_allocator/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>mm-slab</title>
       <link>https://globsguo.github.io/posts/mm-slab/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/posts/mm-slab/</guid>
       <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。
@@ -84,7 +75,7 @@ grub参数中的console=有多种形式，根据Documentation/kernel-parameters.
     <item>
       <title>printk函数</title>
       <link>https://globsguo.github.io/posts/printk/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/posts/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。

@@ -20,5 +20,16 @@
       <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。</description>
     </item>
     
+    <item>
+      <title>Linux Memory Policy</title>
+      <link>https://globsguo.github.io/posts/memory_policy/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/memory_policy/</guid>
+      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。
+内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-aware应用可以使用的编程接口。二者同时应用在进程时，cpuset优先级更高。
+1. Memory Policy Concepts 1.1. Scope of Memory Policies 内核支持内存策略的scope，从最一般的情况到最特殊的情况为：</description>
+    </item>
+    
   </channel>
 </rss>

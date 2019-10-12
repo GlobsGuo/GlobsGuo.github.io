@@ -23,12 +23,12 @@
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="grub参数&#34;console=&#34;"/>
 <meta name="twitter:description" content="本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
-grub参数中的console=有多种形式，根据Documentation/kernel-parameters.txt 文件，
+grub参数中的console=有多种形式，根据 Documentation/kernel-parameters.txt 文件，
  console= [KNL] Output console device and options."/>
 
 <meta property="og:title" content="grub参数&#34;console=&#34;" />
 <meta property="og:description" content="本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
-grub参数中的console=有多种形式，根据Documentation/kernel-parameters.txt 文件，
+grub参数中的console=有多种形式，根据 Documentation/kernel-parameters.txt 文件，
  console= [KNL] Output console device and options." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/posts/grub_parameters/" />
@@ -182,10 +182,19 @@ grub参数中的console=有多种形式，根据Documentation/kernel-parameters.
           <br/>
            <i class="fas fa-tags"></i>
           
+          <a class="badge badge-tag" href="/tags/kernel-sources">kernel sources</a>
+           
+      
           <a class="badge badge-tag" href="/tags/console">console</a>
            
       
           <a class="badge badge-tag" href="/tags/grub">grub</a>
+           
+      
+          <a class="badge badge-tag" href="/tags/kernel-parameters">kernel parameters</a>
+           
+      
+          <a class="badge badge-tag" href="/tags/cmdline">cmdline</a>
           
       
     
@@ -203,7 +212,7 @@ grub参数中的console=有多种形式，根据Documentation/kernel-parameters.
 
 <p>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些  <em>include/linux/init.h</em>  的内容。</p>
 
-<p>grub参数中的console=有多种形式，根据<em>Documentation/kernel-parameters.txt</em> 文件，</p>
+<p>grub参数中的console=有多种形式，根据 <em>Documentation/kernel-parameters.txt</em> 文件，</p>
 
 <blockquote>
 <p>console=    [KNL] Output console device and options.</p>

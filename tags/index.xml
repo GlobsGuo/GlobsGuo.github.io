@@ -12,11 +12,20 @@
     
     
     <item>
-      <title>buddy</title>
-      <link>https://globsguo.github.io/tags/buddy/</link>
+      <title>cgroup</title>
+      <link>https://globsguo.github.io/tags/cgroup/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/tags/buddy/</guid>
+      <guid>https://globsguo.github.io/tags/cgroup/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>cmdline</title>
+      <link>https://globsguo.github.io/tags/cmdline/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/cmdline/</guid>
       <description></description>
     </item>
     
@@ -35,6 +44,15 @@
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/cpuset/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>devres</title>
+      <link>https://globsguo.github.io/tags/devres/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/devres/</guid>
       <description></description>
     </item>
     
@@ -75,6 +93,33 @@
     </item>
     
     <item>
+      <title>kernel parameters</title>
+      <link>https://globsguo.github.io/tags/kernel-parameters/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kernel-parameters/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kernel sources</title>
+      <link>https://globsguo.github.io/tags/kernel-sources/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>mem_section</title>
+      <link>https://globsguo.github.io/tags/mem_section/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mem_section/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>memory</title>
       <link>https://globsguo.github.io/tags/memory/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
@@ -84,27 +129,90 @@
     </item>
     
     <item>
-      <title>mm</title>
-      <link>https://globsguo.github.io/tags/mm/</link>
+      <title>memory model</title>
+      <link>https://globsguo.github.io/tags/memory-model/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/tags/mm/</guid>
+      <guid>https://globsguo.github.io/tags/memory-model/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>page</title>
-      <link>https://globsguo.github.io/tags/page/</link>
+      <title>memory policy</title>
+      <link>https://globsguo.github.io/tags/memory-policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/tags/page/</guid>
+      <guid>https://globsguo.github.io/tags/memory-policy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>NODE_DATA</title>
+      <link>https://globsguo.github.io/tags/node_data/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/node_data/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>platform bus</title>
+      <link>https://globsguo.github.io/tags/platform-bus/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/platform-bus/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>vmemmap</title>
+      <link>https://globsguo.github.io/tags/vmemmap/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/vmemmap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>zonelist</title>
+      <link>https://globsguo.github.io/tags/zonelist/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/zonelist/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmem_cache</title>
+      <link>https://globsguo.github.io/tags/kmem_cache/</link>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmem_cache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmem_cache_node</title>
+      <link>https://globsguo.github.io/tags/kmem_cache_node/</link>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmem_cache_node/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>slab cache</title>
+      <link>https://globsguo.github.io/tags/slab-cache/</link>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/slab-cache/</guid>
       <description></description>
     </item>
     
     <item>
       <title>console_unlock</title>
       <link>https://globsguo.github.io/tags/console_unlock/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/console_unlock/</guid>
       <description></description>
@@ -113,7 +221,7 @@
     <item>
       <title>cont</title>
       <link>https://globsguo.github.io/tags/cont/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/cont/</guid>
       <description></description>
@@ -122,7 +230,7 @@
     <item>
       <title>printk</title>
       <link>https://globsguo.github.io/tags/printk/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/printk/</guid>
       <description></description>

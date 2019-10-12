@@ -5,8 +5,8 @@
     <link>https://globsguo.github.io/tags/mem_section/</link>
     <description>Recent content in mem_section on Globs&#39; blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/mem_section/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,13 +14,11 @@
     <item>
       <title>Memory Management Initialization</title>
       <link>https://globsguo.github.io/posts/memory_management/</link>
-      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/posts/memory_management/</guid>
       <description>本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-64架构为例，假设系统类型为NUMA，sparse memory model。
-1. Memory Model 内存模型一部分内容主要来自网上，*Documentation*中没有找到相关的内容。
-内存模型是从CPU的角度看，系统中物理内存的分布情况；在Linux内核中，使用何种方式来管理这些物理内存。
-Linux支持三种内存模型，flat memory，discontiguous memory和sparse memory。</description>
+1. Memory Model 内存模型一部分内容主要来自网上， Documentation 中没有找到相关的内容。</description>
     </item>
     
   </channel>

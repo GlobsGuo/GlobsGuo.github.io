@@ -3,7 +3,12 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://globsguo.github.io/tags/buddy/</loc>
+    <loc>https://globsguo.github.io/tags/cgroup/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/cmdline/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
@@ -19,6 +24,11 @@
   
   <url>
     <loc>https://globsguo.github.io/tags/cpuset/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/devres/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
@@ -58,7 +68,22 @@
   </url>
   
   <url>
+    <loc>https://globsguo.github.io/tags/kernel-parameters/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kernel-sources/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/posts/memory_policy/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/mem_section/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
@@ -73,22 +98,22 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/mm/</loc>
+    <loc>https://globsguo.github.io/tags/memory-model/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/posts/mm-buddy_allocator/</loc>
+    <loc>https://globsguo.github.io/tags/memory-policy/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/posts/mm-slab/</loc>
+    <loc>https://globsguo.github.io/tags/node_data/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/page/</loc>
+    <loc>https://globsguo.github.io/tags/platform-bus/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
@@ -103,27 +128,53 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
-    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/vmemmap/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/cont/</loc>
-    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/zonelist/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/printk/</loc>
-    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/kmem_cache/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/posts/printk/</loc>
-    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/kmem_cache_node/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/mm-slab/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/slab-cache/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/categories/</loc>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/cont/</loc>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/printk/</loc>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/printk/</loc>
   </url>
   
 </urlset>

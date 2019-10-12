@@ -30,8 +30,7 @@
 /* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/posts/printk/" />
-<meta property="article:published_time" content="2019-08-08T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-08-08T00:00:00+00:00" /><meta property="og:site_name" content="Globs&#39; blog" />
+<meta property="og:site_name" content="Globs&#39; blog" />
 
 
     
@@ -169,8 +168,6 @@
 <div class="post__meta">
     
     
-      <i class="fas fa-calendar-alt"></i> Aug 8, 2019
-    
     
     
     
@@ -180,6 +177,9 @@
           <br/>
            <i class="fas fa-tags"></i>
           
+          <a class="badge badge-tag" href="/tags/kernel-sources">kernel sources</a>
+           
+      
           <a class="badge badge-tag" href="/tags/console_unlock">console_unlock</a>
            
       
@@ -192,7 +192,7 @@
     
     
     <br/>
-    <i class="fas fa-clock"></i> 18 min read
+    <i class="fas fa-clock"></i> 17 min read
 </div>
 
 
@@ -204,7 +204,7 @@
 
 <h1 id="1-printk-c中的重要变量">1. printk.c中的重要变量</h1>
 
-<p>首先介绍一些  <em>kernel/printk/printk.c</em>  中定义的一些十分重要的变量。</p>
+<p>首先介绍一些 <em>kernel/printk/printk.c</em> 中定义的一些十分重要的变量。</p>
 
 <pre><code class="language-C">/* console_sem用来保护对console_drivers列表的访问 */
 static DEFINE_SEMAPHORE(console_sem);
@@ -230,7 +230,7 @@ static int console_may_schedule;
 
 <h2 id="1-1-struct-printk-log">1.1. struct printk_log</h2>
 
-<p>上述变量在 <code>register_console</code>  函数中都有涉及，printk日志系统中最重要的结构体是 <strong>struct printk_log</strong>  ：</p>
+<p>上述变量在 <code>register_console</code> 函数中都有涉及，printk日志系统中最重要的结构体是<strong>struct printk_log</strong> ：</p>
 
 <pre><code class="language-C">struct printk_log {
     u64 ts_nsec;    /* 时间戳，ns计 */
@@ -243,13 +243,13 @@ static int console_may_schedule;
 };
 </code></pre>
 
-<p>代码中对于 <code>printk_log</code>  的说明如下：</p>
+<p>代码中对于 <code>printk_log</code> 的说明如下：</p>
 
 <blockquote>
 <p>The printk log buffer consists of a chain of concatenated variable length records. Every record starts with a record header, containing the overall length of the record.</p>
 </blockquote>
 
-<p>printk日志缓冲区由一系列变长的记录组成，每条记录以一个记录首部信息（ <strong>struct printk_log</strong> ）开始，包含记录的所有长度。</p>
+<p>printk日志缓冲区由一系列变长的记录组成，每条记录以一个记录首部信息（<strong>struct printk_log</strong>）开始，包含记录的所有长度。</p>
 
 <blockquote>
 <p>The heads to the first and last entry in the buffer, as well as the sequence numbers of these both entries are maintained when messages are stored..</p>
@@ -273,7 +273,7 @@ static int console_may_schedule;
 <p>The human readable log message directly follows the message header. The length of the message text is stored in the header, the stored message is not terminated.</p>
 </blockquote>
 
-<p>可读的日志信息紧跟在信息的首部之后（因此， <code>log_text</code>  函数可以得到文本的地址），文本的长度保存在首部内，保存的信息没有终止符。</p>
+<p>可读的日志信息紧跟在信息的首部之后（因此，<code>log_text</code> 函数可以得到文本的地址），文本的长度保存在首部内，保存的信息没有终止符。</p>
 
 <blockquote>
 <p>Optionally, a message can carry a dictionary of properties (key/value pairs), to provide userspace with a machine-readable message context.</p>
@@ -297,7 +297,7 @@ static int console_may_schedule;
 <p>The &lsquo;struct printk_log&rsquo; buffer header must never be directly exported to userspace, it is a kernel-private implementation detail that might need to be changed in the future, when the requirements change.</p>
 </blockquote>
 
-<p>不能将缓冲区首部 <strong>struct printk_log</strong> 直接导出到用户空间，这个结构体包含的内核私有的实现细节可能会在未来发生改变。</p>
+<p>不能将缓冲区首部<strong>struct printk_log</strong>直接导出到用户空间，这个结构体包含的内核私有的实现细节可能会在未来发生改变。</p>
 
 <blockquote>
 <p>/dev/kmsg exports the structured data in the following line format: &ldquo;level,sequnum,timestamp;&lt;message_text&gt;\n&rdquo;</p>
@@ -343,7 +343,7 @@ enum log_flags {
 
 <h2 id="1-2-控制台日志缓冲区">1.2. 控制台日志缓冲区</h2>
 
-<p><em>kernel/printk/printk.c</em>  中还定义了和保存日志的缓冲区相关的变量：</p>
+<p><em>kernel/printk/printk.c</em> 中还定义了和保存日志的缓冲区相关的变量：</p>
 
 <pre><code class="language-C">/* 前缀的最大长度 */
 #define PREFIX_MAX  32
@@ -360,25 +360,25 @@ static u32 log_buf_len = __LOG_BUF_LEN;
 
 <h3 id="1-2-1-控制台日志的相关操作">1.2.1. 控制台日志的相关操作</h3>
 
-<p><strong>log_buf</strong> 相关的函数有：</p>
+<p><strong>log_buf</strong>相关的函数有：</p>
 
 <ul>
 <li><code>log_buf_addr_get</code><br />
-获取 <strong>log_buf</strong> 的地址</li>
+获取<strong>log_buf</strong>的地址</li>
 <li><code>log_buf_len_get</code><br />
-获取 <strong>log_buf</strong> 的长度，即 <strong>log_buf_len</strong></li>
+获取<strong>log_buf</strong>的长度，即<strong>log_buf_len</strong></li>
 <li><code>log_text(const struct printk_log *msg)</code><br />
-获取 <strong>msg</strong> 的 <strong>text</strong> 的索引</li>
+获取<strong>msg</strong>的<strong>text</strong>的索引</li>
 <li><code>log_dict(const struct printk_log *msg)</code><br />
-获取 <strong>msg</strong> 的 <strong>dict</strong> 的索引</li>
+获取<strong>msg</strong>的<strong>dict</strong>的索引</li>
 <li><code>log_from_index(u32 idx)</code><br />
-返回索引 <strong>idx</strong> 指向的 <strong>printk_log</strong> 对象</li>
+返回索引<strong>idx</strong>指向的<strong>printk_log</strong>对象</li>
 <li><code>log_next(u32 idx)</code><br />
-返回索引 <strong>idx</strong> 指向的下一条记录</li>
+返回索引<strong>idx</strong>指向的下一条记录</li>
 <li><code>logbuf_has_space(u32 msg_size, bool empty)</code><br />
-判断 <strong>log_buf</strong> 中是否有空间保存给定大小的 <strong>msg_size</strong> 记录</li>
+判断<strong>log_buf</strong>中是否有空间保存给定大小的<strong>msg_size</strong>记录</li>
 <li><code>log_make_free_space(u32 msg_size)</code><br />
-移动 <strong>log_first_idx</strong> ，直到 <strong>log_buf</strong> 中有大于 <strong>msg_size</strong> 的可用空间</li>
+移动<strong>log_first_idx</strong>，直到<strong>log_buf</strong>中有大于<strong>msg_size</strong>的可用空间</li>
 <li><code>msg_used_size(u16 text_len, u16 dict_len, u32 *pad_len)</code><br />
 根据对齐值，文本的大小，字典的大小计算记录占用的空间大小</li>
 <li><code>truncate_msg(u16 *text_len, u16 *trunc_msg_len, u16 *dict_len, u32 *padlen)</code><br />
@@ -387,11 +387,11 @@ static u32 log_buf_len = __LOG_BUF_LEN;
 
 <h1 id="2-console-cont-flush">2. console_cont_flush</h1>
 
-<p><code>console_unlock</code>  函数一开始，会先调用 <code>console_cont_flush</code>  函数，将保存在 <strong>static struct cont cont</strong> 中的内容输出到控制台。</p>
+<p><code>console_unlock</code> 函数一开始，会先调用 <code>console_cont_flush</code> 函数，将保存在<strong>static struct cont cont</strong>中的内容输出到控制台。</p>
 
 <h2 id="2-1-struct-cont">2.1. struct cont</h2>
 
-<p><strong>struct cont cont</strong> 用来保存连续的多行数据，</p>
+<p><strong>struct cont cont</strong>用来保存连续的多行数据，</p>
 
 <pre><code class="language-C">static struct cont {
     char buf[LOG_LINE_MAX];
@@ -406,9 +406,9 @@ static u32 log_buf_len = __LOG_BUF_LEN;
 } cont;
 </code></pre>
 
-<p>其中可能有部分数据已经输出到控制台，比如<strong>cont.leng=1024</strong>，<strong>cont.cons=2</strong>，表示 <strong>cont</strong> 中共有1024byte数据，都保存在<strong>cont.buf</strong>中，但真正需要输出到控制台的只有1024-2=1022byte数据。</p>
+<p>其中可能有部分数据已经输出到控制台，比如<strong>cont.leng=1024</strong>，<strong>cont.cons=2</strong>，表示<strong>cont</strong>中共有1024byte数据，都保存在<strong>cont.buf</strong>中，但真正需要输出到控制台的只有1024-2=1022byte数据。</p>
 
-<p><code>console_cont_flush</code>  函数执行时，根据 <strong>cont</strong> 的信息，将其中的数据复制到 <strong>text</strong> 参数中，然后调用控制台驱动将这些信息输出。</p>
+<p><code>console_cont_flush</code> 函数执行时，根据<strong>cont</strong>的信息，将其中的数据复制到<strong>text</strong>参数中，然后调用控制台驱动将这些信息输出。</p>
 
 <p>传入的参数如下：</p>
 
@@ -451,7 +451,7 @@ out:
 
 <h1 id="3-console-unlock">3. console_unlock</h1>
 
-<p><em>kernel/printk/printk.c</em>  中的函数 <code>register_console</code>  执行到最后，会调用 <code>console_unlock</code>  ，根据代码的注释，这个函数会输出持有 <strong>console_lock</strong> 时通过 <code>printk</code>  输出的信息。</p>
+<p><em>kernel/printk/printk.c</em> 中的函数 <code>register_console</code> 执行到最后，会调用 <code>console_unlock</code> ，根据代码的注释，这个函数会输出持有<strong>console_lock</strong>时通过 <code>printk</code> 输出的信息。</p>
 
 <blockquote>
 <p>console_unlock - unlock the console system
@@ -571,7 +571,7 @@ skip:
 
 <h1 id="4-con-printbuffer">4. CON_PRINTBUFFER</h1>
 
-<p>执行 <code>register_console</code>  函数时，要注册的 <strong>newcon</strong> 是否具有 <strong>CON_PRINTBUFFER</strong> 标志会影响程序的执行流程：</p>
+<p>执行<code>register_console</code> 函数时，要注册的<strong>newcon</strong>是否具有<strong>CON_PRINTBUFFER</strong>标志会影响程序的执行流程：</p>
 
 <pre><code class="language-C">...
 /* 如果grub没有提供console=uart类型的参数，这里的bcon为NULL，
@@ -603,11 +603,11 @@ if (newcon-&gt;flags &amp; CON_PRINTBUFFER) {
 ...
 </code></pre>
 
-<p><strong>syslog_seq</strong> ， <strong>syslog_idx</strong> ， <strong>syslog_prev</strong> 是定义在  <em>kernel/printk/printk.c</em>  中的static变量，只需要查看文件内部对三个变量的使用情况即可。</p>
+<p><strong>syslog_seq</strong>，<strong>syslog_idx</strong>，<strong>syslog_prev</strong>是定义在 <em>kernel/printk/printk.c</em> 中的static变量，只需要查看文件内部对三个变量的使用情况即可。</p>
 
 <h2 id="4-1-syslog-print">4.1. syslog_print</h2>
 
-<p>第一个修改 <strong>syslog_seq</strong> 的函数是 <code>syslog_print</code> ，函数接收两个参数，一个是来自用户空间的字符串，另一个是要拷贝的字符串的长度。函数执行期间，还会更新 <strong>syslog_seq</strong> ， <strong>syslog_idx</strong> ， <strong>syslog_prev</strong> 的值。</p>
+<p>第一个修改<strong>syslog_seq</strong>的函数是 <code>syslog_print</code>，函数接收两个参数，一个是来自用户空间的字符串，另一个是要拷贝的字符串的长度。函数执行期间，还会更新<strong>syslog_seq</strong>，<strong>syslog_idx</strong>，<strong>syslog_prev</strong>的值。</p>
 
 <pre><code class="language-C">static int syslog_print(char __user *buf, int size)
 {
@@ -681,9 +681,9 @@ if (newcon-&gt;flags &amp; CON_PRINTBUFFER) {
 
 <h2 id="4-2-do-syslog">4.2. do_syslog</h2>
 
-<p>另一个会修改这三个变量的函数是 <code>do_syslog</code>  ，而且只有这个函数会调用 <code>syslog_print</code>  。</p>
+<p>另一个会修改这三个变量的函数是 <code>do_syslog</code> ，而且只有这个函数会调用 <code>syslog_print</code> 。</p>
 
-<p><code>do_syslog</code>  是系统调用 <strong>syslog</strong> 的主要实现，系统调用的实现代码执行 <code>do_syslog</code>  时，传入的 <strong>from_file</strong> 为 <strong>false</strong> 。</p>
+<p><code>do_syslog</code> 是系统调用<strong>syslog</strong>的主要实现，系统调用的实现代码执行 <code>do_syslog</code> 时，传入的<strong>from_file</strong>为<strong>false</strong>。</p>
 
 <pre><code class="language-C">int do_syslog(int type, char __user *buf, int len, bool from_file)
 {
@@ -819,9 +819,9 @@ out:
 
 <h2 id="4-3-syslog-print-all">4.3. syslog_print_all</h2>
 
-<p><code>do_syslog</code>  函数的主要功能通过 <code>syslog_print</code>  和 <code>syslog_print_all</code>  实现，前者已经介绍过，下面介绍 <code>syslog_print_all</code>  。</p>
+<p><code>do_syslog</code> 函数的主要功能通过 <code>syslog_print</code> 和 <code>syslog_print_all</code> 实现，前者已经介绍过，下面介绍<code>syslog_print_all</code> 。</p>
 
-<p><code>sysllog_print_all</code>  从 <strong>clear_seq</strong> 开始，到 <strong>log_next_seq</strong> 为止，将适合长度的msg拷贝到 <strong>@buf</strong>中。如果设置了clear标志，需要更新 <strong>clear_seq</strong> 和 <strong>clear_idx</strong> 为<strong>log_next_seq[idx]</strong> 。函数实现时，先统计从 <strong>clear_seq</strong> 到 <strong>log_next_seq</strong> 之间所有的msg的text的长度和len，然后再从 <strong>clear_seq</strong> 开始，用这个长度和减去每一个msg的textlen，直到len小于或者等于 <strong>@buf</strong> 的长度。然后再从这个位置开始，把每一个msg的text拷贝到 <strong>@buf</strong> 中。</p>
+<p><code>sysllog_print_all</code> 从<strong>clear_seq</strong>开始，到<strong>log_next_seq</strong>为止，将适合长度的msg拷贝到 <strong>@buf</strong>中。如果设置了clear标志，需要更新<strong>clear_seq</strong>和<strong>clear_idx</strong>为<strong>log_next_seq[idx]</strong> 。函数实现时，先统计从<strong>clear_seq</strong>到<strong>log_next_seq</strong>之间所有的msg的text的长度和len，然后再从<strong>clear_seq</strong>开始，用这个长度和减去每一个msg的textlen，直到len小于或者等于 <strong>@buf</strong> 的长度。然后再从这个位置开始，把每一个msg的text拷贝到 <strong>@buf</strong> 中。</p>
 
 <pre><code class="language-C">static int syslog_print_all(char __user *buf, int size, bool clear)
 {
@@ -925,7 +925,7 @@ out:
 
 <h1 id="5-printk">5. printk</h1>
 
-<p>内核打印函数 <code>printk</code>  定义在 <em>kernel/printk/printk.c</em>  中，函数的主要功能通过 <code>vprintk_emit</code>  实现：</p>
+<p>内核打印函数 <code>printk</code> 定义在<em>kernel/printk/printk.c</em> 中，函数的主要功能通过 <code>vprintk_emit</code> 实现：</p>
 
 <pre><code class="language-C">asmlinkage __visible int printk(const char *fmt, ...)
 {
@@ -951,7 +951,7 @@ out:
 
 <h2 id="5-1-可变参数宏">5.1. 可变参数宏</h2>
 
-<p>这个函数使用了可变参数宏 <strong>va_list</strong> ， <strong>va_start</strong> ， <strong>va_end</strong> ，都定义在 <em>include/acpi/platform/acenv.h</em>  中，</p>
+<p>这个函数使用了可变参数宏<strong>va_list</strong>，<strong>va_start</strong>，<strong>va_end</strong>，都定义在<em>include/acpi/platform/acenv.h</em> 中，</p>
 
 <pre><code class="language-C">typedef char *va_list;
 /* 64位系统为7 */
@@ -966,15 +966,15 @@ out:
 #define va_start(ap, A)         (void) ((ap) = (((char *) &amp;(A)) + (_bnd (A,_AUPBND))))
 </code></pre>
 
-<p>要理解这些宏，首先要知道函数调用时，需要通过栈来实现。比如代码 <code>printk(&quot;line%d\n&quot;, line);</code> ，执行时，编译器先将 <code>printk</code>  的参数 <strong>&ldquo;line%d\n&rdquo;</strong>,   <strong>line</strong> 都压入一个栈中，然后在跳转到 <code>pirntk</code>  函数的地址，执行 <code>pirntk</code>  函数。</p>
+<p>要理解这些宏，首先要知道函数调用时，需要通过栈来实现。比如代码 <code>printk(&quot;line%d\n&quot;, line);</code> ，执行时，编译器先将 <code>printk</code> 的参数 <strong>&ldquo;line%d\n&rdquo;</strong>,  <strong>line</strong>都压入一个栈中，然后在跳转到 <code>pirntk</code> 函数的地址，执行 <code>pirntk</code> 函数。</p>
 
-<p><code>va_start(args, fmt);</code> 即 <code>(void)((args) = (((char *)&amp;(fmt)) + 8)))</code> ， 指向 <strong>fmt</strong> 之上的地址，即 <code>printk</code>  的第一个参数。 <code>va_end(args)</code> 只是将 <strong>args</strong> 赋值为 <strong>NULL</strong> 。</p>
+<p><code>va_start(args, fmt);</code> 即 <code>(void)((args) = (((char *)&amp;(fmt)) + 8)))</code> ， 指向<strong>fmt</strong>之上的地址，即 <code>printk</code> 的第一个参数。 <code>va_end(args)</code> 只是将<strong>args</strong>赋值为<strong>NULL</strong>。</p>
 
-<p>至于 <code>va_args</code>  宏，执行的操作是将 <strong>ap</strong> 向后移动 <strong>T</strong> 类型占用的字节数的宽度，并返回一个 <strong>T</strong> 类型的值，类型 <strong>T</strong> 需要根据格式化字符串 <strong>fmt</strong> 的值进行判断。之后在 <code>vsnprintf</code>  函数中会用到。</p>
+<p>至于<code>va_args</code> 宏，执行的操作是将<strong>ap</strong>向后移动<strong>T</strong>类型占用的字节数的宽度，并返回一个<strong>T</strong>类型的值，类型<strong>T</strong>需要根据格式化字符串<strong>fmt</strong>的值进行判断。之后在 <code>vsnprintf</code> 函数中会用到。</p>
 
 <h2 id="5-2-vprintk-emit">5.2. vprintk_emit</h2>
 
-<p><code>vprintk_emit</code>  函数为：</p>
+<p><code>vprintk_emit</code> 函数为：</p>
 
 <pre><code class="language-C">/* @facility = 0 ,STDOUT
     @level = -1
@@ -1162,7 +1162,7 @@ out_restore_irqs:
 
 <h3 id="5-2-1-vscnprintf">5.2.1. vscnprintf</h3>
 
-<p>函数 <code>vprintk_emit</code>  的格式化输出功能通过 <code>vscnprintf</code>  实现，后者的主要功能通过 <code>vsnprintf</code>  函数实现。内核中 <code>vsnprintf</code>  的注释如下：</p>
+<p>函数 <code>vprintk_emit</code> 的格式化输出功能通过 <code>vscnprintf</code> 实现，后者的主要功能通过 <code>vsnprintf</code> 函数实现。内核中 <code>vsnprintf</code> 的注释如下：</p>
 
 <blockquote>
 <p>vsnprintf - Format a string and place it in a buffer<br />
@@ -1185,7 +1185,7 @@ out_restore_irqs:
 
 <p>函数的返回值是根据输入生成的字符的长度，不包括结尾的&rsquo;\0&rsquo;。如果要返回值等于写入buf中的字符的数量，使用<code>vscvprintf()</code>函数。如果返回值大于或者等于size，说明生成的字符串被截断。</p>
 
-<p>以 <code>vprintk_emit</code>  函数中对 <code>vscnprintf</code>  的调用为例，<code>text_len += vscnprintf(text + text_len, sizeof(textbuf) - text_len, fmt, args);</code> ，传递给 <code>vsnprintf</code>  的参数为：</p>
+<p>以 <code>vprintk_emit</code> 函数中对 <code>vscnprintf</code> 的调用为例，<code>text_len += vscnprintf(text + text_len, sizeof(textbuf) - text_len, fmt, args);</code> ，传递给 <code>vsnprintf</code> 的参数为：</p>
 
 <pre><code class="language-C">/* @buf = text
     @size = 1024 - 32

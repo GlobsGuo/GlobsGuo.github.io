@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>kernel parameters on Globs&#39; blog</title>
+    <link>https://globsguo.github.io/tags/kernel-parameters/</link>
+    <description>Recent content in kernel parameters on Globs&#39; blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://globsguo.github.io/tags/kernel-parameters/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>grub参数&#34;console=&#34;</title>
+      <link>https://globsguo.github.io/posts/grub_parameters/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/grub_parameters/</guid>
+      <description>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
+grub参数中的console=有多种形式，根据 Documentation/kernel-parameters.txt 文件，
+ console= [KNL] Output console device and options.</description>
+    </item>
+    
+  </channel>
+</rss>
