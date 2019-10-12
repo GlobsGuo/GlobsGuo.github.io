@@ -1,2 +1,0 @@
-User-agent: *
-Sitemap: https://globsguo.github.io/sitemap.xml
