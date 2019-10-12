@@ -191,6 +191,20 @@
   </url>
   
   <url>
+    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/cont/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/tags/kmem_cache/</loc>
     <lastmod>2019-09-19T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -212,6 +226,20 @@
   </url>
   
   <url>
+    <loc>https://globsguo.github.io/tags/printk/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/printk/</loc>
+    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/tags/slab-cache/</loc>
     <lastmod>2019-09-19T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -220,30 +248,6 @@
   
   <url>
     <loc>https://globsguo.github.io/categories/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/cont/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/printk/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/post/printk/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

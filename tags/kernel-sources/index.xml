@@ -41,7 +41,7 @@
     <item>
       <title>printk函数</title>
       <link>https://globsguo.github.io/post/printk/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/post/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 /* console_sem用来保护对console_drivers列表</description>
