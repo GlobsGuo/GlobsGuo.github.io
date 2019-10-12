@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Documentation on Globs&#39; blog</title>
+    <title>Documentation on Globs&#39; Catchall</title>
     <link>https://globsguo.github.io/tags/documentation/</link>
-    <description>Recent content in Documentation on Globs&#39; blog</description>
+    <description>Recent content in Documentation on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>en</language>
     <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/documentation/index.xml" rel="self" type="application/rss+xml" />
@@ -13,31 +13,29 @@
     
     <item>
       <title>control group</title>
-      <link>https://globsguo.github.io/posts/control_group/</link>
+      <link>https://globsguo.github.io/post/control_group/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/posts/control_group/</guid>
-      <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。</description>
+      <guid>https://globsguo.github.io/post/control_group/</guid>
+      <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的</description>
     </item>
     
     <item>
       <title>driver model</title>
-      <link>https://globsguo.github.io/posts/driver_model/</link>
+      <link>https://globsguo.github.io/post/driver_model/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/posts/driver_model/</guid>
-      <description>1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型包括一组所有总线共有的参数，一组共有的回调函数。 设备和桥的公共接口反映了现代操作系统的目标：实现设备的PnP、电源管理、热插拔等无缝连接，微软和因特尔提出的ACPI，x86下几乎所有的设备都可以在这个框架下工作。</description>
+      <guid>https://globsguo.github.io/post/driver_model/</guid>
+      <description>1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型</description>
     </item>
     
     <item>
       <title>Linux Memory Policy</title>
-      <link>https://globsguo.github.io/posts/memory_policy/</link>
+      <link>https://globsguo.github.io/post/memory_policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/posts/memory_policy/</guid>
-      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。
-内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-aware应用可以使用的编程接口。二者同时应用在进程时，cpuset优先级更高。
-1. Memory Policy Concepts 1.1. Scope of Memory Policies 内核支持内存策略的scope，从最一般的情况到最特殊的情况为：</description>
+      <guid>https://globsguo.github.io/post/memory_policy/</guid>
+      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-</description>
     </item>
     
   </channel>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>memory policy on Globs&#39; blog</title>
+    <title>memory policy on Globs&#39; Catchall</title>
     <link>https://globsguo.github.io/tags/memory-policy/</link>
-    <description>Recent content in memory policy on Globs&#39; blog</description>
+    <description>Recent content in memory policy on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>en</language>
     <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/memory-policy/index.xml" rel="self" type="application/rss+xml" />
@@ -13,13 +13,11 @@
     
     <item>
       <title>Linux Memory Policy</title>
-      <link>https://globsguo.github.io/posts/memory_policy/</link>
+      <link>https://globsguo.github.io/post/memory_policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/posts/memory_policy/</guid>
-      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。
-内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-aware应用可以使用的编程接口。二者同时应用在进程时，cpuset优先级更高。
-1. Memory Policy Concepts 1.1. Scope of Memory Policies 内核支持内存策略的scope，从最一般的情况到最特殊的情况为：</description>
+      <guid>https://globsguo.github.io/post/memory_policy/</guid>
+      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-</description>
     </item>
     
   </channel>

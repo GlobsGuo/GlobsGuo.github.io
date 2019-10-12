@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>kmem_cache_node on Globs&#39; blog</title>
+    <title>kmem_cache_node on Globs&#39; Catchall</title>
     <link>https://globsguo.github.io/tags/kmem_cache_node/</link>
-    <description>Recent content in kmem_cache_node on Globs&#39; blog</description>
+    <description>Recent content in kmem_cache_node on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
+    <language>en</language>
     <lastBuildDate>Thu, 19 Sep 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/kmem_cache_node/index.xml" rel="self" type="application/rss+xml" />
@@ -13,13 +13,11 @@
     
     <item>
       <title>mm-slab</title>
-      <link>https://globsguo.github.io/posts/mm-slab/</link>
+      <link>https://globsguo.github.io/post/mm-slab/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/posts/mm-slab/</guid>
-      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。
-本文从常用的内核内存分配函数 kmalloc 出发，介绍了 kmalloc 函数的执行路径和slab cache的初始化流程。
-1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内存，定义在 include/linux/slab.</description>
+      <guid>https://globsguo.github.io/post/mm-slab/</guid>
+      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 本文从常用的内核内存分配</description>
     </item>
     
   </channel>
