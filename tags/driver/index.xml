@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>driver on Globs&#39; blog</title>
+    <link>https://globsguo.github.io/tags/driver/</link>
+    <description>Recent content in driver on Globs&#39; blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://globsguo.github.io/tags/driver/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>driver model</title>
+      <link>https://globsguo.github.io/posts/driver_model/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/driver_model/</guid>
+      <description>1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型包括一组所有总线共有的参数，一组共有的回调函数。 设备和桥的公共接口反映了现代操作系统的目标：实现设备的PnP、电源管理、热插拔等无缝连接，微软和因特尔提出的ACPI，x86下几乎所有的设备都可以在这个框架下工作。</description>
+    </item>
+    
+  </channel>
+</rss>

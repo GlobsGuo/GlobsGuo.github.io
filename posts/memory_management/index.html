@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
     
     
 
@@ -23,19 +23,15 @@
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Memory Management Initialization"/>
 <meta name="twitter:description" content="本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-64架构为例，假设系统类型为NUMA，sparse memory model。
-1. Memory Model 内存模型一部分内容主要来自网上，*Documentation*中没有找到相关的内容。
-内存模型是从CPU的角度看，系统中物理内存的分布情况；在Linux内核中，使用何种方式来管理这些物理内存。
-Linux支持三种内存模型，flat memory，discontiguous memory和sparse memory。"/>
+1. Memory Model 内存模型一部分内容主要来自网上， Documentation 中没有找到相关的内容。"/>
 
 <meta property="og:title" content="Memory Management Initialization" />
 <meta property="og:description" content="本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-64架构为例，假设系统类型为NUMA，sparse memory model。
-1. Memory Model 内存模型一部分内容主要来自网上，*Documentation*中没有找到相关的内容。
-内存模型是从CPU的角度看，系统中物理内存的分布情况；在Linux内核中，使用何种方式来管理这些物理内存。
-Linux支持三种内存模型，flat memory，discontiguous memory和sparse memory。" />
+1. Memory Model 内存模型一部分内容主要来自网上， Documentation 中没有找到相关的内容。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/posts/memory_management/" />
-<meta property="article:published_time" content="2019-08-08T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-08-08T00:00:00+00:00" /><meta property="og:site_name" content="Globs&#39; blog" />
+<meta property="article:published_time" content="2019-10-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-12T00:00:00+00:00" /><meta property="og:site_name" content="Globs&#39; blog" />
 
 
     
@@ -173,7 +169,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 <div class="post__meta">
     
     
-      <i class="fas fa-calendar-alt"></i> Aug 8, 2019
+      <i class="fas fa-calendar-alt"></i> Oct 12, 2019
     
     
     
@@ -184,16 +180,13 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
           <br/>
            <i class="fas fa-tags"></i>
           
-          <a class="badge badge-tag" href="/tags/memory-model">memory model</a>
-           
-      
-          <a class="badge badge-tag" href="/tags/mem_section">mem_section</a>
+          <a class="badge badge-tag" href="/tags/memory">memory</a>
           
       
     
     
     <br/>
-    <i class="fas fa-clock"></i> 16 min read
+    <i class="fas fa-clock"></i> 18 min read
 </div>
 
 
@@ -207,7 +200,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <h1 id="1-memory-model">1. Memory Model</h1>
 
-<p>内存模型一部分内容主要来自<a href="http://www.wowotech.net/memory_management/memory_model.html">网上</a>，*Documentation*中没有找到相关的内容。</p>
+<p>内存模型一部分内容主要来自<a href="http://www.wowotech.net/memory_management/memory_model.html">网上</a>， <em>Documentation</em> 中没有找到相关的内容。</p>
 
 <p>内存模型是从CPU的角度看，系统中物理内存的分布情况；在Linux内核中，使用何种方式来管理这些物理内存。</p>
 
@@ -219,7 +212,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <p>从系统的任意一个CPU来看，访问物理内存的时候，物理地址空间是连续的，没有空洞的地址空间，这种计算机系统的内存模型就是flat memory model。</p>
 
-<p>这种情况下，节点数据<strong>pg_data_t</strong>只有一个，物理页框号和 <strong>struct page *mem_map</strong> 可以通过一个偏移量互相转化。将<strong>mem_map</strong>放在内存的直接映射区域，操作系统就不需要再为内存建立页表。</p>
+<p>这种情况下，节点数据 <strong>pg_data_t</strong> 只有一个，物理页框号和 <strong>struct page \ *mem_map</strong> 可以通过一个偏移量互相转化。将 <strong>mem_map</strong> 放在内存的直接映射区域，操作系统就不需要再为内存建立页表。</p>
 
 <pre><code class="language-C">// include/asm-generic/memory_model.h
 #define __pfn_to_page(pfn)    (mem_map + ((pfn) - ARCH_PFN_OFFSET))
@@ -230,7 +223,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <p>如果物理内存的地址空间有空洞，这种内存模型就是discontiguous memory model。</p>
 
-<p>这种情况下，节点数据<strong>pg_data_t</strong>有多个，每个节点管理的物理内存都保存在<strong>pg_data_t</strong>中的<strong>node_mem_map</strong>(类似于flat模型中的<strong>mem_map</strong>)成员中。从物理页框号转化为<strong>struct page</strong>需要先从PFN中得到节点ID，然后找到对应的<strong>pg_data_t</strong>，就可以像flat模型一样获得<strong>struct page</strong>数组。</p>
+<p>这种情况下，节点数据 <strong>pg_data_t</strong> 有多个，每个节点管理的物理内存都保存在 <strong>pg_data_t</strong> 中的 <strong>node_mem_map</strong> (类似于flat模型中的 <strong>mem_map</strong> )成员中。从物理页框号转化为 <strong>struct page</strong> 需要先从PFN中得到节点ID，然后找到对应的 <strong>pg_data_t</strong> ，就可以像flat模型一样获得 <strong>struct page</strong> 数组。</p>
 
 <pre><code class="language-C">// include/asm-generic/memory_model.h
 #define __pfn_to_page(pfn)          \
@@ -249,7 +242,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <h3 id="1-2-1-pfn-to-page">1.2.1. __pfn_to_page</h3>
 
-<p>x86下，只有32位(选择32位内核才会出现flat memory model)系统<code>arch_pfn_to_nid</code>有定义：</p>
+<p>x86下，只有32位(选择32位内核才会出现flat memory model)系统 <code>arch_pfn_to_nid</code> 有定义：</p>
 
 <pre><code class="language-C">static inline int pfn_to_nid(unsigned long pfn)
 {
@@ -265,11 +258,11 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <h2 id="1-3-sparse-memory-model">1.3. Sparse Memory Model</h2>
 
-<p>sparse模型用来解决内存的热插拔可能导致的内存节点内的<strong>mem_map</strong>不连续的问题。这种模型将连续的地址空间按照section(x86_64 NUMA架构下为128M)分段，每一个section都是hotplug的。</p>
+<p>sparse模型用来解决内存的热插拔可能导致的内存节点内的 <strong>mem_map</strong> 不连续的问题。这种模型将连续的地址空间按照section(x86_64 NUMA架构下为128M)分段，每一个section都是hotplug的。</p>
 
-<p>整个物理内存的地址空间通过指针 <strong>struct mem_section *</strong> 数组来描述，每个 <strong>mem_section *</strong> 指向一个page，page中包含若干个<strong>struct mem_section</strong>对象，每个对象描述一个section。</p>
+<p>整个物理内存的地址空间通过指针 <strong>struct mem_section *</strong> 数组来描述，每个 <strong>mem_section *</strong> 指向一个page，page中包含若干个 <strong>struct mem_section</strong> 对象，每个对象描述一个section。</p>
 
-<p>每一个section内部，内存地址都是连续的。因此，<strong>mem_map</strong>的page数组依赖于section结构。</p>
+<p>每一个section内部，内存地址都是连续的。因此， <strong>mem_map</strong> 的page数组依赖于section结构。</p>
 
 <pre><code class="language-C">#define __page_to_pfn(pg)                   \
 ({  const struct page *__pg = (pg);             \
@@ -284,7 +277,7 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 })
 </code></pre>
 
-<p>如果开启了<strong>CONFIG_SPARSEMEM_VMEMMAP</strong>选项(默认开启)，PFN和 <strong>struct page *</strong> 之间的转化十分简单：</p>
+<p>如果开启了 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> 选项(默认开启)，PFN和 <strong>struct page *</strong> 之间的转化十分简单：</p>
 
 <pre><code class="language-C">/* memmap is virtually contiguous.  */
 #define __pfn_to_page(pfn)  (vmemmap + (pfn))
@@ -293,9 +286,9 @@ Linux支持三种内存模型，flat memory，discontiguous memory和sparse memo
 
 <h3 id="1-3-1-page-to-pfn">1.3.1. __page_to_pfn</h3>
 
-<p>如果开启了<strong>CONFIG_SPARSEMEM</strong>，但是没有开启<strong>CONFIG_SPARSEMEM_VMEMMAP</strong>，就会开启<strong>SECTION_IN_PAGE_FLAGS</strong>选项，即在页表中包含section信息，据此实现<code>page_to_section</code>。</p>
+<p>如果开启了 <strong>CONFIG_SPARSEMEM</strong> ，但是没有开启 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，就会开启 <strong>SECTION_IN_PAGE_FLAGS</strong> 选项，即在页表中包含section信息，据此实现 <code>page_to_section</code> 。</p>
 
-<p><code>__nr_to_section</code>的实现也很简单，但是需要了解变量<strong>mem_section</strong>的定义：</p>
+<p><code>__nr_to_section</code> 的实现也很简单，但是需要了解变量 <strong>mem_section</strong> 的定义：</p>
 
 <pre><code class="language-C">#ifdef CONFIG_SPARSEMEM_EXTREME
 struct mem_section *mem_section[NR_SECTION_ROOTS]
@@ -319,7 +312,7 @@ EXPORT_SYMBOL(mem_section);
 
 <p>从section中获取对应的 <strong>struct page *</strong> 的首地址后，用要查找的<strong>struct page *</strong> 减去section的首地址，即可获得对应的PFN。</p>
 
-<p>内核代码中有<code>__page_to_pfn</code>函数的注释如下：</p>
+<p>内核代码中有 <code>__page_to_pfn</code> 函数的注释如下：</p>
 
 <blockquote>
 <p>setion&rsquo;s mem_map is encoded to reflect its start_pfn.</p>
@@ -329,43 +322,43 @@ EXPORT_SYMBOL(mem_section);
 
 <h3 id="1-3-2-pfn-to-page">1.3.2. __pfn_to_page</h3>
 
-<p>同理，由PFN可以得到所在的section的index，然后通过<code>__nr_to_section</code>获得section，再根据section中保存的 <strong>struct page *</strong> 的起始地址，获取PFN对应的 <strong>struct page *</strong>。</p>
+<p>同理，由PFN可以得到所在的section的index，然后通过 <code>__nr_to_section</code> 获得section，再根据section中保存的 <strong>struct page *</strong> 的起始地址，获取PFN对应的 <strong>struct page *</strong>。</p>
 
 <h3 id="1-3-3-vmemmap">1.3.3. VMEMMAP</h3>
 
-<p>如果开启<strong>CONFIG_SPARSEMEM_VMEMMAP</strong>，所有的 <strong>struct page *</strong> 都保存在连续的地址空间中，起始地址为<strong>VMEMMAP_START</strong>，x86架构定义在*arch/x86/include/asm/pgtable_64_types.h*，为0xffffea0000000000UL。</p>
+<p>如果开启 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，所有的 <strong>struct page *</strong> 都保存在连续的地址空间中，起始地址为 <strong>VMEMMAP_START</strong> ，x86架构定义在 <em>arch/x86/include/asm/pgtable_64_types.h</em> ，为0xffffea0000000000UL。</p>
 
 <h1 id="2-mem-section">2. mem_section</h1>
 
-<p>使用sparse内存模型的NUMA系统，将所有的物理内存分成内存段，即mem_section。*mm/sparse.c*中定义的<strong>struct mem_section *mem_section[NR_SECTION_ROOTS]</strong> 变量(x86下默认开启<strong>CONFIG_SPARSEMEM_EXTREME</strong>)，包含系统中所有的内存段。</p>
+<p>使用sparse内存模型的NUMA系统，将所有的物理内存分成内存段，即mem_section。 <em>mm/sparse.c</em> 中定义的<strong>struct mem_section *mem_section[NR_SECTION_ROOTS]</strong> 变量(x86下默认开启 <strong>CONFIG_SPARSEMEM_EXTREME</strong> )，包含系统中所有的内存段。</p>
 
-<p>根据定义可知，<strong>mem_section</strong>变量是长度为<strong>NR_SECTION_ROOTS</strong>指针数组，而<strong>NR_SECTION_ROOTS = 2K</strong>，所以<strong>mem_section</strong>占用<strong>16B * 2K = 32KB</strong>的空间。</p>
+<p>根据定义可知， <strong>mem_section</strong> 变量是长度为 <strong>NR_SECTION_ROOTS</strong> 指针数组，而 <strong>NR_SECTION_ROOTS = 2K</strong> ，所以 <strong>mem_section</strong> 占用<strong>16B * 2K = 32KB</strong>的空间。</p>
 
 <p>这个数组是静态的，无论对应的内存段是否存在。</p>
 
-<p><strong>mem_section</strong>的初始化过程由<code>sparse_init</code>完成，函数的调用路径如下：</p>
+<p><strong>mem_section</strong> 的初始化过程由 <code>sparse_init</code> 完成，函数的调用路径如下：</p>
 
 <ul>
-<li><code>start_kernel</code>, <em>init/main.c</em>
+<li><code>start_kernel</code> ,  <em>init/main.c</em>
 
 <ul>
-<li><code>setup_arch</code>, <em>arch/x86/kernel/setup.c</em></li>
-<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code>, <em>arch/x86/kernel/x86_init.c</em>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
 
 <ul>
-<li><code>paging_init</code>, <em>arch/x86/mm/init_64.c</em></li>
-<li><code>sparse_init</code>, <em>arch/x86/mm/sparse.c</em></li>
-<li><code>zone_sizes_init</code>, <em>arch/x86/mm/init.c</em>, 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
+<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
+<li><code>sparse_init</code> ,  <em>arch/x86/mm/sparse.c</em></li>
+<li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
 
 <ul>
-<li><code>free_area_init_nodes(max_zone_pfns)</code>, <em>mm/page_alloc.c</em></li>
-<li><code>free_area_init_node</code>, <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em></li>
 </ul></li>
 </ul></li>
 </ul></li>
 </ul>
 
-<p>这里先说明*arch/x86/mm/init_64.c*中的<code>paging_init</code>函数：</p>
+<p>这里先说明 <em>arch/x86/mm/init_64.c</em> 中的 <code>paging_init</code> 函数：</p>
 
 <pre><code class="language-C">void __init paging_init(void)
 {
@@ -386,13 +379,13 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p><code>paging_init</code>首先调用<code>sparse_memory_present_with_active_region</code>将系统内所有内存节点的物理页框通过<code>memroy_present</code>保存到<strong>mem_section</strong>，并且初始化<strong>mem_section</strong>数组的成员大小为 <strong>SECTION_PER_ROOT * sizeof(struct mem_section)</strong>(<strong>CONFIG_SPARSEMEM_EXTREME</strong>的情况)；然后调用<code>sparse_init</code>重新设置<strong>section_mem_map</strong>成员；最后通过<code>zone_sizes_init</code>初始化内存区域。</p>
+<p><code>paging_init</code> 首先调用 <code>sparse_memory_present_with_active_region</code> 将系统内所有内存节点的物理页框通过 <code>memroy_present</code> 保存到 <strong>mem_section</strong> ，并且初始化 <strong>mem_section</strong> 数组的成员大小为 <strong>SECTION_PER_ROOT * sizeof(struct mem_section)</strong>( <strong>CONFIG_SPARSEMEM_EXTREME</strong> 的情况)；然后调用 <code>sparse_init</code> 重新设置 <strong>section_mem_map</strong> 成员；最后通过 <code>zone_sizes_init</code> 初始化内存区域。</p>
 
-<p>需要说明的是，<code>memory_presents</code>函数不但将节点包含的物理页框添加到<strong>mem_section</strong>，还会设置每个<strong>mem_section</strong>的<strong>section_mem_map</strong>成员为 <strong>(所属的节点ID &lt;&lt; SECTION_NID_SHIFT | SECTION_MARKED_PRESENT)</strong> 。</p>
+<p>需要说明的是， <code>memory_presents</code> 函数不但将节点包含的物理页框添加到 <strong>mem_section</strong> ，还会设置每个 <strong>mem_section</strong> 的 <strong>section_mem_map</strong> 成员为 <strong>(所属的节点ID &lt;&lt; SECTION_NID_SHIFT | SECTION_MARKED_PRESENT)</strong> 。</p>
 
 <h2 id="2-1-sparse-init">2.1. sparse_init</h2>
 
-<p><code>sparse_init</code>主要设置<strong>mem_section</strong>的<strong>section_mem_map</strong>成员，将<code>sparse_memory_present_with_active_regions</code>函数保存的内容替换为对应的PFN，以便第一部分内存模型中介绍的<code>pfn_to_page</code>和<code>page_to_pfn</code>工作正常。</p>
+<p><code>sparse_init</code> 主要设置 <strong>mem_section</strong> 的 <strong>section_mem_map</strong> 成员，将 <code>sparse_memory_present_with_active_regions</code> 函数保存的内容替换为对应的PFN，以便第一部分内存模型中介绍的 <code>pfn_to_page</code> 和 <code>page_to_pfn</code> 工作正常。</p>
 
 <pre><code class="language-C">void __init sparse_init(void)
 {
@@ -475,7 +468,7 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p><code>sparse_init</code>函数的主要工作由<code>alloc_usemap_and_memmap</code>完成，后者负责遍历<strong>mem_section</strong>数组，实际的工作由参数<code>alloc_func</code>完成：</p>
+<p><code>sparse_init</code> 函数的主要工作由 <code>alloc_usemap_and_memmap</code> 完成，后者负责遍历 <strong>mem_section</strong> 数组，实际的工作由参数 <code>alloc_func</code> 完成：</p>
 
 <pre><code class="language-C">static void __init alloc_usemap_and_memmap(void (*alloc_func)
                     (void *, unsigned long, unsigned long,
@@ -533,11 +526,11 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p><code>sparse_init</code>函数先后两次调用<code>alloc_usemap_and_memmap</code>函数，传入的<strong>alloc_func</strong>分别为<code>sparse_early_usemaps_alloc_node</code>和<code>sparse_early_mem_maps_alloc_node</code>，<strong>data</strong>分别为保存 <strong>unsigned long *</strong> 对象的<strong>usemap_map</strong> 和 <strong>struct page *</strong> 对象的<strong>map_map</strong>。</p>
+<p><code>sparse_init</code> 函数先后两次调用 <code>alloc_usemap_and_memmap</code> 函数，传入的 <strong>alloc_func</strong> 分别为 <code>sparse_early_usemaps_alloc_node</code> 和 <code>sparse_early_mem_maps_alloc_node</code> ， <strong>data</strong> 分别为保存 <strong>unsigned long *</strong> 对象的 <strong>usemap_map</strong>  和 <strong>struct page *</strong> 对象的 <strong>map_map</strong> 。</p>
 
 <h3 id="2-1-1-sparse-early-usemaps-alloc-node">2.1.1. sparse_early_usemaps_alloc_node</h3>
 
-<p>分配函数为<code>sparse_early_usemaps_alloc_node</code>时，<strong>data</strong>参数为长度为<strong>NR_MEM_SECTIONS</strong>的 <strong>unsigned long *</strong> 数组<strong>usemap_map</strong>。</p>
+<p>分配函数为 <code>sparse_early_usemaps_alloc_node</code> 时， <strong>data</strong> 参数为长度为 <strong>NR_MEM_SECTIONS</strong> 的 <strong>unsigned long *</strong> 数组 <strong>usemap_map</strong> 。</p>
 
 <pre><code class="language-C">static void __init sparse_early_usemaps_alloc_node(void *data,
                  unsigned long pnum_begin,
@@ -572,7 +565,7 @@ EXPORT_SYMBOL(mem_section);
 
 <h3 id="2-1-2-sparse-early-mem-maps-alloc-node">2.1.2. sparse_early_mem_maps_alloc_node</h3>
 
-<p>分配函数为<code>sparse_early_mem_maps_alloc_node</code>时，<strong>data</strong>参数为长度为<strong>NR_MEM_SECTIONS</strong>的<strong>struct page *</strong> 数组<strong>map_map</strong>。</p>
+<p>分配函数为 <code>sparse_early_mem_maps_alloc_node</code> 时， <strong>data</strong> 参数为长度为 <strong>NR_MEM_SECTIONS</strong> 的<strong>struct page *</strong> 数组 <strong>map_map</strong> 。</p>
 
 <pre><code class="language-C">static void __init sparse_early_mem_maps_alloc_node(void *data,
                  unsigned long pnum_begin,
@@ -585,11 +578,11 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p>和SPARSEMEM相关的还有一个配置项，即前面说到的<strong>CONFIG_SPARSEMEM_VMEMMAP</strong>，开启此选项，系统中所有的<strong>struct page *</strong> 对象保存在连续的内存地址空间中。对应的，<code>sparse_mem_maps_populate_node</code>函数有两个定义。</p>
+<p>和SPARSEMEM相关的还有一个配置项，即前面说到的 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，开启此选项，系统中所有的<strong>struct page *</strong> 对象保存在连续的内存地址空间中。对应的， <code>sparse_mem_maps_populate_node</code> 函数有两个定义。</p>
 
 <h4 id="2-1-2-1-non-vmemmap">2.1.2.1. non-vmemmap</h4>
 
-<p>non-vmemmap情况下<code>sparse_mem_maps_populate_node</code>函数定义在*mm/sparse.c*中：</p>
+<p>non-vmemmap情况下 <code>sparse_mem_maps_populate_node</code> 函数定义在 <em>mm/sparse.c</em> 中：</p>
 
 <pre><code class="language-C">void __init sparse_mem_maps_populate_node(struct page **map_map,
                       unsigned long pnum_begin,
@@ -650,11 +643,11 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p>可以看到，non-vmemmap情况下，每次调用<code>sparse_mem_maps_populate_node</code>函数只是从memblock中分配所需的内存空间，分配的内存空间很有可能不连续。</p>
+<p>可以看到，non-vmemmap情况下，每次调用 <code>sparse_mem_maps_populate_node</code> 函数只是从memblock中分配所需的内存空间，分配的内存空间很有可能不连续。</p>
 
 <h4 id="2-1-2-2-vmemmap">2.1.2.2. vmemmap</h4>
 
-<p>配置vmemmap的情况下，<code>sparse_mem_maps_populate_node</code>定义在*mm/sprase-vmemmap.c*中，<strong>QUESTION</strong></p>
+<p>配置vmemmap的情况下， <code>sparse_mem_maps_populate_node</code> 定义在*mm/sprase-vmemmap.c*中， <strong>QUESTION</strong></p>
 
 <pre><code class="language-C">void __init sparse_mem_maps_populate_node(struct page **map_map,
                       unsigned long pnum_begin,
@@ -708,15 +701,15 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p>至此，系统中内存段的初始化完成，可以通过pfn_to_page和page_to_pfn将<strong>PFN</strong>和 <strong>struct page *</strong> 相互转化。</p>
+<p>至此，系统中内存段的初始化完成，可以通过pfn_to_page和page_to_pfn将 <strong>PFN</strong> 和 <strong>struct page *</strong> 相互转化。</p>
 
 <h1 id="3-内存节点">3. 内存节点</h1>
 
-<p>内存节点是内核管理物理内存的最上层抽象。对于NUMA系统，至少包含一个节点0。每个节点都有一个<strong>struct pglist_data</strong>对象指针，包含该节点的所有物理内存信息。</p>
+<p>内存节点是内核管理物理内存的最上层抽象。对于NUMA系统，至少包含一个节点0。每个节点都有一个 <strong>struct pglist_data</strong> 对象指针，包含该节点的所有物理内存信息。</p>
 
 <h2 id="3-1-stuct-pglist-data-node-data">3.1. stuct pglist_data *node_data[]</h2>
 
-<p>x86架构下，变量 <strong>struct pglist_data *node_data[]</strong> 保存系统中的所有节点信息，定义在*arch/x86/mm/numa.c*中。</p>
+<p>x86架构下，变量 <strong>struct pglist_data *node_data[]</strong> 保存系统中的所有节点信息，定义在 <em>arch/x86/mm/numa.c</em> 中。</p>
 
 <pre><code class="language-c">typedef struct pglist_data {
     /* 节点包含的所有zone信息 */
@@ -761,36 +754,36 @@ EXPORT_SYMBOL(mem_section);
 
 </code></pre>
 
-<h2 id="3-2-node-data-的初始化">3.2. <strong>node_data</strong>的初始化</h2>
+<h2 id="3-2-node-data-的初始化">3.2.  <strong>node_data</strong> 的初始化</h2>
 
-<p>*arch/x86/include/asm/mmzone_64.h*中定义了访问<strong>node_data</strong>变量的宏<code>#define NODE_DATA(nid) (node_data[nid])</code>，内核中的代码大多使用这个宏访问<strong>node_data</strong>变量。</p>
+<p><em>arch/x86/include/asm/mmzone_64.h</em> 中定义了访问 <strong>node_data</strong> 变量的宏<code>#define NODE_DATA(nid) (node_data[nid])</code>，内核中的代码大多使用这个宏访问 <strong>node_data</strong> 变量。</p>
 
 <h3 id="3-2-1-setup-node-data">3.2.1. setup_node_data</h3>
 
-<p>函数<code>setup_node_data</code>负责分配<strong>node_data</strong>变量，进行一些成员的简单初始化，函数的调用路径如下：</p>
+<p>函数 <code>setup_node_data</code> 负责分配 <strong>node_data</strong> 变量，进行一些成员的简单初始化，函数的调用路径如下：</p>
 
 <ul>
-<li><code>start_kernel</code>, <em>init/main.c</em>
+<li><code>start_kernel</code> ,  <em>init/main.c</em>
 
 <ul>
-<li><code>setup_arch</code>, <em>arch/x86/kernel/setup.c</em></li>
-<li><code>initmem_init</code>, <em>arch/x86/mm/numa_64.c</em>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>initmem_init</code> ,  <em>arch/x86/mm/numa_64.c</em>
 
 <ul>
-<li><code>x86_numa_init</code>, <em>arch/x86/mm/numa.c</em></li>
-<li><code>numa_init</code>, <em>arch/x86/mm/numa.c</em>
+<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
 
 <ul>
-<li><code>x86_acpi_numa_init</code>, <em>arch/x86/mm/srat.c</em></li>
-<li><code>acpi_numa_init</code>, <em>drivers/acpi/numa.c</em></li>
-<li><code>numa_register_memblks</code>, <em>arch/x86/mm/numa.c</em></li>
-<li><code>setup_node_data</code>, <em>arch/x86/mm/numa.c</em></li>
+<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em></li>
+<li><code>acpi_numa_init</code> ,  <em>drivers/acpi/numa.c</em></li>
+<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>setup_node_data</code> ,  <em>arch/x86/mm/numa.c</em></li>
 </ul></li>
 </ul></li>
 </ul></li>
 </ul>
 
-<p>需要说明的是，实际测试时，根据boot log，<code>x86_numa_init</code>的执行过程如下：</p>
+<p>需要说明的是，实际测试时，根据boot log， <code>x86_numa_init</code> 的执行过程如下：</p>
 
 <pre><code class="language-C">void __init x86_numa_init(void)
 {
@@ -814,9 +807,9 @@ EXPORT_SYMBOL(mem_section);
 }
 </code></pre>
 
-<p>也就是说，默认情况下，x86架构开启NUMA配置，<code>x86_numa_init</code>函数首先执行<code>x86_acpi_numa_init</code>函数，尝试从ACPI的SRAT中获取NUMA信息，成功的话函数直接退出；否则再调用<code>amd_numa_init</code>，从北桥的PCI配置空间获取NUMA信息，成功的话直接退出；否则再调用<code>dummy_numa_init</code>，直接将<strong>0 - max_pfn</strong>范围的物理页框作为节点0(这个范围内可能有空洞)。</p>
+<p>也就是说，默认情况下，x86架构开启NUMA配置， <code>x86_numa_init</code> 函数首先执行 <code>x86_acpi_numa_init</code> 函数，尝试从ACPI的SRAT中获取NUMA信息，成功的话函数直接退出；否则再调用 <code>amd_numa_init</code> ，从北桥的PCI配置空间获取NUMA信息，成功的话直接退出；否则再调用 <code>dummy_numa_init</code> ，直接将<strong>0 - max_pfn</strong>范围的物理页框作为节点0(这个范围内可能有空洞)。</p>
 
-<p>不论是哪种方式，成功获取到NUMA信息后，都会将其添加到<strong>numa_meminofo</strong>变量。这个变量由<code>numa_init</code>调用函数<code>numa_register_memblks</code>时作为参数传递，添加到<strong>memblock</strong>变量，同时传递给<code>setup_node_data</code>函数，即每个节点的起始页框索引。</p>
+<p>不论是哪种方式，成功获取到NUMA信息后，都会将其添加到 <strong>numa_meminofo</strong> 变量。这个变量由 <code>numa_init</code> 调用函数 <code>numa_register_memblks</code> 时作为参数传递，添加到 <strong>memblock</strong> 变量，同时传递给 <code>setup_node_data</code> 函数，即每个节点的起始页框索引。</p>
 
 <pre><code class="language-C">/* Initialize NODE_DATA for a node on the local memory */
 static void __init setup_node_data(int nid, u64 start, u64 end)
@@ -875,45 +868,45 @@ static void __init setup_node_data(int nid, u64 start, u64 end)
 
 <h3 id="3-2-2-free-area-init-node">3.2.2. free_area_init_node</h3>
 
-<p><code>setup_node_data</code>函数只会初始化<strong>pg_data_t</strong>的部分成员变量(节点信息，起始页框信息)，其余成员变量的初始化在函数<code>free_area_init_node</code>完成，两个函数的调用路径的先后顺序如下：</p>
+<p><code>setup_node_data</code> 函数只会初始化 <strong>pg_data_t</strong> 的部分成员变量(节点信息，起始页框信息)，其余成员变量的初始化在函数 <code>free_area_init_node</code> 完成，两个函数的调用路径的先后顺序如下：</p>
 
 <ul>
-<li><code>start_kernel</code>, <em>init/main.c</em>
+<li><code>start_kernel</code> ,  <em>init/main.c</em>
 
 <ul>
-<li><code>setup_arch</code>, <em>arch/x86/kernel/setup.c</em></li>
-<li><code>initmem_init</code>, <em>arch/x86/mm/numa_64.c</em>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>initmem_init</code> ,  <em>arch/x86/mm/numa_64.c</em>
 
 <ul>
-<li><code>x86_numa_init</code>, <em>arch/x86/mm/numa.c</em></li>
-<li><code>numa_init</code>, <em>arch/x86/mm/numa.c</em>
+<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
 
 <ul>
-<li><code>x86_acpi_numa_init</code>, <em>arch/x86/mm/srat.c</em></li>
-<li><code>acpi_numa_init</code>, <em>drivers/acpi/numa.c</em></li>
-<li><code>numa_register_memblks</code>, <em>arch/x86/mm/numa.c</em></li>
-<li><code>setup_node_data</code>, <em>arch/x86/mm/numa.c</em></li>
+<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em></li>
+<li><code>acpi_numa_init</code> ,  <em>drivers/acpi/numa.c</em></li>
+<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>setup_node_data</code> ,  <em>arch/x86/mm/numa.c</em></li>
 </ul></li>
 </ul></li>
-<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code>, <em>arch/x86/kernel/x86_init.c</em>
+<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
 
 <ul>
-<li><code>paging_init</code>, <em>arch/x86/mm/init_64.c</em></li>
-<li><code>zone_sizes_init</code>, <em>arch/x86/mm/init.c</em>, 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
+<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
+<li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
 
 <ul>
-<li><code>free_area_init_nodes(max_zone_pfns)</code>, <em>mm/page_alloc.c</em></li>
-<li><code>free_area_init_node</code>, <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em></li>
 </ul></li>
 </ul></li>
-<li><code>build_all_zonelists</code>, <em>mm/page_alloc.c</em></li>
-<li><code>page_alloc_init</code>, <em>mm/page_alloc.c</em></li>
-<li><code>mm_init</code>, <em>init/main.c</em></li>
-<li><code>kmem_cache_init</code>, <em>mm/slub.c</em></li>
+<li><code>build_all_zonelists</code> ,  <em>mm/page_alloc.c</em></li>
+<li><code>page_alloc_init</code> ,  <em>mm/page_alloc.c</em></li>
+<li><code>mm_init</code> ,  <em>init/main.c</em></li>
+<li><code>kmem_cache_init</code> ,  <em>mm/slub.c</em></li>
 </ul></li>
 </ul>
 
-<p><code>setup_node_data</code>使用的NUMA信息来自ACPI表或者BIOS-e820，可能包含空洞，PFN的范围不准确；<code>free_area_init_node</code>使用的内存信息来自<strong>struct memblock memblock</strong>变量，用<strong>memblock</strong>的信息对NUMA信息进一步修正(<strong>memblock</strong>定义在*mm/memblock.c*中，保存始化阶段通过<code>memblock_reserve</code>、<code>memblock_set_node</code>函数保留的内存信息。)：</p>
+<p><code>setup_node_data</code> 使用的NUMA信息来自ACPI表或者BIOS-e820，可能包含空洞，PFN的范围不准确； <code>free_area_init_node</code> 使用的内存信息来自 <strong>struct memblock memblock</strong> 变量，用 <strong>memblock</strong> 的信息对NUMA信息进一步修正( <strong>memblock</strong> 定义在 <em>mm/memblock.c</em> 中，保存始化阶段通过 <code>memblock_reserve</code> 、 <code>memblock_set_node</code> 函数保留的内存信息。)：</p>
 
 <pre><code class="language-C">/* 执行上面的函数路径时，
    @zones_size = NULL
@@ -958,13 +951,13 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 }
 </code></pre>
 
-<p>至此，变量<strong>node_data</strong>初始化完毕，包含的节点信息供后续的内存初始化操作使用。</p>
+<p>至此，变量 <strong>node_data</strong> 初始化完毕，包含的节点信息供后续的内存初始化操作使用。</p>
 
 <h2 id="3-3-zonelist的初始化">3.3. zonelist的初始化</h2>
 
-<p><code>start_kernel</code>函数会调用<code>build_all_zonelists</code>初始化内存区域表，即<strong>pg_data_t</strong>的<strong>node_zonelists</strong>成员。</p>
+<p><code>start_kernel</code> 函数会调用 <code>build_all_zonelists</code> 初始化内存区域表，即 <strong>pg_data_t</strong> 的 <strong>node_zonelists</strong> 成员。</p>
 
-<p><code>build_all_zonelists</code>会调用<code>__build_all_zonelists</code>，后者分别调用<code>build_zonelists</code>和<code>build_zonelist_cache</code>完成zonelist的初始化：</p>
+<p><code>build_all_zonelists</code> 会调用 <code>__build_all_zonelists</code> ，后者分别调用 <code>build_zonelists</code> 和 <code>build_zonelist_cache</code> 完成zonelist的初始化：</p>
 
 <pre><code class="language-C">static int __build_all_zonelists(void *data)
 {
@@ -1023,7 +1016,7 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 }
 </code></pre>
 
-<p><strong>struct zonelist</strong>结构如下，</p>
+<p><strong>struct zonelist</strong> 结构如下，</p>
 
 <pre><code class="language-C">struct zonelist {
     struct zonelist_cache *zlcache_ptr;          // NULL or &amp;zlcache
@@ -1034,13 +1027,13 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 };
 </code></pre>
 
-<p><strong>MAX_ZONES_PER_ZONELIST</strong>为系统中的节点数和zone类型数的乘积，假如系统中共有2各节点，zone有3种类型(DMA，DMA32，NORMAL)，则 <strong>_zonerefs</strong> 的长度为6 + 1 = 7。数组的最后一个元素总是设置为空，作为结束标志。</p>
+<p><strong>MAX_ZONES_PER_ZONELIST</strong> 为系统中的节点数和zone类型数的乘积，假如系统中共有2各节点，zone有3种类型(DMA，DMA32，NORMAL)，则  <strong>_zonerefs</strong>  的长度为6 + 1 = 7。数组的最后一个元素总是设置为空，作为结束标志。</p>
 
 <h3 id="3-3-1-build-zonelists">3.3.1. build_zonelists</h3>
 
-<p><code>build_zonelists</code>函数完成 <strong>pg_data_t</strong> 成员 <strong>struct zonelist node_zonelists[MAX_ZONELISTS]</strong> 的初始化工作。zonelist是页面请求操作的对象，其中第一个zone是首选目标，其余的zone是备选项，按照优先级降序排列。</p>
+<p><code>build_zonelists</code> 函数完成  <strong>pg_data_t</strong>  成员 <strong>struct zonelist node_zonelists[MAX_ZONELISTS]</strong> 的初始化工作。zonelist是页面请求操作的对象，其中第一个zone是首选目标，其余的zone是备选项，按照优先级降序排列。</p>
 
-<p>NUMA系统中，<strong>MAX_ZONELISTS</strong>为2，因为我们需要支持 <strong>__GFP_THISNODE</strong> 选项：</p>
+<p>NUMA系统中， <strong>MAX_ZONELISTS</strong> 为2，因为我们需要支持  <strong>__GFP_THISNODE</strong>  选项：</p>
 
 <ul>
 <li>node_zonelists[0]<br />
@@ -1049,7 +1042,7 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 没有备选node的zonelist</li>
 </ul>
 
-<p>zonelist的备选node通过函数<code>find_next_best_node</code>确定：备选node不能已经包含在zonelist中，应该是距离当前节点次近的节点，不属于任何CPU的节点更佳——这些节点没有分配内存的压力。距离根据距离数组计算——数组中包含系统中所有节点间的距离。</p>
+<p>zonelist的备选node通过函数 <code>find_next_best_node</code> 确定：备选node不能已经包含在zonelist中，应该是距离当前节点次近的节点，不属于任何CPU的节点更佳——这些节点没有分配内存的压力。距离根据距离数组计算——数组中包含系统中所有节点间的距离。</p>
 
 <pre><code class="language-C">static void build_zonelists(pg_data_t *pgdat)
 {
@@ -1123,9 +1116,9 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 
 </code></pre>
 
-<p>可以看到，创建zonelist时，有两种策略，一种为了保证最大程度的局部性，即<code>build_zonelists_in_node_order</code>；一种为了避免DMA内存被耗尽，即<code>build_zonelists_in_zone_order</code>。两种策略可以通过grub参数“numa_zonelist_order”设置，也可以通过sysctl设置。</p>
+<p>可以看到，创建zonelist时，有两种策略，一种为了保证最大程度的局部性，即 <code>build_zonelists_in_node_order</code> ；一种为了避免DMA内存被耗尽，即 <code>build_zonelists_in_zone_order</code> 。两种策略可以通过grub参数“numa_zonelist_order”设置，也可以通过sysctl设置。</p>
 
-<p><code>build_zonelists_in_node_order</code>找到传入的<strong>pgdata</strong>的<strong>node_zonelists[0]</strong> 中第一个没有设置的 <strong>_zonerefs</strong> ，即 <strong>_zonerefs</strong> 中的最后一个元素，然后将<strong>zonelist</strong>中包含的所有zone按照类型从高到低的顺序添加到 <strong>_zonerefs</strong> 中：</p>
+<p><code>build_zonelists_in_node_order</code> 找到传入的 <strong>pgdata</strong> 的<strong>node_zonelists[0]</strong> 中第一个没有设置的  <strong>_zonerefs</strong>  ，即  <strong>_zonerefs</strong>  中的最后一个元素，然后将 <strong>zonelist</strong> 中包含的所有zone按照类型从高到低的顺序添加到  <strong>_zonerefs</strong>  中：</p>
 
 <pre><code class="language-C">static void build_zonelists_in_node_order(pg_data_t *pgdat, int node)
 {
@@ -1145,7 +1138,7 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 }
 </code></pre>
 
-<p><code>build_zonelists_in_zone_order</code>则根据<strong>node_order</strong>数组中按照距当前节点的距离保存的内存节点先将同一类型的每个节点的所有zone添加，然后添加其他类型的zone，按照类型从高到低的顺序：</p>
+<p><code>build_zonelists_in_zone_order</code> 则根据 <strong>node_order</strong> 数组中按照距当前节点的距离保存的内存节点先将同一类型的每个节点的所有zone添加，然后添加其他类型的zone，按照类型从高到低的顺序：</p>
 
 <pre><code class="language-C">static void build_zonelists_in_zone_order(pg_data_t *pgdat, int nr_nodes)
 {
@@ -1190,9 +1183,9 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
 <h4 id="3-3-2-1-zlcache的说明">3.3.2.1. zlcache的说明</h4>
 
-<p><code>build_zonelist_cache</code>初始化<strong>struct zonelist</strong>中的剩余两个成员变量：<strong>zlcache_ptr</strong>和<strong>zlcache</strong>。</p>
+<p><code>build_zonelist_cache</code> 初始化 <strong>struct zonelist</strong> 中的剩余两个成员变量： <strong>zlcache_ptr</strong> 和 <strong>zlcache</strong> 。</p>
 
-<p><strong>struct zonelist_cache</strong>缓存每个zonelist的关键信息，以便在<code>get_page_from_freelist()</code>函数中扫描空闲页面时减小高速缓存的footprint。</p>
+<p><strong>struct zonelist_cache</strong> 缓存每个zonelist的关键信息，以便在<code>get_page_from_freelist()</code>函数中扫描空闲页面时减小高速缓存的footprint。</p>
 
 <pre><code class="language-C">struct zonelist_cache {
     unsigned short z_to_n[MAX_ZONES_PER_ZONELIST];      /* zone-&gt;nid */
@@ -1201,19 +1194,19 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 };
 </code></pre>
 
-<p>位图<strong>fullzones</strong>追踪上次zero&rsquo;d fullzones之后，zonelist中缺少空闲内存的zone信息。</p>
+<p>位图 <strong>fullzones</strong> 追踪上次zero&rsquo;d fullzones之后，zonelist中缺少空闲内存的zone信息。</p>
 
-<p>数组<strong>z_to_n[]</strong>将zonelist中的每个zone映射到所属的节点的ID，以便快速确认该节点是否包含在当前进程的<strong>mems_allowed</strong>中。</p>
+<p>数组<strong>z_to_n[]</strong>将zonelist中的每个zone映射到所属的节点的ID，以便快速确认该节点是否包含在当前进程的 <strong>mems_allowed</strong> 中。</p>
 
-<p><strong>fullzones</strong>和 <strong>z_to_n[]</strong> 都是和zonelist一一对应，通过zonelist的 <strong>_zonerefs</strong>提供的偏移量进行索引。</p>
+<p><strong>fullzones</strong> 和 <strong>z_to_n[]</strong> 都是和zonelist一一对应，通过zonelist的  <strong>_zonerefs</strong> 提供的偏移量进行索引。</p>
 
-<p><code>get_page_from_freelist()</code>函数执行两次扫描。第一次扫描时，跳过设置了<strong>fullzones</strong>中对应位的zone，以及对应的节点没有包含在<strong>current-&gt;mems_allowed</strong>中的zone。第二次扫描时，跳过<strong>zonelist_cache</strong>，保证查看了每个zone。</p>
+<p><code>get_page_from_freelist()</code>函数执行两次扫描。第一次扫描时，跳过设置了 <strong>fullzones</strong> 中对应位的zone，以及对应的节点没有包含在<strong>current-&gt;mems_allowed</strong>中的zone。第二次扫描时，跳过 <strong>zonelist_cache</strong> ，保证查看了每个zone。</p>
 
-<p>每一秒钟执行一次zero out(zap) fullzones的操作，<strong>last_full_zap</strong>保存上一次zap操作的时间。这种机制可以减少zone刚刚进入低内存状态，不停地检测zone是否有空闲内存所花费的时间。</p>
+<p>每一秒钟执行一次zero out(zap) fullzones的操作， <strong>last_full_zap</strong> 保存上一次zap操作的时间。这种机制可以减少zone刚刚进入低内存状态，不停地检测zone是否有空闲内存所花费的时间。</p>
 
 <h4 id="3-3-2-2-zlcache的初始化">3.3.2.2. zlcache的初始化</h4>
 
-<p>函数<code>build_zonelist_cache</code>完成zlcache的初始化，</p>
+<p>函数 <code>build_zonelist_cache</code> 完成zlcache的初始化，</p>
 
 <pre><code class="language-C">static void build_zonelist_cache(pg_data_t *pgdat)
 {
@@ -1236,28 +1229,28 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
 <h3 id="3-3-3-zonelist的额外说明">3.3.3. zonelist的额外说明</h3>
 
-<p><strong>struct zonelist_cache</strong>的成员属于<strong>struct zonelist</strong>。但是，<strong>MPOL_BIND</strong>内存策略的zonelist结构体长度不同，通常更短——<strong>MPOL_BIND</strong>策略不需要<strong>zonelist_cache</strong>成员，因此我们将固定长度的成员放在zonelist结构体的起始位置，以<strong>zonelist_cache</strong>结尾。</p>
+<p><strong>struct zonelist_cache</strong> 的成员属于 <strong>struct zonelist</strong> 。但是， <strong>MPOL_BIND</strong> 内存策略的zonelist结构体长度不同，通常更短—— <strong>MPOL_BIND</strong> 策略不需要 <strong>zonelist_cache</strong> 成员，因此我们将固定长度的成员放在zonelist结构体的起始位置，以 <strong>zonelist_cache</strong> 结尾。</p>
 
-<p><strong>zonelist_cache</strong>这个可选的成员变量通过<strong>zlcache_ptr</strong>指针定位，在<strong>MPOL_BIND</strong>的情况下指针为NULL。</p>
+<p><strong>zonelist_cache</strong> 这个可选的成员变量通过 <strong>zlcache_ptr</strong> 指针定位，在 <strong>MPOL_BIND</strong> 的情况下指针为NULL。</p>
 
-<p>由此，<strong>strut zonelist</strong>有两种形式：</p>
+<p>由此， <strong>strut zonelist</strong> 有两种形式：</p>
 
 <ol>
 <li>完整的，固定长度的版本</li>
-<li>针对<strong>MPOL_BIND</strong>内存策略的版本(<strong>zlcache_ptr</strong>为空)</li>
+<li>针对 <strong>MPOL_BIND</strong> 内存策略的版本( <strong>zlcache_ptr</strong> 为空)</li>
 </ol>
 
-<p>虽然存在多个CPU同时修改<strong>zonelist_cache</strong>的<strong>fullzones</strong>和<strong>last_full_zap</strong>的情况，我们没有加锁——这只是提示信息，如果这些信息有误，只不过会影响分配器的运行速度，但是不会影响分配器的功能。</p>
+<p>虽然存在多个CPU同时修改 <strong>zonelist_cache</strong> 的 <strong>fullzones</strong> 和 <strong>last_full_zap</strong> 的情况，我们没有加锁——这只是提示信息，如果这些信息有误，只不过会影响分配器的运行速度，但是不会影响分配器的功能。</p>
 
 <h1 id="4-内存区域">4. 内存区域</h1>
 
-<p>根据物理内存的使用方式，内核将物理内存分为多个内存区域(zone)，每个zone用<strong>struct zone</strong>来描述。以x86_64架构为例，内核包括ZONE_DMA，ZONE_DMA32，ZONE_NORMAL，ZONE_MOVABLE四种。</p>
+<p>根据物理内存的使用方式，内核将物理内存分为多个内存区域(zone)，每个zone用 <strong>struct zone</strong> 来描述。以x86_64架构为例，内核包括ZONE_DMA，ZONE_DMA32，ZONE_NORMAL，ZONE_MOVABLE四种。</p>
 
 <p>因为系统中的DMA设备寻址范围小于16MB，因此需要ZONE_DMA；有的设备只能寻址小于4GB的地址，需要ZONE_DMA32。</p>
 
 <h2 id="4-1-struct-zone">4.1. struct zone</h2>
 
-<p>Linux内核用<strong>struct zone</strong>描述内存区域：</p>
+<p>Linux内核用 <strong>struct zone</strong> 描述内存区域：</p>
 
 <pre><code class="language-C">struct zone {
     unsigned long watermark[NR_WMARK];
@@ -1329,23 +1322,23 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
 <p>watermark数组长度为3，三个元素分别是WMARK_MIN，WMARK_LOW，WMARK_HIGH。</p>
 
-<p>watermark的描述来自<strong>undering the linux virtual memory manager</strong>一书：</p>
+<p>watermark的描述来自 <strong>undering the linux virtual memory manager</strong> 一书：</p>
 
-<p>可用的内存少于LOW值，<strong>kswapd</strong>程序就会被唤醒，执行页面释放操作。如果压力很大，进程会同步的释放内存，即direct-reclaim路径。</p>
+<p>可用的内存少于LOW值， <strong>kswapd</strong> 程序就会被唤醒，执行页面释放操作。如果压力很大，进程会同步的释放内存，即direct-reclaim路径。</p>
 
 <p>每一个区域都有一个watermark数组，追踪区域的内存压力。MIN值在内存初始化时通过函数<code>free_area_init_core()</code>计算，通常是ZoneSizeInPages/128。</p>
 
 <h5 id="4-1-1-1-1-wmark-low">4.1.1.1.1. WMARK_LOW</h5>
 
-<p>区域的空闲页面数到达LOW时，伙伴分配器会唤醒<strong>kswapd</strong>，开始释放页面。LOW的默认值时MIN的两倍。</p>
+<p>区域的空闲页面数到达LOW时，伙伴分配器会唤醒 <strong>kswapd</strong> ，开始释放页面。LOW的默认值时MIN的两倍。</p>
 
 <h5 id="4-1-1-1-2-wmark-min">4.1.1.1.2. WMARK_MIN</h5>
 
-<p>到达MIN时，分配器会以同步的方式执行<strong>kswapd</strong>操作，被称作*direct-reclaim*路径。</p>
+<p>到达MIN时，分配器会以同步的方式执行 <strong>kswapd</strong> 操作，被称作*direct-reclaim*路径。</p>
 
 <h5 id="4-1-1-1-3-wmark-high">4.1.1.1.3. WMARK_HIGH</h5>
 
-<p><strong>kswapd</strong>唤醒之后，直到空闲页面的数量到达HIGH，内存区域才会被视为balanced，此时<strong>kswapd</strong>回到休眠状态。HIGH的默认值为MIN的三倍。</p>
+<p><strong>kswapd</strong> 唤醒之后，直到空闲页面的数量到达HIGH，内存区域才会被视为balanced，此时 <strong>kswapd</strong> 回到休眠状态。HIGH的默认值为MIN的三倍。</p>
 
 <h4 id="4-1-1-2-lowmem-reserve">4.1.1.2. lowmem_reserve</h4>
 
@@ -1354,7 +1347,7 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <blockquote>
 <p>我们不知道分配出去的内存最终是否会被释放，为了避免浪费数GB的内存，我们必须保留lower zone的内存，否则就有在lower zone出现OOM的风险，尽管在higher zone可能有大量可用的内存。</p>
 
-<p>这个数组在运行时会随着<strong>sysctl_lowmem_reserve_ratio</strong>的变化而变化。</p>
+<p>这个数组在运行时会随着 <strong>sysctl_lowmem_reserve_ratio</strong> 的变化而变化。</p>
 </blockquote>
 
 <p>根据之前的说明，较高区域的内存通常较大，较低区域的内存通常较小。这个数组用来限制每个内存区域应该保留的内存页的数量，避免在较低内存区域出现OOM的情况。</p>
@@ -1363,47 +1356,47 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
 <h5 id="4-1-1-3-1-spanned-pages">4.1.1.3.1. spanned_pages</h5>
 
-<p><strong>spanned_pages</strong>包含空洞，计算方法为<code>spanned_pages = zone_end_pfn - zone_start_pfn</code>。</p>
+<p><strong>spanned_pages</strong> 包含空洞，计算方法为<code>spanned_pages = zone_end_pfn - zone_start_pfn</code>。</p>
 
 <h5 id="4-1-1-3-2-present-pages">4.1.1.3.2. present_pages</h5>
 
-<p><strong>present_pages</strong>是区域包含的物理页框数，不包含空洞，计算方法为<code>present_pages = spanned_pages - absent_pages(pages in holes)</code>。</p>
+<p><strong>present_pages</strong> 是区域包含的物理页框数，不包含空洞，计算方法为<code>present_pages = spanned_pages - absent_pages(pages in holes)</code>。</p>
 
 <h5 id="4-1-1-3-3-managed-pages">4.1.1.3.3. managed_pages</h5>
 
-<p><strong>managed_pages</strong>是伙伴系统当前管理的页框数，计算方法为<code>managed_pages = present_pages - reserved_pages</code>。</p>
+<p><strong>managed_pages</strong> 是伙伴系统当前管理的页框数，计算方法为<code>managed_pages = present_pages - reserved_pages</code>。</p>
 
 <p>因此，内存热插拔系统或者内存的电源管理逻辑可以使用<code>present_pages - managed_pages</code>来获得不受管理的页面数。页面分配器和VM扫描器负责计算被管理页面的所有阈值信息。</p>
 
 <h4 id="4-1-1-4-wait-table-xx">4.1.1.4. wait_table_xx</h4>
 
-<p><strong>wait_table</strong>的相关变量用于追踪等待页面的进程信息，在页面可用时唤醒进程。问题是可能占用大量的空间，特别是同一时刻等待页面的进程很少。因此，我们使用哈希表来代替per-page等待队列。</p>
+<p><strong>wait_table</strong> 的相关变量用于追踪等待页面的进程信息，在页面可用时唤醒进程。问题是可能占用大量的空间，特别是同一时刻等待页面的进程很少。因此，我们使用哈希表来代替per-page等待队列。</p>
 
 <p>进程被唤醒时，必须再次确认等待的页面已经可用——由于使用的是哈希表，某一个页面可用时，被唤醒的进程可能有一大堆。</p>
 
-<p><strong>wait_table</strong>保存等待队列哈希表；<strong>wait_table_hash_nr_entries</strong>是哈希表的长度，即<code>1 &lt;&lt; wait_table_bits</code>。</p>
+<p><strong>wait_table</strong> 保存等待队列哈希表； <strong>wait_table_hash_nr_entries</strong> 是哈希表的长度，即<code>1 &lt;&lt; wait_table_bits</code>。</p>
 
 <h3 id="4-1-2-内存区域的初始化">4.1.2. 内存区域的初始化</h3>
 
-<p><strong>strut zone</strong>的成员变量的初始化主要由<code>free_area_init_core</code>函数完成，函数的调用路径如下：</p>
+<p><strong>strut zone</strong> 的成员变量的初始化主要由 <code>free_area_init_core</code> 函数完成，函数的调用路径如下：</p>
 
 <ul>
-<li><code>start_kernel</code>, <em>init/main.c</em>
+<li><code>start_kernel</code> ,  <em>init/main.c</em>
 
 <ul>
-<li><code>setup_arch</code>, <em>arch/x86/kernel/setup.c</em></li>
-<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code>, <em>arch/x86/kernel/x86_init.c</em>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
 
 <ul>
-<li><code>paging_init</code>, <em>arch/x86/mm/init_64.c</em></li>
-<li><code>zone_sizes_init</code>, <em>arch/x86/mm/init.c</em>, 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
+<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
+<li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
 
 <ul>
-<li><code>free_area_init_nodes(max_zone_pfns)</code>, <em>mm/page_alloc.c</em></li>
-<li><code>free_area_init_node</code>, <em>mm/page_alloc.c</em>
+<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em>
 
 <ul>
-<li><code>free_area_init_core</code>, <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_core</code> ,  <em>mm/page_alloc.c</em></li>
 </ul></li>
 </ul></li>
 </ul></li>
@@ -1540,9 +1533,14 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
 <div class="navigation navigation-single">
     
+    <a href="/posts/mm-buddy_allocator/" class="navigation-prev">
+      <i aria-hidden="true" class="fa fa-chevron-left"></i>
+      <span class="navigation-tittle">MM-Buddy Allocator</span>
+    </a>
     
-    <a href="/posts/printk/" class="navigation-next">
-      <span class="navigation-tittle">printk函数</span>
+    
+    <a href="/posts/memory_policy/" class="navigation-next">
+      <span class="navigation-tittle">Linux Memory Policy</span>
       <i aria-hidden="true" class="fa fa-chevron-right"></i>
     </a>
     

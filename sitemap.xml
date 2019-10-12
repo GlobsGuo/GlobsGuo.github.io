@@ -3,52 +3,122 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/buddy/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/cont/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/console/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/control_group/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/cpuset/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/documentation/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/driver/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/driver_model/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/posts/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/grub/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/printk/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/posts/grub_parameters/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/posts/printk/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/kernel/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/</loc>
-    <lastmod>2019-09-09T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/posts/memory_policy/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/mem_section/</loc>
-    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+    <loc>https://globsguo.github.io/tags/memory/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/posts/memory_management/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/mm/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/mm-buddy_allocator/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/mm-slab/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/page/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/</loc>
+    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/console_unlock/</loc>
     <lastmod>2019-08-08T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/memory-model/</loc>
+    <loc>https://globsguo.github.io/tags/cont/</loc>
+    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/printk/</loc>
+    <lastmod>2019-08-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/posts/printk/</loc>
     <lastmod>2019-08-08T00:00:00+00:00</lastmod>
   </url>
   

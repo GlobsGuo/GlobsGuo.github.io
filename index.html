@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
     
   <head>
     <link href="https://gmpg.org/xfn/11" rel="profile">
@@ -24,7 +24,7 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://globsguo.github.io/" />
 
-<meta property="og:updated_time" content="2019-09-09T00:00:00+00:00" /><meta property="og:site_name" content="Globs&#39; blog" />
+<meta property="og:updated_time" content="2019-10-12T00:00:00+00:00" /><meta property="og:site_name" content="Globs&#39; blog" />
 
 
     
@@ -162,19 +162,85 @@
       
       <div class="post-list__item">
         <span class="item__title--big">
-          <a href="/posts/printk/" >printk函数</a>
+          <a href="/posts/control_group/" >control group</a>
         </span>
         <span class="item__date">
-          Sep 9, 2019
+          Oct 12, 2019
         </span>
         <span >
         
-        1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
-/* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1.
+        1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。
         
         </span>
         
-          ... <a class="read-more-symbol" href="/posts/printk/">➦</a>
+          ... <a class="read-more-symbol" href="/posts/control_group/">➦</a>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/driver_model/" >driver model</a>
+        </span>
+        <span class="item__date">
+          Oct 12, 2019
+        </span>
+        <span >
+        
+        1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型包括一组所有总线共有的参数，一组共有的回调函数。 设备和桥的公共接口反映了现代操作系统的目标：实现设备的PnP、电源管理、热插拔等无缝连接，微软和因特尔提出的ACPI，x86下几乎所有的设备都可以在这个框架下工作。
+        
+        </span>
+        
+          ... <a class="read-more-symbol" href="/posts/driver_model/">➦</a>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/grub_parameters/" >grub参数&#34;console=&#34;</a>
+        </span>
+        <span class="item__date">
+          Oct 12, 2019
+        </span>
+        <span >
+        
+        本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。
+grub参数中的console=有多种形式，根据Documentation/kernel-parameters.txt 文件，
+ console= [KNL] Output console device and options.
+        
+        </span>
+        
+          ... <a class="read-more-symbol" href="/posts/grub_parameters/">➦</a>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/memory_policy/" >Linux Memory Policy</a>
+        </span>
+        <span class="item__date">
+          Oct 12, 2019
+        </span>
+        <span >
+        
+        内核中，内存策略决定了NUMA系统中分配内存的节点。
+内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-aware应用可以使用的编程接口。二者同时应用在进程时，cpuset优先级更高。
+1. Memory Policy Concepts 1.1. Scope of Memory Policies 内核支持内存策略的scope，从最一般的情况到最特殊的情况为：
+        
+        </span>
+        
+          ... <a class="read-more-symbol" href="/posts/memory_policy/">➦</a>
         
         </div>
         
@@ -187,18 +253,80 @@
           <a href="/posts/memory_management/" >Memory Management Initialization</a>
         </span>
         <span class="item__date">
-          Aug 8, 2019
+          Oct 12, 2019
         </span>
         <span >
         
         本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-64架构为例，假设系统类型为NUMA，sparse memory model。
-1. Memory Model 内存模型一部分内容主要来自网上，*Documentation*中没有找到相关的内容。
-内存模型是从CPU的角度看，系统中物理内存的分布情况；在Linux内核中，使用何种方式来管理这些物理内存。
-Linux支持三种内存模型，flat memory，discontiguous memory和sparse memory。
+1. Memory Model 内存模型一部分内容主要来自网上， Documentation 中没有找到相关的内容。
         
         </span>
         
           ... <a class="read-more-symbol" href="/posts/memory_management/">➦</a>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/mm-buddy_allocator/" >MM-Buddy Allocator</a>
+        </span>
+        <span class="item__date">
+          Oct 12, 2019
+        </span>
+        <span >
+        
+        
+        
+        </span>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/mm-slab/" >mm-slab</a>
+        </span>
+        <span class="item__date">
+          Oct 12, 2019
+        </span>
+        <span >
+        
+        SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。
+本文从常用的内核内存分配函数 kmalloc 出发，介绍了 kmalloc 函数的执行路径和slab cache的初始化流程。
+1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内存，定义在 include/linux/slab.
+        
+        </span>
+        
+          ... <a class="read-more-symbol" href="/posts/mm-slab/">➦</a>
+        
+        </div>
+        
+     
+      
+        
+      
+      <div class="post-list__item">
+        <span class="item__title--big">
+          <a href="/posts/printk/" >printk函数</a>
+        </span>
+        <span class="item__date">
+          Aug 8, 2019
+        </span>
+        <span >
+        
+        1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。
+/* console_sem用来保护对console_drivers列表的访问 */ static DEFINE_SEMAPHORE(console_sem); /* console_drivers保存所有的控制台驱动，所有的控制台 驱动都调用register_console函数注册到console_drivers 列表中 */ struct console *console_drivers; EXPORT_SYMBOL_GPL(console_drivers); /* 注释说这两个变量用来调试VT代码 */ static int console_locked, console_suspended; /* 如果exclusive_console不是NULL，信息只会输出到这个控制台 */ static struct console *exclusive_console; /* 包含所有的控制台命令行信息，只有__add_preferred_consoles函数 会向其中增加元素，数组长度为8 */ static struct cmdline_console console_cmdline[MAX_CMDLINECONSOLES]; /* 控制台代码可能会调用schedule()标志 */ static int console_may_schedule;  1.
+        
+        </span>
+        
+          ... <a class="read-more-symbol" href="/posts/printk/">➦</a>
         
         </div>
         

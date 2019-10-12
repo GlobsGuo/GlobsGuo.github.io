@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>memory on Globs&#39; blog</title>
+    <link>https://globsguo.github.io/tags/memory/</link>
+    <description>Recent content in memory on Globs&#39; blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://globsguo.github.io/tags/memory/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>control group</title>
+      <link>https://globsguo.github.io/posts/control_group/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/control_group/</guid>
+      <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。</description>
+    </item>
+    
+    <item>
+      <title>Linux Memory Policy</title>
+      <link>https://globsguo.github.io/posts/memory_policy/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/memory_policy/</guid>
+      <description>内核中，内存策略决定了NUMA系统中分配内存的节点。
+内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-aware应用可以使用的编程接口。二者同时应用在进程时，cpuset优先级更高。
+1. Memory Policy Concepts 1.1. Scope of Memory Policies 内核支持内存策略的scope，从最一般的情况到最特殊的情况为：</description>
+    </item>
+    
+    <item>
+      <title>Memory Management Initialization</title>
+      <link>https://globsguo.github.io/posts/memory_management/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/memory_management/</guid>
+      <description>本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-64架构为例，假设系统类型为NUMA，sparse memory model。
+1. Memory Model 内存模型一部分内容主要来自网上， Documentation 中没有找到相关的内容。</description>
+    </item>
+    
+    <item>
+      <title>mm-slab</title>
+      <link>https://globsguo.github.io/posts/mm-slab/</link>
+      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/posts/mm-slab/</guid>
+      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。
+本文从常用的内核内存分配函数 kmalloc 出发，介绍了 kmalloc 函数的执行路径和slab cache的初始化流程。
+1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内存，定义在 include/linux/slab.</description>
+    </item>
+    
+  </channel>
+</rss>
