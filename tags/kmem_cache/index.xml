@@ -6,18 +6,36 @@
     <description>Recent content in kmem_cache on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 19 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/kmem_cache/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>mm-slab</title>
-      <link>https://globsguo.github.io/post/mm-slab/</link>
-      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
+      <title>mm-slab初始化</title>
+      <link>https://globsguo.github.io/post/mm-slab_initialization/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/mm-slab/</guid>
-      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 本文从常用的内核内存分配</description>
+      <guid>https://globsguo.github.io/post/mm-slab_initialization/</guid>
+      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分</description>
+    </item>
+    
+    <item>
+      <title>mm-slab对象的分配</title>
+      <link>https://globsguo.github.io/post/mm-slab_objects_allocation/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm-slab_objects_allocation/</guid>
+      <description>slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内</description>
+    </item>
+    
+    <item>
+      <title>mm-slab对象的回收</title>
+      <link>https://globsguo.github.io/post/mm-slab_objects_free/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm-slab_objects_free/</guid>
+      <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {</description>
     </item>
     
   </channel>

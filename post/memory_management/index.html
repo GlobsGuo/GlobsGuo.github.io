@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-12T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="11281">
+<meta itemprop="wordCount" content="11210">
 
 
 
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-12 </span>
         
-          <span class="more-meta"> 11281 words </span>
+          <span class="more-meta"> 11210 words </span>
           <span class="more-meta"> 23 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -1398,146 +1398,142 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <p><strong>strut zone</strong> 的成员变量的初始化主要由 <code>free_area_init_core</code> 函数完成，函数的调用路径如下：</p>
 
 <ul>
-<li><code>start_kernel</code> ,  <em>init/main.c</em>
+<li><p><code>start_kernel</code> ,  <em>init/main.c</em></p>
 
 <ul>
 <li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
-<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
+
+<li><p><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em></p>
 
 <ul>
 <li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
-<li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
+
+<li><p><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数</p>
 
 <ul>
 <li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
-<li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em>
+
+<li><p><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em></p>
 
 <ul>
-<li><code>free_area_init_core</code> ,  <em>mm/page_alloc.c</em></li>
+<li><p><code>free_area_init_core</code> ,  <em>mm/page_alloc.c</em></p>
+
+<pre><code class="language-C">static void __paginginit free_area_init_core(struct pglist_data *pgdat,
+unsigned long node_start_pfn, unsigned long node_end_pfn,
+unsigned long *zones_size, unsigned long *zholes_size)
+{
+enum zone_type j;
+int nid = pgdat-&gt;node_id;
+unsigned long zone_start_pfn = pgdat-&gt;node_start_pfn;
+int ret;
+/* resize用来支持内存的热插拔，这个函数在开启
+CONFIG_MEMORY_HOTPLUG时初始化pgdat中的
+node_size_lock自旋锁 */
+pgdat_resize_init(pgdat);
+#ifdef CONFIG_NUMA_BALANCING
+/* 和内存负载均衡相关的参数，此处不多介绍 */
+spin_lock_init(&amp;pgdat-&gt;numabalancing_migrate_lock);
+pgdat-&gt;numabalancing_migrate_nr_pages = 0;
+pgdat-&gt;numabalancing_migrate_next_window = jiffies;
+#endif
+/* 初始化两个等待队列
+kswap_wait用来唤醒kswapd进程执行内存回收操作
+pfmemalloc_wait暂时不清楚用途 */
+init_waitqueue_head(&amp;pgdat-&gt;kswapd_wait);
+init_waitqueue_head(&amp;pgdat-&gt;pfmemalloc_wait);
+/* 和cgroup相关的初始化 */
+pgdat_page_cgroup_init(pgdat);
+
+/* 初始化pg_data_t中包含的每个zone的信息 */
+for (j = 0; j &lt; MAX_NR_ZONES; j++) {
+struct zone *zone = pgdat-&gt;node_zones + j;
+unsigned long size, realsize, freesize, memmap_pages;
+
+size = zone_spanned_pages_in_node(nid, j, node_start_pfn,
+      node_end_pfn, zones_size);
+realsize = freesize = size - zone_absent_pages_in_node(nid, j,
+            node_start_pfn,
+            node_end_pfn,
+            zholes_size);
+
+/*
+* Adjust freesize so that it accounts for how much memory
+* is used by this zone for memmap. This affects the watermark
+* and per-cpu initialisations
+*/
+memmap_pages = calc_memmap_size(size, realsize);
+if (freesize &gt;= memmap_pages) {
+freesize -= memmap_pages;
+if (memmap_pages)
+printk(KERN_DEBUG
+   &quot;  %s zone: %lu pages used for memmap\n&quot;,
+   zone_names[j], memmap_pages);
+} else
+printk(KERN_WARNING
+&quot;  %s zone: %lu pages exceeds freesize %lu\n&quot;,
+zone_names[j], memmap_pages, freesize);
+
+/* Account for reserved pages */
+if (j == 0 &amp;&amp; freesize &gt; dma_reserve) {
+freesize -= dma_reserve;
+printk(KERN_DEBUG &quot;  %s zone: %lu pages reserved\n&quot;,
+zone_names[0], dma_reserve);
+}
+
+if (!is_highmem_idx(j))
+nr_kernel_pages += freesize;
+/* Charge for highmem memmap if there are enough kernel pages */
+else if (nr_kernel_pages &gt; memmap_pages * 2)
+nr_kernel_pages -= memmap_pages;
+nr_all_pages += freesize;
+
+zone-&gt;spanned_pages = size;
+zone-&gt;present_pages = realsize;
+/*
+* Set an approximate value for lowmem here, it will be adjusted
+* when the bootmem allocator frees pages into the buddy system.
+* And all highmem pages will be managed by the buddy system.
+*/
+zone-&gt;managed_pages = is_highmem_idx(j) ? realsize : freesize;
+#ifdef CONFIG_NUMA
+zone-&gt;node = nid;
+zone-&gt;min_unmapped_pages = (freesize*sysctl_min_unmapped_ratio)
+    / 100;
+zone-&gt;min_slab_pages = (freesize * sysctl_min_slab_ratio) / 100;
+#endif
+zone-&gt;name = zone_names[j];
+spin_lock_init(&amp;zone-&gt;lock);
+spin_lock_init(&amp;zone-&gt;lru_lock);
+zone_seqlock_init(zone);
+zone-&gt;zone_pgdat = pgdat;
+/* 初始化per-cpu成员变量pageset */
+zone_pcp_init(zone);
+
+/* For bootup, initialized properly in watermark setup */
+mod_zone_page_state(zone, NR_ALLOC_BATCH, zone-&gt;managed_pages);
+/* 初始化成员变量lruvec */
+lruvec_init(&amp;zone-&gt;lruvec);
+if (!size)
+continue;
+
+set_pageblock_order();
+/* sparse模型下为空 */
+setup_usemap(pgdat, zone, zone_start_pfn, size);
+/* 初始化zone的wait_table和free_area域 */
+ret = init_currently_empty_zone(zone, zone_start_pfn,
+    size, MEMMAP_EARLY);
+BUG_ON(ret);
+/* 设置zone内页框对应的struct page信息 */
+memmap_init(size, nid, j, zone_start_pfn);
+zone_start_pfn += size;
+}
+}
+</code></pre></li>
 </ul></li>
 </ul></li>
 </ul></li>
 </ul></li>
 </ul>
-
-<p>根据代码中的注释，函数包括下列步骤：
-&gt; 建立zone数据结构：
-&gt;
-&gt; - 将所有页面标记为reserved
-&gt; - 将所有的内存队列标记为空
-&gt; - 清除内存位图</p>
-
-<pre><code class="language-C">static void __paginginit free_area_init_core(struct pglist_data *pgdat,
-        unsigned long node_start_pfn, unsigned long node_end_pfn,
-        unsigned long *zones_size, unsigned long *zholes_size)
-{
-    enum zone_type j;
-    int nid = pgdat-&gt;node_id;
-    unsigned long zone_start_pfn = pgdat-&gt;node_start_pfn;
-    int ret;
-    /* resize用来支持内存的热插拔，这个函数在开启
-       CONFIG_MEMORY_HOTPLUG时初始化pgdat中的
-       node_size_lock自旋锁 */
-    pgdat_resize_init(pgdat);
-#ifdef CONFIG_NUMA_BALANCING
-    /* 和内存负载均衡相关的参数，此处不多介绍 */
-    spin_lock_init(&amp;pgdat-&gt;numabalancing_migrate_lock);
-    pgdat-&gt;numabalancing_migrate_nr_pages = 0;
-    pgdat-&gt;numabalancing_migrate_next_window = jiffies;
-#endif
-    /* 初始化两个等待队列
-       kswap_wait用来唤醒kswapd进程执行内存回收操作
-       pfmemalloc_wait暂时不清楚用途 */
-    init_waitqueue_head(&amp;pgdat-&gt;kswapd_wait);
-    init_waitqueue_head(&amp;pgdat-&gt;pfmemalloc_wait);
-    /* 和cgroup相关的初始化 */
-    pgdat_page_cgroup_init(pgdat);
-
-    /* 初始化pg_data_t中包含的每个zone的信息 */
-    for (j = 0; j &lt; MAX_NR_ZONES; j++) {
-        struct zone *zone = pgdat-&gt;node_zones + j;
-        unsigned long size, realsize, freesize, memmap_pages;
-
-        size = zone_spanned_pages_in_node(nid, j, node_start_pfn,
-                          node_end_pfn, zones_size);
-        realsize = freesize = size - zone_absent_pages_in_node(nid, j,
-                                node_start_pfn,
-                                node_end_pfn,
-                                zholes_size);
-
-        /*
-         * Adjust freesize so that it accounts for how much memory
-         * is used by this zone for memmap. This affects the watermark
-         * and per-cpu initialisations
-         */
-        memmap_pages = calc_memmap_size(size, realsize);
-        if (freesize &gt;= memmap_pages) {
-            freesize -= memmap_pages;
-            if (memmap_pages)
-                printk(KERN_DEBUG
-                       &quot;  %s zone: %lu pages used for memmap\n&quot;,
-                       zone_names[j], memmap_pages);
-        } else
-            printk(KERN_WARNING
-                &quot;  %s zone: %lu pages exceeds freesize %lu\n&quot;,
-                zone_names[j], memmap_pages, freesize);
-
-        /* Account for reserved pages */
-        if (j == 0 &amp;&amp; freesize &gt; dma_reserve) {
-            freesize -= dma_reserve;
-            printk(KERN_DEBUG &quot;  %s zone: %lu pages reserved\n&quot;,
-                    zone_names[0], dma_reserve);
-        }
-
-        if (!is_highmem_idx(j))
-            nr_kernel_pages += freesize;
-        /* Charge for highmem memmap if there are enough kernel pages */
-        else if (nr_kernel_pages &gt; memmap_pages * 2)
-            nr_kernel_pages -= memmap_pages;
-        nr_all_pages += freesize;
-
-        zone-&gt;spanned_pages = size;
-        zone-&gt;present_pages = realsize;
-        /*
-         * Set an approximate value for lowmem here, it will be adjusted
-         * when the bootmem allocator frees pages into the buddy system.
-         * And all highmem pages will be managed by the buddy system.
-         */
-        zone-&gt;managed_pages = is_highmem_idx(j) ? realsize : freesize;
-#ifdef CONFIG_NUMA
-        zone-&gt;node = nid;
-        zone-&gt;min_unmapped_pages = (freesize*sysctl_min_unmapped_ratio)
-                        / 100;
-        zone-&gt;min_slab_pages = (freesize * sysctl_min_slab_ratio) / 100;
-#endif
-        zone-&gt;name = zone_names[j];
-        spin_lock_init(&amp;zone-&gt;lock);
-        spin_lock_init(&amp;zone-&gt;lru_lock);
-        zone_seqlock_init(zone);
-        zone-&gt;zone_pgdat = pgdat;
-        /* 初始化per-cpu成员变量pageset */
-        zone_pcp_init(zone);
-
-        /* For bootup, initialized properly in watermark setup */
-        mod_zone_page_state(zone, NR_ALLOC_BATCH, zone-&gt;managed_pages);
-        /* 初始化成员变量lruvec */
-        lruvec_init(&amp;zone-&gt;lruvec);
-        if (!size)
-            continue;
-
-        set_pageblock_order();
-        /* sparse模型下为空 */
-        setup_usemap(pgdat, zone, zone_start_pfn, size);
-        /* 初始化zone的wait_table和free_area域 */
-        ret = init_currently_empty_zone(zone, zone_start_pfn,
-                        size, MEMMAP_EARLY);
-        BUG_ON(ret);
-        /* 设置zone内页框对应的struct page信息 */
-        memmap_init(size, nid, j, zone_start_pfn);
-        zone_start_pfn += size;
-    }
-}
-</code></pre>
 
 <h1 id="5-总结">5. 总结</h1>
 
@@ -1591,8 +1587,8 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
             <span class="prev-text nav-default">Linux Memory Policy</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/mm-slab/">
-            <span class="next-text nav-default">mm-slab</span>
+        <a class="next" href="/post/printk/">
+            <span class="next-text nav-default">printk函数</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

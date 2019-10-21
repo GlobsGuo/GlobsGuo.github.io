@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>memory on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/memory/</link>
-    <description>Recent content in memory on Globs&#39; Catchall</description>
+    <title>kmalloc on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/kmalloc/</link>
+    <description>Recent content in kmalloc on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/memory/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://globsguo.github.io/tags/kmalloc/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>mm-slab初始化</title>
-      <link>https://globsguo.github.io/post/mm-slab_initialization/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/post/mm-slab_initialization/</guid>
-      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分</description>
-    </item>
     
     <item>
       <title>mm-slab对象的分配</title>
@@ -36,15 +27,6 @@
       
       <guid>https://globsguo.github.io/post/mm-slab_objects_free/</guid>
       <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {</description>
-    </item>
-    
-    <item>
-      <title>control group</title>
-      <link>https://globsguo.github.io/post/control_group/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/post/control_group/</guid>
-      <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的</description>
     </item>
     
   </channel>

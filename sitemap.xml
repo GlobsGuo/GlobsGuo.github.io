@@ -2,6 +2,132 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://globsguo.github.io/tags/create_boot_cache/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kernel-sources/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kfree/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmalloc/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmalloc_caches/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmem_cache/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmem_cache_alloc/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmem_cache_init/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/memory/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/mm-slab_initialization/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/mm-slab_objects_allocation/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/mm-slab_objects_free/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/slab_alloc/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/slab_free/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/slub/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/</loc>
+    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/tags/cgroup/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -65,13 +191,6 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/</loc>
-    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://globsguo.github.io/tags/grub/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -100,13 +219,6 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/kernel-sources/</loc>
-    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://globsguo.github.io/post/memory_policy/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -115,13 +227,6 @@
   
   <url>
     <loc>https://globsguo.github.io/tags/mem_section/</loc>
-    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/memory/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -163,20 +268,6 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/post/</loc>
-    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/</loc>
-    <lastmod>2019-10-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://globsguo.github.io/tags/vmemmap/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -205,27 +296,6 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/kmem_cache/</loc>
-    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/kmem_cache_node/</loc>
-    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/post/mm-slab/</loc>
-    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://globsguo.github.io/tags/printk/</loc>
     <lastmod>2019-09-19T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -234,13 +304,6 @@
   
   <url>
     <loc>https://globsguo.github.io/post/printk/</loc>
-    <lastmod>2019-09-19T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/slab-cache/</loc>
     <lastmod>2019-09-19T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

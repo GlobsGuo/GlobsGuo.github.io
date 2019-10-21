@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>mm-slab初始化 - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.58.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/mm-slab_initialization/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="mm-slab初始化" />
+<meta property="og:description" content="SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm-slab_initialization/" />
+<meta property="article:published_time" content="2019-10-21T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="name" content="mm-slab初始化">
+<meta itemprop="description" content="SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分">
+
+
+<meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="4666">
+
+
+
+<meta itemprop="keywords" content="kernel-sources,memory,kmem_cache,slub,kmem_cache_init,create_boot_cache," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="mm-slab初始化"/>
+<meta name="twitter:description" content="SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">mm-slab初始化</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-10-21 </span>
+        
+          <span class="more-meta"> 4666 words </span>
+          <span class="more-meta"> 10 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#1-struct-kmem-cache">1. struct kmem_cache</a></li>
+<li><a href="#2-create-boot-cache">2. create_boot_cache</a>
+<ul>
+<li><a href="#2-1-init-kmem-cache-nodes">2.1. init_kmem_cache_nodes</a>
+<ul>
+<li><a href="#2-1-1-early-kmem-cache-node-alloc">2.1.1. early_kmem_cache_node_alloc</a>
+<ul>
+<li><a href="#2-1-1-1-new-slab">2.1.1.1. new_slab</a></li>
+</ul></li>
+<li><a href="#2-1-2-kmem-cache-alloc-node">2.1.2. kmem_cache_alloc_node</a></li>
+</ul></li>
+<li><a href="#2-2-alloc-kmem-cache-cpus">2.2. alloc_kmem_cache_cpus</a></li>
+</ul></li>
+<li><a href="#3-kmalloc-caches">3. kmalloc_caches</a>
+<ul>
+<li><a href="#3-1-create-kmalloc-caches">3.1. create_kmalloc_caches</a></li>
+</ul></li>
+<li><a href="#4-其他slab-cache的初始化">4. 其他slab cache的初始化</a></li>
+<li><a href="#5-总结">5. 总结</a></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
+
+<p>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。</p>
+
+<p>Linux内核支持三种分配器，分别为SLAB，SLOB，SLUB。x86架构下，默认采用SLUB分配器。<br />
+因此，本文解析内核代码时，默认采用SLUB下的代码定义；同时，虽然三种分配器名称不同，但是都起源于SLAB，因此本文依然用slab来指代小内存分配器，而不是用SLUB。</p>
+
+<p>由于slab涉及到的内容较多，初步分为三部分进行介绍：slab初始化，slab对象的分配，slab对象的回收。</p>
+
+<p>建议先看一下<a href="https://blog.csdn.net/RichardYSteven/article/details/71308350">资料</a>关于SLUB的介绍，对整个系统即各个组件之间的关系有个大体认识。</p>
+
+<p>slab cache的初始化通过函数 <code>kmem_cache_init</code> 函数完成，主要完成三个工作：创建 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 和 <strong>kmalloc_caches</strong> 三个slab cache。</p>
+
+<p><strong>kmem_cache_node</strong> 分配 <strong>struct kmem_cache_node</strong> 对象，因为 <strong>struct kmem_cache</strong> 对象包含 <strong>struct kmem_cache_node</strong> 的成员，因此先创建 <strong>kmem_cache_node</strong> 。</p>
+
+<p><strong>kmem_cache</strong> 分配 <strong>struct kmem_cache</strong> 对象，供创建其他的slab cache使用，例如 <strong>kmalloc_caches</strong> slab cache。</p>
+
+<p><strong>kmalloc_caches</strong> 是一个slab cache数组，包含分配各种大小的对象的slab cache，供 <code>kmalloc</code> 函数使用。</p>
+
+<h1 id="1-struct-kmem-cache">1. struct kmem_cache</h1>
+
+<p><strong>struct kmem_cache</strong> 是描述slab cache的结构体，定义在 <em>include/linux/slub_def.h</em> ，以 <strong>kmem_cache_node</strong> 分配器为例， 执行这些函数时，设置其成员变量的函数为：</p>
+
+<ul>
+<li><p><code>create_boot_cache</code>，<em>mm/slab_common.c</em></p>
+
+<ul>
+<li>const char *<strong>name</strong> = &ldquo;kmem_cache_node&rdquo;<br />
+slab cache的名称，显示在 <em>/sys/kernel/slab/</em> 目录下</li>
+<li>int <strong>size</strong> = sizeof(struct kmem_cache_node) = 64<br />
+slab cache保存的对象的大小，包含元数据</li>
+<li>int <strong>object_size</strong> = 64<br />
+slab cache保存的对象的大小，不包含包含元数据</li>
+<li>int <strong>align</strong> = 64<br /></li>
+<li>int <strong>refcount</strong> = -1<br />
+重用计数器，请求创建新的SLUB时，SLUB分配器重用已经创建的相似大小的SLUB，以减少SLUB种类的个数</li>
+</ul></li>
+
+<li><p><code>kmem_cache_open</code>，<em>mm/slub.c</em></p>
+
+<ul>
+<li>unsigned long <strong>flags</strong><br />
+标志位，指明slab cache的特点</li>
+<li>int <strong>reserved</strong> = 0</li>
+<li>unsigned long <strong>min_partial</strong> = 5<br />
+每个node的部分空slab缓冲区数量不能低于这个值</li>
+<li>unsigned long <strong>cpu_partial</strong> = 30<br />
+cpu的可用对象数量的最大值</li>
+<li>unsigned long <strong>remote_node_defrag_ratio</strong> = 1000<br />
+用于NUMA系统，值越小，越倾向于在本节点分配对象</li>
+</ul></li>
+
+<li><p><code>calculate_sizes</code>，<em>mm/slub.c</em></p>
+
+<ul>
+<li>int <strong>inuse</strong> = 64<br />
+元数据的偏移量</li>
+<li>int <strong>size</strong> = 64</li>
+<li>gfp_t <strong>allocflags</strong> = 0<br />
+每一次分配时使用的标志</li>
+<li>struct kmem_cache_order_object <strong>oo</strong> = { 64 }<br />
+保存slab需要的页框数量的order值和object的数量，可以计算出需要多少页框，这个是默认值，初始化时根据经验设置</li>
+<li>struct kmem_cache_order_object <strong>min</strong> = { 64 }<br />
+保存slab需要的页框数量的order值和object的数量，这个是最小值，如果尝试用oo分配失败，使用最小值进行分配</li>
+<li>struct kmem_cache_order_object <strong>max</strong> = { 64 }<br />
+保存slab需要的页框数量的order值和object的数量，这个是最大值</li>
+</ul></li>
+</ul>
+
+<h1 id="2-create-boot-cache">2. create_boot_cache</h1>
+
+<p><code>kmem_cache_init</code> 主要调用 <code>create_boot_cache</code> 创建slab分配器，设置参数。涉及到的函数及调用关系如下：</p>
+
+<p><strong><code>kmem_cache_init</code></strong></p>
+
+<ul>
+<li>create_boot_cache(kmem_cache_node)
+
+<ul>
+<li>__kmem_cache_create</li>
+<li>kmem_cache_open
+
+<ul>
+<li>init_kmem_cache_nodes</li>
+<li>early_kmem_cache_node_alloc / kmem_cache_alloc_node
+
+<ul>
+<li>init_kmem_cache_node</li>
+</ul></li>
+<li>alloc_kmem_cache_cpus</li>
+</ul></li>
+</ul></li>
+<li>create_boot_cache(kmem_cache)</li>
+<li>create_kmalloc_caches &ndash; kmalloc_caches[]</li>
+</ul>
+
+<p>开启 <strong>CONFIG_SLUB</strong> 时， <code>create_boot_cache</code> 只有创建 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 和 <strong>kmalloc_caches</strong> 时会调用。</p>
+
+<p><code>create_boot_cache</code> 会设置传入cache的一些成员变量，然后调用 <code>__kmem_cache_create</code> 函数。</p>
+
+<pre><code class="language-C">void __init create_boot_cache(struct kmem_cache *s, const char *name, size_t size,
+        unsigned long flags)
+{
+    int err;
+    s-&gt;name = name;
+    s-&gt;size = s-&gt;object_size = size;
+    s-&gt;align = calculate_alignment(flags, ARCH_KMALLOC_MINALIGN, size);
+    err = __kmem_cache_create(s, flags);
+
+    if (err)
+        panic(&quot;Creation of kmalloc slab %s size=%zu failed. Reason %d\n&quot;,
+                    name, size, err);
+
+    s-&gt;refcount = -1;   /* Exempt from merging for now */
+}
+</code></pre>
+
+<p><code>__kmem_cache_crete</code> 主要通过 <code>kmem_cache_open</code> 实现，这个函数除了设置cache的一些参数以外，还会调用 <code>init_kmem_cache_nodes</code> 和 <code>alloc_kmem_cache_cpus</code> ;前者用于初始化kmem_cache中的 <strong>struct kmem_cache_node *node[MAX_NUMNODES]</strong> 成员,
+后者用于分配 <strong>struct kmem_cache</strong> 中的per-cpu成员变量 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 。</p>
+
+<h2 id="2-1-init-kmem-cache-nodes">2.1. init_kmem_cache_nodes</h2>
+
+<p><code>init_kmem_cache_nodes</code> 函数根据当前slab系统的状态，为传入的 <strong>struct kmem_cache</strong> 对象分配 <strong>struct kmem_cache_node</strong> 类型的成员变量。</p>
+
+<pre><code class="language-C">static int init_kmem_cache_nodes(struct kmem_cache *s)
+{
+    int node;
+    /* 遍历每个具有normal内存的内存节点 */
+    for_each_node_state(node, N_NORMAL_MEMORY) {
+        struct kmem_cache_node *n;
+        /*
+         此时kmem_cache_node和kmem_cache两个slab
+         cache还没有建立，不能使用 */
+        if (slab_state == DOWN) {
+            early_kmem_cache_node_alloc(node);
+            continue;
+        }
+        /*
+         kmem_cache_node已经建立，直接从中分配一个
+         struct kmem_cache_node对象 */
+        n = kmem_cache_alloc_node(kmem_cache_node,
+                        GFP_KERNEL, node);
+
+        if (!n) {
+            free_kmem_cache_nodes(s);
+            return 0;
+        }
+        /* 设置kmem_cache的per-cpu变量指向正确的节点 */
+        s-&gt;node[node] = n;
+        /* 初始化kmem_cache_node的成员变量 */
+        init_kmem_cache_node(n);
+    }
+    return 1;
+}
+</code></pre>
+
+<h3 id="2-1-1-early-kmem-cache-node-alloc">2.1.1. early_kmem_cache_node_alloc</h3>
+
+<p>如果系统的slab系统还没有启动，即 <strong>slab_state = DOWN</strong> ，这发生在 <strong>kmalloc_caches</strong> 数组初始化之前——还没有调用 <code>create_kmalloc_caches</code> ，就通过 <code>early_kmem_cache_node_alloc</code> 分配并初始化 <strong>kmem_cache_node</strong> 。</p>
+
+<p>根据内核的代码，当且仅当创建 <strong>kmem_cache_node</strong> 和 <strong>kmem_cache_node</strong> 时，会执行 <code>early_kmem_cache_node_alloc</code> 函数。</p>
+
+<p>这个函数首先通过 <code>new_slab</code> 函数从指定的内存节点通过buddy allocator分配一个新的page给 <strong>kmem_cache_node</strong> 分配器，然后初始化struct page中和SLUB相关的信息，并且将page保存到 <strong>kmem_cache_node</strong> 的 <strong>node[]</strong> 域中。</p>
+
+<pre><code class="language-C">static void early_kmem_cache_node_alloc(int node)
+{
+    struct page *page;
+    struct kmem_cache_node *n;
+
+    BUG_ON(kmem_cache_node-&gt;size &lt; sizeof(struct kmem_cache_node));
+
+    /*
+     调用伙伴系统的__alloc_pages_nodemask函数分配
+     新的page给kmem_cache_node，并设置page的成员变量 */
+    page = new_slab(kmem_cache_node, GFP_NOWAIT, node);
+
+    BUG_ON(!page);
+    if (page_to_nid(page) != node) {
+        pr_err(&quot;SLUB: Unable to allocate memory from node %d\n&quot;, node);
+        pr_err(&quot;SLUB: Allocating a useless per node structure in order to be able to continue\n&quot;);
+    }
+    /* 对于新分配的page，page-&gt;freelist为页面的起始地址 */
+    n = page-&gt;freelist;
+    BUG_ON(!n);
+    /*
+     page-&gt;freelist指向page的起始地址，
+     即第一个可用的free object */
+    page-&gt;freelist = get_freepointer(kmem_cache_node, n);
+    page-&gt;inuse = 1;
+    page-&gt;frozen = 0;
+    /* 保存到kmem_cache_node中对应的节点中 */
+    kmem_cache_node-&gt;node[node] = n;
+#ifdef CONFIG_SLUB_DEBUG
+    /* 根据kmem_cache_node的标志设置对象 */
+    init_object(kmem_cache_node, n, SLUB_RED_ACTIVE);
+    init_tracking(kmem_cache_node, n);
+#endif
+    /*
+     初始化cache node中partial list，nr_slabs，
+     total_objects，full list */
+    init_kmem_cache_node(n);
+    /* 增加cache node的统计信息，包括nr_slabs，total_objects */
+    inc_slabs_node(kmem_cache_node, node, page-&gt;objects);
+
+    /*
+     * No locks need to be taken here as it has just been
+     * initialized and there is no concurrent access.
+     */
+     /* 将page添加到node的partial list中 */
+    __add_partial(n, page, DEACTIVATE_TO_HEAD);
+}
+</code></pre>
+
+<h4 id="2-1-1-1-new-slab">2.1.1.1. new_slab</h4>
+
+<p><code>early_kmem_cache_node_alloc</code> 首先调用 <code>new_slab</code> 为指定的内存节点分配用作slab的内存页，并且初始化其中的对象。</p>
+
+<pre><code class="language-C">static struct page *new_slab(struct kmem_cache *s, gfp_t flags, int node)
+{
+    struct page *page;
+    void *start;
+    void *last;
+    void *p;
+    int order;
+
+    BUG_ON(flags &amp; GFP_SLAB_BUG_MASK);
+
+    /* allocate_slab最终调用alloc_pages函数分配新的page，
+       并且设置page-&gt;objects = s-&gt;oo.x。
+       函数根据传入的kmem_cache-&gt;oo的大小分配指定数量的page。*/
+    page = allocate_slab(s,
+        flags &amp; (GFP_RECLAIM_MASK | GFP_CONSTRAINT_MASK), node);
+    if (!page)
+        goto out;
+    /* 如果是复合页面，返回复合页面包含的page数；
+       否则返回0 */
+    order = compound_order(page);
+    /* 将新的page包含的对象数添加到slab cache中对应的节点中，
+       并增加slab的计数(每个page计为一个slab) */
+    inc_slabs_node(s, page_to_nid(page), page-&gt;objects);
+    /* 设置page所属的slab cache */
+    page-&gt;slab_cache = s;
+    /* 设置page的PG_slab标志 */
+    __SetPageSlab(page);
+    /* pfmemalloc标志 */
+    if (page-&gt;pfmemalloc)
+        SetPageSlabPfmemalloc(page);
+    /* start设置为page的内核虚拟地址 */
+    start = page_address(page);
+    /* 设置slab cache为特定值 */
+    if (unlikely(s-&gt;flags &amp; SLAB_POISON))
+        memset(start, POISON_INUSE, PAGE_SIZE &lt;&lt; order);
+
+    last = start;
+    /*
+     设置slab cache中的每个对象指向下一个对象，如果
+     slab cache定义了构造函数，用构造函数初始化对象 */
+    for_each_object(p, s, start, page-&gt;objects) {
+        setup_object(s, page, last);
+        set_freepointer(s, last, p);
+        last = p;
+    }
+    setup_object(s, page, last);
+    /* 最后一个object指向NULL */
+    set_freepointer(s, last, NULL);
+    /* 设置page-&gt;freelist为内存页的起始虚拟地址 */
+    page-&gt;freelist = start;
+    /* page-&gt;inuse等于页面中包含的对象的数量 */
+    page-&gt;inuse = page-&gt;objects;
+    page-&gt;frozen = 1;
+out:
+    return page;
+}
+</code></pre>
+
+<h3 id="2-1-2-kmem-cache-alloc-node">2.1.2. kmem_cache_alloc_node</h3>
+
+<p><code>kmem_cache_alloc_node</code> 函数和 <code>slab_alloc</code> 一样，通过 <code>slab_alloc_node</code> 实现，之后在介绍 <code>slab_alloc</code> 函数时详细说明。</p>
+
+<pre><code class="language-C">void *kmem_cache_alloc_node(struct kmem_cache *s, gfp_t gfpflags, int node)
+{
+    void *ret = slab_alloc_node(s, gfpflags, node, _RET_IP_);
+
+    trace_kmem_cache_alloc_node(_RET_IP_, ret,
+                    s-&gt;object_size, s-&gt;size, gfpflags, node);
+
+    return ret;
+}
+EXPORT_SYMBOL(kmem_cache_alloc_node);
+</code></pre>
+
+<h2 id="2-2-alloc-kmem-cache-cpus">2.2. alloc_kmem_cache_cpus</h2>
+
+<p><code>kmem_cache_open</code> 函数调用 <code>init_kmem_cache_nodes</code> 后，接着调用 <code>alloc_kmem_cache_cpus</code> ，初始化 <strong>struct kmem_cache</strong> 结构体中的per-cpu成员 <strong>cpu_slab</strong> 。</p>
+
+<p><strong>cpu_slab</strong> 类型为 <strong>struct kmem_cache_cpu</strong> ，包含每个CPU的slab信息：</p>
+
+<pre><code class="language-C">struct kmem_cache_cpu {
+    void **freelist;    /* Pointer to next available object */
+    unsigned long tid;  /* Globally unique transaction id */
+    struct page *page;  /* The slab from which we are allocating */
+    struct page *partial;   /* Partially allocated frozen slabs */
+#ifdef CONFIG_SLUB_STATS
+    unsigned stat[NR_SLUB_STAT_ITEMS];
+#endif
+};
+</code></pre>
+
+<p>对于多CPU系统而言，每一个slab cache对象，都包含系统中所有CPU的同种类型的slab信息——对于某种对象的slab cache，系统中的每个CPU都有一个slab用来响应对应CPU的对象分配请求。</p>
+
+<p>这些信息保存在 <strong>cpu_slab</strong> ，而 <strong>struct kmem_cache</strong> 包括所有CPU的slab信息。其中和 <strong>cpu_slab</strong> 相关的成员变量包括 <strong>cpu_partial</strong> ，即每个CPU需要保留的partial objects的数量。</p>
+
+<pre><code class="language-C">static inline int alloc_kmem_cache_cpus(struct kmem_cache *s)
+{
+    BUILD_BUG_ON(PERCPU_DYNAMIC_EARLY_SIZE &lt;
+            KMALLOC_SHIFT_HIGH * sizeof(struct kmem_cache_cpu));
+
+    /*
+     * Must align to double word boundary for the double cmpxchg
+     * instructions to work; see __pcpu_double_call_return_bool().
+     */
+    s-&gt;cpu_slab = __alloc_percpu(sizeof(struct kmem_cache_cpu),
+                     2 * sizeof(void *));
+
+    if (!s-&gt;cpu_slab)
+        return 0;
+    /* 初始化cpu_slab的tid为CPU ID */
+    init_kmem_cache_cpus(s);
+
+    return 1;
+}
+</code></pre>
+
+<p>至此，slab系统的两个cache—— <strong>kmem_cache_node</strong> 和 <strong>kmem_cache</strong> 初始化完成，可以用来响应其他 <strong>struct kmem_cache_node</strong> 和 <strong>struct kmem_cache</strong> 对象的内存分配请求。</p>
+
+<h1 id="3-kmalloc-caches">3. kmalloc_caches</h1>
+
+<p>分配kmalloc slab cache的关键变量是 <strong>kmalloc_caches</strong> ，定义在*mm/slab_common.c*中， <strong>struct kmem_cache *kmalloc_caches[KMALLOC_SHIFT_HIGH + 1]</strong> ，在 <code>create_kmalloc_caches</code> 函数中初始化。</p>
+
+<p>这个函数中，x86架构下 <strong>KMALLOC_SHIFT_LOW</strong> =3， <strong>KMALLOC_SHIFT_HIGH</strong> =13， <strong>KMALLOC_MIN_SIZE</strong> =8，许多修复 <strong>size_index</strong> 数组的条件语句不满足，此处省略不述：</p>
+
+<pre><code class="language-C">void __init create_kmalloc_caches(unsigned long flags)
+{
+    int i;
+    ...
+    for (i = KMALLOC_SHIFT_LOW; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
+        if (!kmalloc_caches[i]) {
+            /* create_alloc_cache函数完成实际工作 */
+            kmalloc_caches[i] = create_kmalloc_cache(NULL,
+                            1 &lt;&lt; i, flags);
+        }
+
+        /*
+         * Caches that are not of the two-to-the-power-of size.
+         * These have to be created immediately after the
+         * earlier power of two caches
+         */
+        if (KMALLOC_MIN_SIZE &lt;= 32 &amp;&amp; !kmalloc_caches[1] &amp;&amp; i == 6)
+            kmalloc_caches[1] = create_kmalloc_cache(NULL, 96, flags);
+
+        if (KMALLOC_MIN_SIZE &lt;= 64 &amp;&amp; !kmalloc_caches[2] &amp;&amp; i == 7)
+            kmalloc_caches[2] = create_kmalloc_cache(NULL, 192, flags);
+    }
+    /*
+     现在，kmalloc_caches[]的大小为
+     -，96，192，8，16 ... 2^13 */
+    /* Kmalloc array is now usable */
+    slab_state = UP;
+    /* 设置slab的名称 */
+    for (i = 0; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
+        struct kmem_cache *s = kmalloc_caches[i];
+        char *n;
+
+        if (s) {
+            n = kasprintf(GFP_NOWAIT, &quot;kmalloc-%d&quot;, kmalloc_size(i));
+
+            BUG_ON(!n);
+            s-&gt;name = n;
+        }
+    }
+    #ifdef CONFIG_ZONE_DMA
+    for (i = 0; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
+        struct kmem_cache *s = kmalloc_caches[i];
+
+        if (s) {
+            int size = kmalloc_size(i);
+            char *n = kasprintf(GFP_NOWAIT,
+                 &quot;dma-kmalloc-%d&quot;, size);
+
+            BUG_ON(!n);
+            kmalloc_dma_caches[i] = create_kmalloc_cache(n,
+                size, SLAB_CACHE_DMA | flags);
+        }
+    }
+#endif
+}
+</code></pre>
+
+<p>结合此函数中创建 <strong>kmalloc_caches</strong> 的过程，可以理解*mm/slab_common.c*中 <strong>static s8 size_index[24]</strong> 数组的内容。</p>
+
+<h2 id="3-1-create-kmalloc-caches">3.1. create_kmalloc_caches</h2>
+
+<p><code>create_kmalloc_caches</code> 函数的主要工作通过 <code>create_kmalloc_cache</code> 实现，这个函数首先从 <strong>kmem_cache</strong> 中分配一个 <strong>struct kmem_cache</strong> 对象，然后调用 <code>create_boot_cache</code> 函数，设置创建的 <strong>kmem_cache</strong> 对象的参数，包括per-cpu成员变量；并且创建对应的sysfs目录，位于 <em>/sys/kernel/slab/&lt;kmem_cache name&gt;/</em> 。</p>
+
+<pre><code class="language-C">struct kmem_cache *__init create_kmalloc_cache(const char *name, size_t size,
+                unsigned long flags)
+{
+    struct kmem_cache *s = kmem_cache_zalloc(kmem_cache, GFP_NOWAIT);
+
+    if (!s)
+        panic(&quot;Out of memory when creating slab %s\n&quot;, name);
+
+    create_boot_cache(s, name, size, flags);
+    /* slab_cache是保存系统中所有slab cache的链表 */
+    list_add(&amp;s-&gt;list, &amp;slab_caches);
+    s-&gt;refcount = 1;
+    return s;
+}
+</code></pre>
+
+<p>可以看到，创建 <strong>kmalloc_caches</strong> 时，直接通过 <code>kmem_cache_zalloc</code> 从 <strong>kmem_cache</strong> slab cache中分配一个 <strong>struct kmem_cache</strong> 对象使用。</p>
+
+<h1 id="4-其他slab-cache的初始化">4. 其他slab cache的初始化</h1>
+
+<p>除了 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 、 <strong>kmalloc_caches</strong> 三个slab cache，内核中其他的slab cache的创建通过 <code>kmem_cache_create</code> 函数完成：</p>
+
+<pre><code class="language-C">/*
+ * kmem_cache_create - Create a cache.
+ * @name: A string which is used in /proc/slabinfo to identify this cache.
+ * @size: The size of objects to be created in this cache.
+ * @align: The required alignment for the objects.
+ * @flags: SLAB flags
+ * @ctor: A constructor for the objects.
+ *
+ * Returns a ptr to the cache on success, NULL on failure.
+ * Cannot be called within a interrupt, but can be interrupted.
+ * The @ctor is run when new pages are allocated by the cache.
+ *
+ * The flags are
+ *
+ * %SLAB_POISON - Poison the slab with a known test pattern (a5a5a5a5)
+ * to catch references to uninitialised memory.
+ *
+ * %SLAB_RED_ZONE - Insert `Red' zones around the allocated memory to check
+ * for buffer overruns.
+ *
+ * %SLAB_HWCACHE_ALIGN - Align the objects in this cache to a hardware
+ * cacheline.  This can be beneficial if you're counting cycles as closely
+ * as davem.
+ */
+struct kmem_cache *
+kmem_cache_create(const char *name, size_t size, size_t align,
+          unsigned long flags, void (*ctor)(void *))
+{
+    struct kmem_cache *s;
+    char *cache_name;
+    int err;
+
+    get_online_cpus();
+    get_online_mems();
+
+    mutex_lock(&amp;slab_mutex);
+
+    err = kmem_cache_sanity_check(name, size);
+    if (err)
+        goto out_unlock;
+     /*
+     * Some allocators will constraint the set of valid flags to a subset
+     * of all flags. We expect them to define CACHE_CREATE_MASK in this
+     * case, and we'll just provide them with a sanitized version of the
+     * passed flags.
+     */
+    flags &amp;= CACHE_CREATE_MASK;
+    /*
+     寻找系统中是否有可以复用的slab cache。如果有，增加
+     匹配的slab的引用计数，设置slab的参数；如果没有，则
+     调用do_kmem_cache_create创建一个slab cache */
+    s = __kmem_cache_alias(name, size, align, flags, ctor);
+    if (s)
+        goto out_unlock;
+
+    cache_name = kstrdup(name, GFP_KERNEL);
+    if (!cache_name) {
+        err = -ENOMEM;
+        goto out_unlock;
+    }
+    /*
+     和create_kmalloc_cache类似，先调用kmem_cache_zalloc
+     分配一个kmem_cache对象，然后调用__kmem_cache_create
+     执行kmem_cache的初始化 */
+    s = do_kmem_cache_create(cache_name, size, size,
+                 calculate_alignment(flags, align, size),
+                 flags, ctor, NULL, NULL);
+    if (IS_ERR(s)) {
+        err = PTR_ERR(s);
+        kfree(cache_name);
+    }
+
+out_unlock:
+    mutex_unlock(&amp;slab_mutex);
+
+    put_online_mems();
+    put_online_cpus();
+
+    if (err) {
+        if (flags &amp; SLAB_PANIC)
+            panic(&quot;kmem_cache_create: Failed to create slab '%s'. Error %d\n&quot;,
+                name, err);
+        else {
+            printk(KERN_WARNING &quot;kmem_cache_create(%s) failed with error %d&quot;,
+                name, err);
+            dump_stack();
+        }
+        return NULL;
+    }
+    return s;
+}
+EXPORT_SYMBOL(kmem_cache_create);
+</code></pre>
+
+<h1 id="5-总结">5. 总结</h1>
+
+<p>从代码看，每一个slab cache通过一个 <strong>struct kmem_cache</strong> 对象描述；每个slab cache包含多个slab，每个slab通常为一个page；每个slab cache可以为一种对象分配内存；每个slab cache包含系统中 <strong>所有CPU</strong> 的 <strong>所有内存节点</strong> 的属于该对象的slab信息，保存在 <strong>struct kmem_cache</strong> 的 <strong>node</strong> 变量和 <strong>cpu_slab</strong> 变量；前者以节点为单位统计slab的信息，后者以CPU为单位统计slab的信息。</p>
+
+<p>整个slab系统的建立过程从 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 、 <strong>kmalloc_caches</strong> 三个slab cache的初始化开始。这三个分配器通过 <code>create_boot_cache</code> 函数建立；其他的分配器通过函数 <code>kmem_cache_create</code> 函数创建。</p>
+
+<p>两个函数最终都会调用 <code>__kmem_cache_create</code> 来初始化新创建 <strong>struct kmem_cache</strong> 对象，区别在于获取 <strong>struct kmem_cache</strong> 对象的方式。</p>
+
+<p>slab最终通过伙伴系统获取内存页，介绍slab系统之后介绍伙伴系统。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-10-21
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/kernel-sources/">kernel-sources</a>
+          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kmem_cache/">kmem_cache</a>
+          <a href="/tags/slub/">slub</a>
+          <a href="/tags/kmem_cache_init/">kmem_cache_init</a>
+          <a href="/tags/create_boot_cache/">create_boot_cache</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/mm-slab_objects_allocation/">
+            <span class="next-text nav-default">mm-slab对象的分配</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

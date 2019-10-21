@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>mm-slab对象的分配 - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.58.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/mm-slab_objects_allocation/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="mm-slab对象的分配" />
+<meta property="og:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm-slab_objects_allocation/" />
+<meta property="article:published_time" content="2019-10-21T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="name" content="mm-slab对象的分配">
+<meta itemprop="description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内">
+
+
+<meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="3944">
+
+
+
+<meta itemprop="keywords" content="kernel-sources,memory,kmem_cache,slub,kmalloc_caches,kmalloc,slab_alloc,kmem_cache_alloc," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="mm-slab对象的分配"/>
+<meta name="twitter:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">mm-slab对象的分配</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-10-21 </span>
+        
+          <span class="more-meta"> 3944 words </span>
+          <span class="more-meta"> 8 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#1-kmalloc">1. kmalloc</a></li>
+<li><a href="#2-kmalloc">2. __kmalloc</a>
+<ul>
+<li><a href="#2-1-kmalloc-slab">2.1. kmalloc_slab</a></li>
+<li><a href="#2-2-slab-alloc">2.2. slab_alloc</a>
+<ul>
+<li><a href="#2-2-1-slab-alloc">2.2.1. __slab_alloc</a>
+<ul>
+<li><a href="#2-2-1-1-new-slab-objects">2.2.1.1. new_slab_objects</a>
+<ul>
+<li><a href="#2-2-1-1-1-get-partial-node">2.2.1.1.1. get_partial_node</a></li>
+<li><a href="#2-2-1-1-2-get-any-partial">2.2.1.1.2. get_any_partial</a></li>
+</ul></li>
+<li><a href="#2-2-1-2-deactivate-slab">2.2.1.2. deactivate_slab</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><a href="#3-kmem-cache-alloc">3. kmem_cache_alloc</a></li>
+<li><a href="#4-总结">4. 总结</a></li>
+</ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      
+
+<p>slab cache建立后，就可以从中分配对象。以 <strong>kmalloc_caches</strong> 为例，执行 <code>kmalloc</code> 函数时会从中分配对象。</p>
+
+<h1 id="1-kmalloc">1. kmalloc</h1>
+
+<p>搞内核的肯定对 <code>kmalloc</code> 不会陌生，和 <code>malloc</code> 函数类似，这个函数用来分配内存，定义在 <em>include/linux/slab.h</em> 中：</p>
+
+<pre><code class="language-C">/* kmalloc is the normal method of allocating memory
+ * for objects smaller than page size in the kernel.
+ * @size: how many bytes of memory are required.
+ * @flags: the type of memory to allocate.
+ */
+static __always_inline void *kmalloc(size_t size, gfp_t flags)
+{
+    if (__builtin_constant_p(size)) {
+        /*# slub下KMALLOC_MAX_CACHE_SIZE = 8kb */
+        if (size &gt; KMALLOC_MAX_CACHE_SIZE)
+            return kmalloc_large(size, flags);
+#ifndef CONFIG_SLOB /* x86下默认关闭 */
+        if (!(flags &amp; GFP_DMA)) {
+            int index = kmalloc_index(size);
+
+            if (!index)
+                return ZERO_SIZE_PTR;
+
+            return kmem_cache_alloc_trace(kmalloc_caches[index],
+                    flags, size);
+        }
+#endif
+    }
+    return __kmalloc(size, flags);
+}
+</code></pre>
+
+<p>虽然代码的注释说明 <code>kmalloc</code> 函数通常用于向内核的对象分配小于页面大小的内存，但是函数一开始会判断请求的内存的大小，如果大于8KB，就会调用 <code>kmalloc_large</code> 函数；否则调用 <code>__kmalloc</code> 函数。</p>
+
+<p><code>kmalloc</code> 函数主要是两个分支：一个是分配小于等于8kb的内存 <code>__kmalloc</code> ，一个是分配大于8kb的内存 <code>kmalloc_large</code> ，对应的函数调用关系如下：</p>
+
+<p><strong><code>kmalloc</code></strong></p>
+
+<ol>
+<li>kmalloc_large
+
+<ul>
+<li>get_order</li>
+<li>kmalloc_order
+
+<ul>
+<li>alloc_kmem_pages
+
+<ul>
+<li>alloc_pages
+
+<ul>
+<li>__alloc_pages_nodemask</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li>__kmalloc
+
+<ul>
+<li>kmalloc_large &ndash; unlikely</li>
+<li>kmalloc_slab &ndash; kmalloc_caches[]</li>
+<li>slab_alloc
+
+<ul>
+<li>slab_alloc_node
+
+<ul>
+<li>__slab_alloc &ndash; unlikely</li>
+<li>prefetch</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ol>
+
+<p>调用 <code>kmalloc</code> 函数需要提供 <strong>flags</strong> 参数，指明要申请的内存的类型，或者说，可以用于响应该申请操作的内存类型。</p>
+
+<p>根据内核中 <code>kmalloc</code> 函数的注释， <strong>flags</strong> 参数可以是下列值：</p>
+
+<blockquote>
+<ul>
+<li>%GFP_USER - Allocate memory on behalf of user.  May sleep.</li>
+<li>%GFP_KERNEL - Allocate normal kernel ram.  May sleep.</li>
+<li>%GFP_ATOMIC - Allocation will not sleep.<br />
+May use emergency pools.   For example, use this inside interrupt handlers.</li>
+<li>%GFP_HIGHUSER - Allocate pages from high memory.</li>
+<li>%GFP_NOIO - Do not do any I/O at all while trying to get memory.</li>
+<li>%GFP_NOFS - Do not make any fs calls while trying to get memory.</li>
+<li>%GFP_NOWAIT - Allocation will not sleep.</li>
+<li>%__GFP_THISNODE - Allocate node-local memory only.</li>
+<li>%GFP_DMA - Allocation suitable for DMA.<br />
+Should only be used for kmalloc() caches. Otherwise, use a slab created with SLAB_DMA.</li>
+</ul>
+
+<p>Also it is possible to set different flags by OR&rsquo;ing in one or more of the following additional @flags:</p>
+
+<ul>
+<li>%__GFP_COLD - Request cache-cold pages instead of trying to return cache-warm pages.</li>
+<li>%__GFP_HIGH - This allocation has high priority and may use emergency pools.</li>
+<li>%__GFP_NOFAIL - Indicate that this allocation is in no way allowed to fail(think twice before using).</li>
+<li>%__GFP_NORETRY - If memory is not immediately available, then give up at once.</li>
+<li>%__GFP_NOWARN - If allocation fails, don&rsquo;t issue any warnings.</li>
+<li>%__GFP_REPEAT - If allocation fails initially, try once more before failing.</li>
+</ul>
+</blockquote>
+
+<p>更多的标志符定义在 <em>include/linux/gfp.h</em> 中，上面列出的都是常用的标志符。</p>
+
+<p>这些标志符可以分为三类：行为修饰符、区域修饰符、类型标志。其中区域修饰符最终会转化为 <em>include/linux/mmzone.h</em> 中的 <strong>zone_type</strong> ：</p>
+
+<pre><code class="language-C">enum zone_type {
+#ifdef CONFIG_ZONE_DMA
+    /*
+     用于不能寻址所有内存地址的DMA设备
+     x86下为 &lt;16MB的地址 */
+    ZONE_DMA,
+#endif
+#ifdef CONFIG_ZONE_DMA32
+    /*
+     x86_64同时支持只能在16MB以下的地址空间
+     执行DMA操作的设备和可以在4GB以下的地址
+     空间执行DMA操作的32bit设备，因此需要
+     两个DMA内存区域 */
+    ZONE_DMA32,
+#endif
+    ZONE_NORMAL,
+#ifdef CONFIG_HIGHMEM
+    /*
+     只有内核将这些区域映射到自己的地址空间
+     后才能正常访问，比如i386下内核要访问
+     900MB以上的地址空间
+     32bit的x86架构，为高于896MB的所有物理
+     内存，其他架构为空 */
+    ZONE_HIGHMEM,
+#endif
+    ZONE_MOVABLE,
+    __MAX_NR_ZONES
+}
+</code></pre>
+
+<h1 id="2-kmalloc">2. __kmalloc</h1>
+
+<p>如果请求的内存小于8KB，就会调用 <code>__kmalloc</code> 函数， <strong>CONFIG_SLUB</strong> 下，这个函数定义在 <em>mm/slub.c</em> 中：</p>
+
+<pre><code class="language-C">void *__kmalloc(size_t size, gfp_t flags)
+{
+    struct kmem_cache *s;
+    void *ret;
+    /* KMALLOC_MAX_CACHE_SIZE = 8MB */
+    if (unlikely(size &gt; KMALLOC_MAX_CACHE_SIZE))
+        /* 和kmalloc函数size大于8kb时采用相同的分配函数 */
+        return kmalloc_large(size, flags);
+    /* 获取slab cache */
+    s = kmalloc_slab(size, flags);
+
+    if (unlikely(ZERO_OR_NULL_PTR(s)))
+        return s;
+
+    ret = slab_alloc(s, flags, _RET_IP_);
+
+    trace_kmalloc(_RET_IP_, ret, size, s-&gt;size, flags);
+
+    return ret;
+}
+EXPORT_SYMBOL(__kmalloc);
+</code></pre>
+
+<h2 id="2-1-kmalloc-slab">2.1. kmalloc_slab</h2>
+
+<p>其中 <code>kmalloc_slab</code> 函数根据传入的 <strong>size</strong> 返回slab高速缓存，如果 <strong>size</strong> 大于SLUB下 <strong>KMALLOC_MAX_SIZE = 8MB</strong> ，直接返回NULL：</p>
+
+<pre><code class="language-C">struct kmem_cache *kmalloc_slab(size_t size, gfp_t flags)
+{
+    int index;
+
+    /*# KMALLOC_MAX_SIZE = 8MB */
+    if (unlikely(size &gt; KMALLOC_MAX_SIZE)) {
+        WARN_ON_ONCE(!(flags &amp; __GFP_NOWARN));
+        return NULL;
+    }
+
+    if (size &lt;= 192) {
+        if (!size)
+            return ZERO_SIZE_PTR;
+        /*
+         size_index数组根据所需的slab cache的
+         大小转化为对应的index，只涉及到小于等
+         于192的情况 */
+        index = size_index[size_index_elem(size)];
+    } else
+        /*
+         根据代码中的注释，fls函数返回参数中
+         最高有效位的index */
+        index = fls(size - 1);
+
+#ifdef CONFIG_ZONE_DMA
+    if (unlikely((flags &amp; GFP_DMA)))
+        return kmalloc_dma_caches[index];
+
+#endif
+    return kmalloc_caches[index];
+}
+</code></pre>
+
+<h2 id="2-2-slab-alloc">2.2. slab_alloc</h2>
+
+<p>如果 <code>__kmalloc</code> 函数调用 <code>kmalloc_slab</code> 之后返回值不为空，说明系统中有符合请求的内存大小的kmalloc slab分配器，就会调用 <code>slab_alloc</code> 函数，对slab分配器进行修改，并从中分配一个请求的对象作为返回值。</p>
+
+<p><strong>CONFIG_SLUB</strong> 下 <code>slab_alloc</code> 函数通过 <code>slab_alloc_node</code> 函数实现，后者定义在 <em>mm/slub.c</em> 中。</p>
+
+<p>这个函数的主体逻辑是两个分支语句：一种情况是当前CPU的freelist为空，或者分配slab的节点和当前CPU的内存节点不匹配，执行较慢的分配路径 <code>__slab_alloc</code> ；否则直接从freelist中获取新分配的对象，通过预取指令将对象放到cache中：</p>
+
+<pre><code class="language-C">static __always_inline void *slab_alloc_node(struct kmem_cache *s,
+        gfp_t gfpflags, int node, unsigned long addr)
+{
+    ...
+    object = c-&gt;freelist;
+    /* page属于per-cpu变量c */
+    page = c-&gt;page;
+    /* 没有可用的对象，或者page不属于当前node */
+    if (unlikely(!object || !node_match(page, node))) {
+        /* 执行慢分配路径 */
+        object = __slab_alloc(s, gfpflags, node, addr, c);
+        /*# increase the statistic in s-&gt;cpu_slab */
+        stat(s, ALLOC_SLOWPATH);
+    } else {
+        /* 获取新的对象 */
+        void *next_object = get_freepointer_safe(s, object);
+        /* 更新freelist和tid的值 */
+        if (unlikely(!this_cpu_cmpxchg_double(
+                s-&gt;cpu_slab-&gt;freelist, s-&gt;cpu_slab-&gt;tid,
+                object, tid,
+                next_object, next_tid(tid)))) {
+            /* 记录更新失败的信息 */
+            note_cmpxchg_failure(&quot;slab_alloc&quot;, s, tid);
+            goto redo;
+        }
+        /* 通过指令预取分配的对象 */
+        prefetch_freepointer(s, next_object);
+        /* 增加s-&gt;cpu_slab的统计信息 */
+        stat(s, ALLOC_FASTPATH);
+    }
+    ...
+}
+</code></pre>
+
+<h3 id="2-2-1-slab-alloc">2.2.1. __slab_alloc</h3>
+
+<p>正如代码注释所说：</p>
+
+<blockquote>
+<p>Slow path. The lockless freelist is empty or we need to perform debugging duties.</p>
+</blockquote>
+
+<p><code>__slab_alloc</code> 执行速度较慢，无锁freelist为空或者需要执行调试操作时会走这条路径。</p>
+
+<blockquote>
+<p>Processing is still very fast if new objects have been freed to the regular freelist. In that case we simply take over the regular freelist as the lockless freelist and zap the regular freelist.</p>
+</blockquote>
+
+<p>如果常规freelist中有新的对象被释放，仍然能够快速处理。这种情况下，只需要将常规freelist当做无锁freelist使用，然后移除常规freelist。</p>
+
+<blockquote>
+<p>If that is not working then we fall back to the partial lists. We take the first element of the freelist as the object to allocate now and move the rest of the freelist to the lockless freelist.</p>
+</blockquote>
+
+<p>否则，转向partial list，将freelist中的第一个元素视为要分配的对象，并将剩余的freelist放到无锁freelist中。</p>
+
+<blockquote>
+<p>And if we were unable to get a new slab from the partial slab lists then we need to allocate a new slab. This is the slowest path since it involves a call to the page allocator and the setup of a new slab.</p>
+</blockquote>
+
+<p>如果无法从partial list中获取一个新的slab(内存页)，就分配一个新的slab，这是最慢的路径——需要调用页分配器(buddy allocator)，并且初始化slab。</p>
+
+<pre><code class="language-C">static void *__slab_alloc(struct kmem_cache *s, gfp_t gfpflags, int node,
+              unsigned long addr, struct kmem_cache_cpu *c)
+{
+    void *freelist;
+    struct page *page;
+    unsigned long flags;
+
+    local_irq_save(flags);
+#ifdef CONFIG_PREEMPT
+    /*
+     * We may have been preempted and rescheduled on a different
+     * cpu before disabling interrupts. Need to reload cpu area
+     * pointer.
+     */
+    c = this_cpu_ptr(s-&gt;cpu_slab);
+#endif
+    /* page指向当前CPU分配slab的内存页 */
+    page = c-&gt;page;
+    /* 内存页为空，跳转到分配操作 */
+    if (!page)
+        goto new_slab;
+redo:
+    /* 内存page和node节点不匹配 */
+    if (unlikely(!node_match(page, node))) {
+        stat(s, ALLOC_NODE_MISMATCH);
+        /* 将page从slab cache中删除 */
+        deactivate_slab(s, page, c-&gt;freelist);
+        c-&gt;page = NULL;
+        c-&gt;freelist = NULL;
+        /* 跳转到分配操作 */
+        goto new_slab;
+    }
+
+    /*
+     * By rights, we should be searching for a slab page that was
+     * PFMEMALLOC but right now, we are losing the pfmemalloc
+     * information when the page leaves the per-cpu allocator
+     */
+    if (unlikely(!pfmemalloc_match(page, gfpflags))) {
+        deactivate_slab(s, page, c-&gt;freelist);
+        c-&gt;page = NULL;
+        c-&gt;freelist = NULL;
+        goto new_slab;
+    }
+
+    /* must check again c-&gt;freelist in case of cpu migration or IRQ */
+    freelist = c-&gt;freelist;
+    /*
+     freelist可用，跳转到加载操作；这种情况即函数注释的第一种情况：
+     slab中有新的对象释放，直接获取然后返回即可 */
+    if (freelist)
+        goto load_freelist;
+
+    freelist = get_freelist(s, page);
+
+    if (!freelist) {
+        c-&gt;page = NULL;
+        stat(s, DEACTIVATE_BYPASS);
+        /* 没有空闲对象可用，从partial list中获取可用对象 */
+        goto new_slab;
+    }
+    /*
+     ALLOC_REFILL对应的应该是第一次请求空闲对象失败，但是
+     执行慢路径时当前slab有对象被释放，并且分配成功 */
+    stat(s, ALLOC_REFILL);
+
+load_freelist:
+    /*
+     * freelist is pointing to the list of objects to be used.
+     * page is pointing to the page from which the objects are obtained.
+     * That page must be frozen for per cpu allocations to work.
+     */
+    VM_BUG_ON(!c-&gt;page-&gt;frozen);
+    /* 从slab cache中获取下一个可用的对象 */
+    c-&gt;freelist = get_freepointer(s, freelist);
+    /* tid + 1 */
+    c-&gt;tid = next_tid(c-&gt;tid);
+    local_irq_restore(flags);
+    return freelist;
+
+new_slab:
+    /* partial list可用，从partial list分配新的对象 */
+    if (c-&gt;partial) {
+        page = c-&gt;page = c-&gt;partial;
+        c-&gt;partial = page-&gt;next;
+        stat(s, CPU_PARTIAL_ALLOC);
+        c-&gt;freelist = NULL;
+        /*
+         将partial list的第一个slab作为当前正在使用的slab，
+         再次执行各种判断逻辑 */
+        goto redo;
+    }
+    /* partial list不可用，创建新的slab */
+    freelist = new_slab_objects(s, gfpflags, node, &amp;c);
+    /* 创建新的slab失败 */
+    if (unlikely(!freelist)) {
+        slab_out_of_memory(s, gfpflags, node);
+        local_irq_restore(flags);
+        return NULL;
+    }
+
+    page = c-&gt;page;
+    if (likely(!kmem_cache_debug(s) &amp;&amp; pfmemalloc_match(page, gfpflags)))
+        goto load_freelist;
+
+    /* Only entered in the debug case */
+    if (kmem_cache_debug(s) &amp;&amp;
+            !alloc_debug_processing(s, page, freelist, addr))
+        goto new_slab;  /* Slab failed checks. Next slab needed */
+
+    deactivate_slab(s, page, get_freepointer(s, freelist));
+    c-&gt;page = NULL;
+    c-&gt;freelist = NULL;
+    local_irq_restore(flags);
+    return freelist;
+}
+</code></pre>
+
+<h4 id="2-2-1-1-new-slab-objects">2.2.1.1. new_slab_objects</h4>
+
+<p>执行慢路径 <code>__slab_alloc</code> 时，如果当前CPU的slab cache的partial list也不可用，就通过 <code>new_slab_objects</code> 函数，先从属于当前节点的slab中通过 <code>get_partial</code> 尝试从当前的节点获取一个partial slab，如果失败再通过 <code>get_any_partial</code> 从其他的节点获取一个partial slab，如果都失败则通过伙伴系统分配新的内存页作为slab使用。</p>
+
+<h5 id="2-2-1-1-1-get-partial-node">2.2.1.1.1. get_partial_node</h5>
+
+<p><code>get_partial</code> 函数的主要功能通过 <code>get_partial_node</code> 从指定的节点获取partial slab，然后保存到当前CPU的slab cache的partial list中。</p>
+
+<pre><code class="language-C">static void *get_partial_node(struct kmem_cache *s, struct kmem_cache_node *n,
+                struct kmem_cache_cpu *c, gfp_t flags)
+{
+    struct page *page, *page2;
+    void *object = NULL;
+    int available = 0;
+    int objects;
+
+    /*
+     * Racy check. If we mistakenly see no partial slabs then we
+     * just allocate an empty slab. If we mistakenly try to get a
+     * partial slab and there is none available then get_partials()
+     * will return NULL.
+     */
+    if (!n || !n-&gt;nr_partial)
+        return NULL;
+
+    spin_lock(&amp;n-&gt;list_lock);
+    list_for_each_entry_safe(page, page2, &amp;n-&gt;partial, lru) {
+        void *t;
+        /* 如果没有设置pfmemalloc，直接跳过 */
+        if (!pfmemalloc_match(page, flags))
+            continue;
+        /*
+         将page从slab cache的partial表移除，并且将其中
+         包含的可用对象的数量保存在objects中，设置page
+         的冻结标志 */
+        t = acquire_slab(s, n, page, object == NULL, &amp;objects);
+        /*
+         如果acquire_slab函数执行cmpxchg操作失败，!t为真。
+         暂时没有想到什么时候会出现这种情况 */
+        if (!t)
+            break;
+        /* 将可用对象增加到available */
+        available += objects;
+        if (!object) {
+            /* 设置当前页面为正在使用的slab */
+            c-&gt;page = page;
+            stat(s, ALLOC_FROM_PARTIAL);
+            object = t;
+        } else {
+            /* 添加到当前CPU的partial list中 */
+            put_cpu_partial(s, page, 0);
+            stat(s, CPU_PARTIAL_NODE);
+        }
+        /*
+         如果可用的对象已经大于s-&gt;cpu_partial的一半，退出
+         循环；否则继续便利当前节点的partial list*/
+        if (!kmem_cache_has_cpu_partial(s)
+            || available &gt; s-&gt;cpu_partial / 2)
+            break;
+
+    }
+    spin_unlock(&amp;n-&gt;list_lock);
+    return object;
+}
+</code></pre>
+
+<h5 id="2-2-1-1-2-get-any-partial">2.2.1.1.2. get_any_partial</h5>
+
+<p><code>get_any_partial</code> 按照距离当前节点由近到远的顺序在其他的节点上寻找可用的partial slab，主要功能同样通过 <code>get_partial_node</code> 实现。</p>
+
+<h4 id="2-2-1-2-deactivate-slab">2.2.1.2. deactivate_slab</h4>
+
+<p><code>deactivate_slab</code> 函数将一个slab从slab cache中移除，涉及到slab释放的问题，放在下一篇“slab对象的回收”说明。</p>
+
+<h1 id="3-kmem-cache-alloc">3. kmem_cache_alloc</h1>
+
+<p>“slab初始化”中说过，更一般的，通过 <code>kmem_cache_create</code> 函数创建一个slab cache。</p>
+
+<p>创建完成后可以通过函数 <code>kmem_cache_alloc</code> 函数从slab cache中分配指定大小的对象。</p>
+
+<h1 id="4-总结">4. 总结</h1>
+
+<p>从代码可以看出SLUB分配对象时的操作流程(简化流程)：</p>
+
+<ol>
+<li>首先从当前CPU的freelist中获取可用对象，获取成功直接返回对象，更新freelist，通过预取指令放到cache，即快路径。</li>
+<li>如果freelist没有对象可用，执行慢路径，从CPU的partial slab中取出第一个元素，作为当前正在使用的slab，并尝试从中分配对象。</li>
+<li>如果CPU的partial list也为空，就从当前节点中获取一个partial slab，分配给当前CPU使用。</li>
+<li>如果当前节点中也没有partial slab可用，就按照距离当前节点的从近到远的顺序，分配partial slab使用。</li>
+</ol>
+
+<p>所以， <code>__slab_alloc</code> 函数的注释中所说的“lockless freelist”和“regular freelist”，指的应该是 <strong>struct kmem_cache_cpu</strong> 的 <strong>freelist</strong> 成员；“the rest of the freelist”的freelist指的应该是第一个partial slab分配完请求的对象后剩余的freelist。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-10-21
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/kernel-sources/">kernel-sources</a>
+          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kmem_cache/">kmem_cache</a>
+          <a href="/tags/slub/">slub</a>
+          <a href="/tags/kmalloc_caches/">kmalloc_caches</a>
+          <a href="/tags/kmalloc/">kmalloc</a>
+          <a href="/tags/slab_alloc/">slab_alloc</a>
+          <a href="/tags/kmem_cache_alloc/">kmem_cache_alloc</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mm-slab_initialization/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">mm-slab初始化</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm-slab_objects_free/">
+            <span class="next-text nav-default">mm-slab对象的回收</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

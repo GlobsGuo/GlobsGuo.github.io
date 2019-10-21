@@ -6,10 +6,118 @@
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>create_boot_cache</title>
+      <link>https://globsguo.github.io/tags/create_boot_cache/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/create_boot_cache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kernel sources</title>
+      <link>https://globsguo.github.io/tags/kernel-sources/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kfree</title>
+      <link>https://globsguo.github.io/tags/kfree/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kfree/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmalloc</title>
+      <link>https://globsguo.github.io/tags/kmalloc/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmalloc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmalloc_caches</title>
+      <link>https://globsguo.github.io/tags/kmalloc_caches/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmalloc_caches/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmem_cache</title>
+      <link>https://globsguo.github.io/tags/kmem_cache/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmem_cache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmem_cache_alloc</title>
+      <link>https://globsguo.github.io/tags/kmem_cache_alloc/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmem_cache_alloc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kmem_cache_init</title>
+      <link>https://globsguo.github.io/tags/kmem_cache_init/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmem_cache_init/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>memory</title>
+      <link>https://globsguo.github.io/tags/memory/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/memory/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>slab_alloc</title>
+      <link>https://globsguo.github.io/tags/slab_alloc/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/slab_alloc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>slab_free</title>
+      <link>https://globsguo.github.io/tags/slab_free/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/slab_free/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>slub</title>
+      <link>https://globsguo.github.io/tags/slub/</link>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/slub/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>cgroup</title>
@@ -102,29 +210,11 @@
     </item>
     
     <item>
-      <title>kernel sources</title>
-      <link>https://globsguo.github.io/tags/kernel-sources/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>mem_section</title>
       <link>https://globsguo.github.io/tags/mem_section/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/mem_section/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>memory</title>
-      <link>https://globsguo.github.io/tags/memory/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/memory/</guid>
       <description></description>
     </item>
     
@@ -201,38 +291,11 @@
     </item>
     
     <item>
-      <title>kmem_cache</title>
-      <link>https://globsguo.github.io/tags/kmem_cache/</link>
-      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/kmem_cache/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kmem_cache_node</title>
-      <link>https://globsguo.github.io/tags/kmem_cache_node/</link>
-      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/kmem_cache_node/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>printk</title>
       <link>https://globsguo.github.io/tags/printk/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/printk/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>slab cache</title>
-      <link>https://globsguo.github.io/tags/slab-cache/</link>
-      <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/slab-cache/</guid>
       <description></description>
     </item>
     
