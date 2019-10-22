@@ -6,10 +6,55 @@
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>buddy-allocator</title>
+      <link>https://globsguo.github.io/tags/buddy-allocator/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/buddy-allocator/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kernel-sources</title>
+      <link>https://globsguo.github.io/tags/kernel-sources/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>memory</title>
+      <link>https://globsguo.github.io/tags/memory/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/memory/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>NODE_DATA</title>
+      <link>https://globsguo.github.io/tags/node_data/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/node_data/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>zonelist</title>
+      <link>https://globsguo.github.io/tags/zonelist/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/zonelist/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>create_boot_cache</title>
@@ -17,15 +62,6 @@
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/create_boot_cache/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kernel-sources</title>
-      <link>https://globsguo.github.io/tags/kernel-sources/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
       <description></description>
     </item>
     
@@ -80,15 +116,6 @@
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/kmem_cache_init/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>memory</title>
-      <link>https://globsguo.github.io/tags/memory/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/memory/</guid>
       <description></description>
     </item>
     
@@ -210,24 +237,6 @@
     </item>
     
     <item>
-      <title>mem_section</title>
-      <link>https://globsguo.github.io/tags/mem_section/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/mem_section/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>memory model</title>
-      <link>https://globsguo.github.io/tags/memory-model/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/memory-model/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>memory policy</title>
       <link>https://globsguo.github.io/tags/memory-policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
@@ -237,38 +246,11 @@
     </item>
     
     <item>
-      <title>NODE_DATA</title>
-      <link>https://globsguo.github.io/tags/node_data/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/node_data/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>platform bus</title>
       <link>https://globsguo.github.io/tags/platform-bus/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/platform-bus/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>vmemmap</title>
-      <link>https://globsguo.github.io/tags/vmemmap/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/vmemmap/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>zonelist</title>
-      <link>https://globsguo.github.io/tags/zonelist/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/zonelist/</guid>
       <description></description>
     </item>
     

@@ -6,18 +6,18 @@
     <description>Recent content in zonelist on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/zonelist/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Memory Management Initialization</title>
-      <link>https://globsguo.github.io/post/memory_management/</link>
-      <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
+      <title>mm-buddy_allocator初始化</title>
+      <link>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</link>
+      <pubDate>Tue, 22 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/memory_management/</guid>
-      <description>本文从Linux内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明Linux的内存管理用到的数据结构的初始化流程。本文以x86-6</description>
+      <guid>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</guid>
+      <description>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存</description>
     </item>
     
   </channel>
