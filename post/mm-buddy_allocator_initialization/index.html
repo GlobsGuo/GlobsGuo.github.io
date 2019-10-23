@@ -42,15 +42,15 @@
 <meta property="og:description" content="在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm-buddy_allocator_initialization/" />
-<meta property="article:published_time" content="2019-10-22T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-10-22T00:00:00+00:00" />
+<meta property="article:published_time" content="2019-10-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-23T00:00:00+00:00" />
 <meta itemprop="name" content="mm-buddy_allocator初始化">
 <meta itemprop="description" content="在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存">
 
 
-<meta itemprop="datePublished" content="2019-10-22T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-10-22T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="6997">
+<meta itemprop="datePublished" content="2019-10-23T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-10-23T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="8516">
 
 
 
@@ -123,10 +123,10 @@
       <h1 class="post-title">mm-buddy_allocator初始化</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-10-22 </span>
+        <span class="post-time"> 2019-10-23 </span>
         
-          <span class="more-meta"> 6997 words </span>
-          <span class="more-meta"> 14 mins read </span>
+          <span class="more-meta"> 8516 words </span>
+          <span class="more-meta"> 17 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -184,7 +184,18 @@
 <li><a href="#2-1-2-内存区域的初始化">2.1.2. 内存区域的初始化</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#3-总结">3. 总结</a></li>
+<li><a href="#3-zone-pcp-init">3. zone_pcp_init</a>
+<ul>
+<li><a href="#3-1-boot-pageset">3.1. boot_pageset</a></li>
+<li><a href="#3-2-rmqueue-bulk">3.2. rmqueue_bulk</a></li>
+</ul></li>
+<li><a href="#4-free-area的初始化">4. free_area的初始化</a>
+<ul>
+<li><a href="#4-1-init-currently-empty-zone">4.1. init_currently_empty_zone</a></li>
+<li><a href="#4-2-memmap-init-zone">4.2. memmap_init_zone</a></li>
+<li><a href="#4-3-free-all-bootmem">4.3. free_all_bootmem</a></li>
+</ul></li>
+<li><a href="#5-总结">5. 总结</a></li>
 </ul>
 </nav>
   </div>
@@ -396,6 +407,7 @@ static void __init setup_node_data(int nid, u64 start, u64 end)
 <li><code>build_all_zonelists</code> ,  <em>mm/page_alloc.c</em></li>
 <li><code>page_alloc_init</code> ,  <em>mm/page_alloc.c</em></li>
 <li><code>mm_init</code> ,  <em>init/main.c</em></li>
+<li><code>mem_init</code> , <em>arch/x86/mm/init_64.c</em></li>
 <li><code>kmem_cache_init</code> ,  <em>mm/slub.c</em></li>
 </ul></li>
 </ul>
@@ -1041,9 +1053,204 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 }
 </code></pre>
 
-<h1 id="3-总结">3. 总结</h1>
+<h1 id="3-zone-pcp-init">3. zone_pcp_init</h1>
 
-<p>至此，伙伴系统分配页面所需的内存信息建立完成；buddy allocator的具体执行流程，在下一篇文章介绍。</p>
+<p><code>free_area_init_core</code> 还会调用 <code>zone_pcp_init</code> 初始化 <strong>struct zone</strong> 的成员 <strong>struct per_cpu_pageset __percpu *pageset</strong> ，即《深入理解Linux内核》一书中第八章内存管理的“每cpu页框高速缓存”一节。</p>
+
+<p>根据书中所述：</p>
+
+<blockquote>
+<p>为了提升系统性能，每个内存管理区定义了一个“每CPU”页框高速缓存。所有“每CPU”页框高速缓存包含一些预先分配的页框，它们用于满足本地CPU发出的单一内存请求。</p>
+</blockquote>
+
+<p>这里的“每CPU”页框高速缓存就是 <strong>struct per_cpu_pageset</strong> ，定义在 <em>include/linux/mmzone.h</em> 。书中还说每个 <strong>per_cpu_pageset</strong> 对象都包含两个 <strong>struct per_cpu_pages</strong> 对象，一个热高速缓存，一个冷高速缓存——这个是2.6内核的实现，3.16只包含一个 <strong>per_cpu_pages</strong> 对象。</p>
+
+<p><strong>struct per_cpu_pages</strong> 定义如下：</p>
+
+<pre><code class="language-C">struct per_cpu_pages {
+    int count;      /* 高速缓存中页框数 */
+    int high;       /* 上界，表示高速缓存用尽 */
+    int batch;      /* 添加/移除操作的页框数 */
+
+    /* Lists of pages, one per migrate type stored on the pcp-lists */
+    struct list_head lists[MIGRATE_PCPTYPES];
+};
+</code></pre>
+
+<h2 id="3-1-boot-pageset">3.1. boot_pageset</h2>
+
+<p><code>zone_pcp_init</code> 直接将zone的pageset指向定义在 <em>mm/page_alloc.c</em> 中的 <strong>boot_pageset</strong> 变量，这个变量在 <code>__build_all_zonelists</code> 函数中通过 <code>setup_pageset</code> 初始化：</p>
+
+<pre><code class="language-C">static void setup_pageset(struct per_cpu_pageset *p, unsigned long batch)
+{
+    pageset_init(p);
+    pageset_set_batch(p, batch);
+}
+</code></pre>
+
+<p>其中 <code>pageset_init</code> 初始化 <strong>struct per_cpu_pageset</strong> 的每个成员； <code>pageset_set_batch</code> 设置per-cpu页框高速缓存的batch为传入的值，即0。</p>
+
+<h2 id="3-2-rmqueue-bulk">3.2. rmqueue_bulk</h2>
+
+<p><code>zone_pcp_init</code> 将zone的pageset指向 <strong>boot_pageset</strong> 后，per-cpu页框高速缓存中没有可用的页。<br />
+buddy allocator分配内存页时，会调用 <code>rmqueue_bulk</code> 分配页框到per-cpu页框高速缓存。这个函数在buddy allocator一文中再进行详细说明。</p>
+
+<h1 id="4-free-area的初始化">4. free_area的初始化</h1>
+
+<p>上面的函数建立了zone和zonelist，但是分配内存页真正用到的其实是 <strong>struct zone</strong> 中的 <strong>struct free_area free_area[MAX_ORDER]</strong> 成员，zone中的所有内存会分成 $2^{0}-2^{10}$ 个连续的页框，以解决外碎片的问题。</p>
+
+<h2 id="4-1-init-currently-empty-zone">4.1. init_currently_empty_zone</h2>
+
+<p><code>free_area_init_core</code> 调用 <code>init_currently_empty_zone</code> 函数完成 <strong>free_area</strong> 的初始化，这个函数只是将每种大小的 <strong>free_area</strong> 的数量初始化为零，并且初始化每种 <strong>free_area</strong> 包含的所有 migrate type 的链表。<br />
+但是并没有真正建立可以分配内存页的 <strong>free_area</strong> 结构。</p>
+
+<h2 id="4-2-memmap-init-zone">4.2. memmap_init_zone</h2>
+
+<p><code>free_area_init_core</code> 调用的另一个函数 <code>memmap_init</code> ，x86架构下定义为 <code>memmap_init_zone</code> 。<br />
+这个函数主要设置zone中每个page的具体信息，即 <strong>struct page</strong> 的各个成员变量。</p>
+
+<pre><code class="language-C">void __meminit memmap_init_zone(unsigned long size, int nid, unsigned long zone,
+        unsigned long start_pfn, enum memmap_context context)
+{
+    struct page *page;
+    unsigned long end_pfn = start_pfn + size;
+    unsigned long pfn;
+    struct zone *z;
+
+    if (highest_memmap_pfn &lt; end_pfn - 1)
+        highest_memmap_pfn = end_pfn - 1;
+
+    z = &amp;NODE_DATA(nid)-&gt;node_zones[zone];
+    for (pfn = start_pfn; pfn &lt; end_pfn; pfn++) {
+        /*
+         * There can be holes in boot-time mem_map[]s
+         * handed to this function.  They do not
+         * exist on hotplugged memory.
+         */
+        if (context == MEMMAP_EARLY) {
+            if (!early_pfn_valid(pfn))
+                continue;
+            if (!early_pfn_in_nid(pfn, nid))
+                continue;
+        }
+        page = pfn_to_page(pfn);
+        /*
+         下列操作设置struct page的各个成员：
+         flag域的zone，nodeid，memsection，
+         _count = -1，
+         _mapcount = 1，
+         _last_cpuid = 0xff，
+         flag域的reserved标志 */
+        set_page_links(page, zone, nid, pfn);
+        mminit_verify_page_links(page, zone, nid, pfn);
+        init_page_count(page);
+        page_mapcount_reset(page);
+        page_cpupid_reset_last(page);
+        SetPageReserved(page);
+
+        if ((z-&gt;zone_start_pfn &lt;= pfn)
+            &amp;&amp; (pfn &lt; zone_end_pfn(z))
+            &amp;&amp; !(pfn &amp; (pageblock_nr_pages - 1)))
+            set_pageblock_migratetype(page, MIGRATE_MOVABLE);
+
+        INIT_LIST_HEAD(&amp;page-&gt;lru);
+#ifdef WANT_PAGE_VIRTUAL    //x86 下未定义
+        /* The shift won't overflow because ZONE_NORMAL is below 4G. */
+        if (!is_highmem_idx(zone))
+            set_page_address(page, __va(pfn &lt;&lt; PAGE_SHIFT));
+#endif
+    }
+}
+</code></pre>
+
+<h2 id="4-3-free-all-bootmem">4.3. free_all_bootmem</h2>
+
+<p><strong>free_area</strong> 初始化的过程，是在 <code>free_all_bootmem</code> 函数，这个函数由 <em>arch/x86/mm/init_64.c</em> 中的 <code>mem_init</code> 调用。<br />
+x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因此采用 <em>mm/nobootmem.c</em> 中的定义，调用 <code>free_low_memory_core_early</code> 函数完成主要工作：</p>
+
+<pre><code class="language-C">static unsigned long __init free_low_memory_core_early(void)
+{
+    unsigned long count = 0;
+    phys_addr_t start, end;
+    u64 i;
+
+    for_each_free_mem_range(i, NUMA_NO_NODE, &amp;start, &amp;end, NULL)
+        count += __free_memory_core(start, end);
+
+#ifdef CONFIG_ARCH_DISCARD_MEMBLOCK //x86下默认定义
+    {
+        phys_addr_t size;
+
+        /* Free memblock.reserved array if it was allocated */
+        size = get_allocated_memblock_reserved_regions_info(&amp;start);
+        if (size)
+            count += __free_memory_core(start, start + size);
+
+        /* Free memblock.memory array if it was allocated */
+        size = get_allocated_memblock_memory_regions_info(&amp;start);
+        if (size)
+            count += __free_memory_core(start, start + size);
+    }
+#endif
+
+    return count;
+}
+</code></pre>
+
+<p>函数主要通过 <code>__free_memory_core</code> 释放 <strong>memblock</strong> 中保存的内存块，后者调用 <code>__free_pages_memory</code> ：</p>
+
+<pre><code class="language-C">static void __init __free_pages_memory(unsigned long start, unsigned long end)
+{
+    int order;
+
+    while (start &lt; end) {
+        /*
+         MAX_ORDER = 11，__ffs返回start中最高位的索引，
+         因此，start越大，order可能越大，但是最大不会
+         超过10 */
+        order = min(MAX_ORDER - 1UL, __ffs(start));
+        /* 将order限制在合法的范围内 */
+        while (start + (1UL &lt;&lt; order) &gt; end)
+            order--;
+
+        __free_pages_bootmem(pfn_to_page(start), order);
+
+        start += (1UL &lt;&lt; order);
+    }
+}
+</code></pre>
+
+<p><code>__free_pages_memory</code>最终会调用 <em>mm/page_alloc.c</em> 中的 <code>__free_pages_bootmem</code> ，传入起始页面和释放的order：</p>
+
+<pre><code class="language-C">void __init __free_pages_bootmem(struct page *page, unsigned int order)
+{
+    unsigned int nr_pages = 1 &lt;&lt; order;
+    struct page *p = page;
+    unsigned int loop;
+
+    prefetchw(p);
+    for (loop = 0; loop &lt; (nr_pages - 1); loop++, p++) {
+        prefetchw(p + 1);
+        __ClearPageReserved(p);
+        set_page_count(p, 0);
+    }
+    __ClearPageReserved(p);
+    set_page_count(p, 0);
+
+    page_zone(page)-&gt;managed_pages += nr_pages;
+    set_page_refcounted(page);
+    __free_pages(page, order);
+}
+</code></pre>
+
+<p><code>__free_pages_bootmem</code> 清除之前的reserved标志，先将 <strong>_count</strong> 设置为0，之后再设置为1，然后调用 <code>__free_pages</code>，将page释放到buddy系统。</p>
+
+<p><code>__free_pages</code> 是伙伴系统释放内存页的函数，放在下一篇buddy allocator进行说明。</p>
+
+<h1 id="5-总结">5. 总结</h1>
+
+<p>至此，伙伴系统分配页面所需的内存信息建立完成：zone，zonelist，以及每个zone的free_area信息。<br />
+buddy allocator的具体执行流程，在下一篇文章介绍。</p>
 
     </div>
 
@@ -1055,7 +1262,7 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-10-22
+        2019-10-23
         
     </span>
   </p>
