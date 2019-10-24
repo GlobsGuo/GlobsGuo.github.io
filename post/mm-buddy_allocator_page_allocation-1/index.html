@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-buddy allocator - Globs&#39; Catchall</title>
+  <title>mm-buddy_allocator分配页框(上) - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -26,7 +26,7 @@
 <meta name="generator" content="Hugo 0.58.3 with theme even" />
 
 
-<link rel="canonical" href="https://globsguo.github.io/post/mm-buddy_allocator/" />
+<link rel="canonical" href="https://globsguo.github.io/post/mm-buddy_allocator_page_allocation-1/" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -38,25 +38,25 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-buddy allocator" />
+<meta property="og:title" content="mm-buddy_allocator分配页框(上)" />
 <meta property="og:description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://globsguo.github.io/post/mm-buddy_allocator/" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm-buddy_allocator_page_allocation-1/" />
 <meta property="article:published_time" content="2019-10-24T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-10-24T00:00:00+00:00" />
-<meta itemprop="name" content="mm-buddy allocator">
+<meta itemprop="name" content="mm-buddy_allocator分配页框(上)">
 <meta itemprop="description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内">
 
 
 <meta itemprop="datePublished" content="2019-10-24T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-24T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="4706">
+<meta itemprop="wordCount" content="6655">
 
 
 
-<meta itemprop="keywords" content="kernel-sources,buddy-allocator,page_alloc,__alloc_pages_nodemask,kmalloc," />
+<meta itemprop="keywords" content="kernel-sources,memory,buddy-allocator,kmalloc,expand,get_page_from_freelist,__alloc_pages_nodemask,zlcache," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-buddy allocator"/>
+<meta name="twitter:title" content="mm-buddy_allocator分配页框(上)"/>
 <meta name="twitter:description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内"/>
 
 <!--[if lte IE 9]>
@@ -120,13 +120,13 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-buddy allocator</h1>
+      <h1 class="post-title">mm-buddy_allocator分配页框(上)</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2019-10-24 </span>
         
-          <span class="more-meta"> 4706 words </span>
-          <span class="more-meta"> 10 mins read </span>
+          <span class="more-meta"> 6655 words </span>
+          <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -141,25 +141,26 @@
 <li><a href="#1-1-alloc-kmem-pages">1.1. alloc_kmem_pages</a></li>
 <li><a href="#1-2-alloc-pages-current">1.2. alloc_pages_current</a></li>
 </ul></li>
-<li><a href="#2-alloc-pages-nodemask">2. __alloc_pages_nodemask</a>
+<li><a href="#2-alloc-pages-nodemask">2. __alloc_pages_nodemask</a></li>
+<li><a href="#3-get-page-from-freelist">3. get_page_from_freelist</a>
 <ul>
-<li><a href="#2-1-get-page-from-freelist">2.1. get_page_from_freelist</a>
+<li><a href="#3-1-cpuset-zone-allowed-softwall">3.1. cpuset_zone_allowed_softwall</a></li>
+<li><a href="#3-2-zone-watermark-ok">3.2. zone_watermark_ok</a></li>
+<li><a href="#3-3-buffered-rmqueue">3.3. buffered_rmqueue</a>
 <ul>
-<li><a href="#2-1-1-cpuset-zone-allowed-softwall">2.1.1. cpuset_zone_allowed_softwall</a></li>
-<li><a href="#2-1-2-zone-watermark-ok">2.1.2. zone_watermark_ok</a></li>
-</ul></li>
-<li><a href="#2-2-buffered-rmqueue">2.2. buffered_rmqueue</a>
+<li><a href="#3-3-1-rmqueue-bulk">3.3.1. rmqueue_bulk</a></li>
+<li><a href="#3-3-2-rmqueue">3.3.2. __rmqueue</a>
 <ul>
-<li><a href="#2-2-1-rmqueue-bulk">2.2.1. rmqueue_bulk</a></li>
-<li><a href="#2-2-2-rmqueue">2.2.2. __rmqueue</a>
+<li><a href="#3-3-2-1-rmqueue-smallest">3.3.2.1. __rmqueue_smallest</a></li>
+<li><a href="#3-3-2-2-rmqueue-fallback">3.3.2.2. __rmqueue_fallback</a>
 <ul>
-<li><a href="#rmqueue-smallest">__rmqueue_smallest</a></li>
+<li><a href="#3-3-2-2-1-try-to-steal-freepages">3.3.2.2.1. try_to_steal_freepages</a></li>
+<li><a href="#3-3-2-2-2-move-freepages">3.3.2.2.2. move_freepages</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#2-3-zone-reclaim">2.3. zone_reclaim</a></li>
-<li><a href="#2-3-free-pages">2.3. __free_pages</a></li>
 </ul></li>
-<li><a href="#3-总结">3. 总结</a></li>
+</ul></li>
+<li><a href="#4-总结">4. 总结</a></li>
 </ul>
 </nav>
   </div>
@@ -169,7 +170,9 @@
 
 <p>slab系统调用buddy分配器分配所需要的内存页，作为slab使用。</p>
 
-<p>和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内存分配请求，本文仍然从 <code>kmalloc</code> 函数的实现入手，介绍伙伴系统的核心函数 <code>__alloc_pages_nodemask</code> ，说明伙伴系统的工作流程。</p>
+<p>和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内存分配请求，本文仍然从 <code>kmalloc</code> 函数的实现入手，结合伙伴系统的核心函数 <code>__alloc_pages_nodemask</code> ，说明伙伴系统分配页框的过程。</p>
+
+<p>由于伙伴系统分配页框的流程十分复杂，本文只介绍分配页框的第一次尝试，即 <code>__alloc_pages_nodemask</code> 函数第一次调用 <code>get_page_from_freelist</code> 的具体流程； <code>__alloc_pages_slowpath</code> 函数放在下一篇文章。</p>
 
 <h1 id="1-kmalloc-large">1. kmalloc_large</h1>
 
@@ -351,7 +354,7 @@ EXPORT_SYMBOL(__alloc_pages_nodemask);
 <p><code>__alloc_pages_nodemask</code> 通过 <code>first_zones_zonelist</code> 获取可以使用的第一个zoneref，成功后执行进一步操作—— <code>get_page_from_freelist</code> 。<br />
 如果分配失败，移除可能存在的 <strong>PF_MEMALLOC_NOIO</strong> 标志，然后调用 <code>__alloc_pages_slowpath</code> 函数，再次尝试分配内存页。</p>
 
-<h2 id="2-1-get-page-from-freelist">2.1. get_page_from_freelist</h2>
+<h1 id="3-get-page-from-freelist">3. get_page_from_freelist</h1>
 
 <p><code>get_page_from_freelist</code> 是 <code>__alloc_pages_nodemask</code> 分配页面的第一次尝试：</p>
 
@@ -529,7 +532,7 @@ this_zone_full:
 }
 </code></pre>
 
-<h3 id="2-1-1-cpuset-zone-allowed-softwall">2.1.1. cpuset_zone_allowed_softwall</h3>
+<h2 id="3-1-cpuset-zone-allowed-softwall">3.1. cpuset_zone_allowed_softwall</h2>
 
 <p>如果系统开启了cpuset功能， <code>cpuset_zone_allowed_softwall</code> 最终调用 <code>__cpuset_node_allowed_softwall</code> 实现cpuset的限制功能：</p>
 
@@ -618,7 +621,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 
 <p><code>__alloc_pages_nodemask</code> 执行慢路径 <code>__alloc_pages_slowpath</code> 时，还会调用 <code>get_page_from_freelist</code> 。如果设置了 <strong>GFP_ATOMIC</strong> ，不会执行这个函数。这些函数调用不会设置 <code>__alloc_pages</code> 的wait变量， <strong>alloc_flags</strong> 的 <strong>ALLOC_CPUSET</strong> 也不会设置。</p>
 
-<h3 id="2-1-2-zone-watermark-ok">2.1.2. zone_watermark_ok</h3>
+<h2 id="3-2-zone-watermark-ok">3.2. zone_watermark_ok</h2>
 
 <p>对于列表中的每个zone，如果zlcache没有标记为满，并且位于可用的内存节点，符合cpuset的限制，并且没有设置 <strong>ALLOC_FAIR</strong> 分配标志，通过了dirty检查，则调用 <strong>zone_watermark_ok</strong> 函数判断当前zone的空闲页是否高于给定的watermark。</p>
 
@@ -663,7 +666,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 }
 </code></pre>
 
-<h2 id="2-2-buffered-rmqueue">2.2. buffered_rmqueue</h2>
+<h2 id="3-3-buffered-rmqueue">3.3. buffered_rmqueue</h2>
 
 <p>如果找到了可以使用的zone，就通过 <code>buffered_rmqueue</code> 从zone中分配所需的内存页：</p>
 
@@ -750,15 +753,15 @@ failed:
 }
 </code></pre>
 
-<h3 id="2-2-1-rmqueue-bulk">2.2.1. rmqueue_bulk</h3>
+<h3 id="3-3-1-rmqueue-bulk">3.3.1. rmqueue_bulk</h3>
 
 <p>作为补充per-cpu页框高速缓存的内存页的函数， <code>rmqueue_bulk</code> 通过 <code>__rmqueue</code> 依次从伙伴系统申请 <strong>batch</strong> 个页框，并根据传入的 <strong>cold</strong> 参数将申请到的页面依次添加到传入的 <strong>list</strong> (即per-cpu页框高速缓存的页框链表)的头部(cold为false)或者尾部(cold为true)。</p>
 
 <p>函数会修改zone的空闲页面统计数，返回真正申请到的页面数。</p>
 
-<h3 id="2-2-2-rmqueue">2.2.2. __rmqueue</h3>
+<h3 id="3-3-2-rmqueue">3.3.2. __rmqueue</h3>
 
-<p><code>__rmqueue</code> 是“真正”的伙伴系统分配函数，函数第一次尝试分配请求的migratetype所需的页面数，如果失败，并且第一次请求的migratetype不是 <strong>MIGRATE_RESERVE</strong> ，再尝试分配。</p>
+<p><code>__rmqueue</code> 是“真正”的伙伴系统分配函数，函数第一次尝试分配请求的migratetype所需的页面数；如果失败，并且第一次请求的migratetype不是 <strong>MIGRATE_RESERVE</strong> ，再调用 <code>__rmqueue_fallback</code> 尝试分配；如果分配再次失败，则将migratetype置为 <strong>MIGRATE_RESERVE</strong> ，从保留内存区域进行分配。</p>
 
 <pre><code class="language-C">static struct page *__rmqueue(struct zone *zone, unsigned int order,
                         int migratetype)
@@ -787,7 +790,7 @@ retry_reserve:
 }
 </code></pre>
 
-<h4 id="rmqueue-smallest">__rmqueue_smallest</h4>
+<h4 id="3-3-2-1-rmqueue-smallest">3.3.2.1. __rmqueue_smallest</h4>
 
 <p><code>__rmqueue_smallest</code> 是 <code>__rmqueue</code> 函数分配页框的第一次尝试。<br />
 函数从传入的order开始，从zone中最接近order的 <strong>free_area</strong> 中分配页框。</p>
@@ -820,35 +823,223 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 }
 </code></pre>
 
-<p>如果没有和给定的order相同的 <strong>free_area</strong> ，<code>__rmqueue_smallest</code> 从最接近order的 <strong>free_area</strong> 分配内存，然后 调用<code>expand</code> 函数将</p>
+<p>如果没有和给定的order相同的 <strong>free_area</strong> ，<code>__rmqueue_smallest</code> 从最接近order的 <strong>free_area</strong> 分配内存，然后 调用<code>expand</code> 函数将原来order较大的内存块切分成较小的内存块，并且添加到相应的链表中。</p>
 
-<h2 id="2-3-zone-reclaim">2.3. zone_reclaim</h2>
+<h4 id="3-3-2-2-rmqueue-fallback">3.3.2.2. __rmqueue_fallback</h4>
 
-<h2 id="2-3-free-pages">2.3. __free_pages</h2>
+<p>如果 <code>__rmqueue_smallest</code> 分配失败，并且migratetype不是reserve类型，则调用 <code>__rmqueue_fallback</code> 函数尝试分配。<br />
+和 <code>__rmqueue_smallest</code> 不同， <code>__rmqueue_fallback</code> 从最大的order开始，从 <strong>fallback</strong> 表中，查找当前migratetype对应的可用migratetype，获取可用的 <strong>free_area</strong> ，然后从中分配页框。</p>
 
-<p><code>__free_pages</code> 定义在 <em>mm/page_alloc.c</em> ：</p>
-
-<pre><code class="language-C">void __free_pages(struct page *page, unsigned int order)
+<pre><code class="language-C">static inline struct page *
+__rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 {
-    /* 将page-&gt;_count减一，如果不是0不执行释放操作 */
-    if (put_page_testzero(page)) {
-        if (order == 0)
-            free_hot_cold_page(page, false);
-        else
-            __free_pages_ok(page, order);
-    }
-}
+    struct free_area *area;
+    unsigned int current_order;
+    struct page *page;
+    int migratetype, new_type, i;
 
-EXPORT_SYMBOL(__free_pages);
+    /* Find the largest possible block of pages in the other list */
+    for (current_order = MAX_ORDER-1;
+                current_order &gt;= order &amp;&amp; current_order &lt;= MAX_ORDER-1;
+                --current_order) {
+        for (i = 0;; i++) {
+            migratetype = fallbacks[start_migratetype][i];
+
+            /* MIGRATE_RESERVE handled later if necessary */
+            /* MIGRATE_RESERVE是最后一个元素 */
+            if (migratetype == MIGRATE_RESERVE)
+                break;
+
+            area = &amp;(zone-&gt;free_area[current_order]);
+            if (list_empty(&amp;area-&gt;free_list[migratetype]))
+                continue;
+
+            page = list_entry(area-&gt;free_list[migratetype].next,
+                    struct page, lru);
+            area-&gt;nr_free--;
+            /* start_migratetype是首选，migratetype是后备选项 */
+            new_type = try_to_steal_freepages(zone, page,
+                              start_migratetype,
+                              migratetype);
+
+            /* Remove the page from the freelists */
+            list_del(&amp;page-&gt;lru);
+            rmv_page_order(page);
+
+            /*
+             expand函数将
+             free_area[current_order].freelist[new_type]
+             切分成较小order的内存块，保存到响应列表 */
+            expand(zone, page, order, current_order, area,
+                   new_type);
+            /* The freepage_migratetype may differ from pageblock's
+             * migratetype depending on the decisions in
+             * try_to_steal_freepages. This is OK as long as it does
+             * not differ for MIGRATE_CMA type.
+             */
+            set_freepage_migratetype(page, new_type);
+
+            trace_mm_page_alloc_extfrag(page, order, current_order,
+                start_migratetype, migratetype, new_type);
+
+            return page;
+        }
+    }
+
+    return NULL;
+}
 </code></pre>
 
-<p>函数有两个分支：如果释放单个页面，执行 <code>free_hot_cold_page</code> ，否则执行 <code>__free_pages_ok</code> 。</p>
+<p><strong>fallbacks</strong> 是定义在 <em>mm/page_alloc.c</em> 中的二维数组，保存着每种migratetype分配失败时，可以使用的其他migratetype。</p>
 
-<h1 id="3-总结">3. 总结</h1>
+<p>如果 <code>__rmqueue_fallback</code> 也分配失败， <code>__rmqueue</code> 将migratetype设置成reserve类型，再次执行上面两个函数进行分配。</p>
 
-<p>分配内存页时，对于单页请求，先从per-cpu页框高速缓存中分配，如果per-cpu页框高速缓存中没有空闲页，在从伙伴系统中申请页框作为补充。<br />
-如果是多页请求，直接从伙伴系统中分配页框。<br />
-从伙伴系统分配页框时，</p>
+<h5 id="3-3-2-2-1-try-to-steal-freepages">3.3.2.2.1. try_to_steal_freepages</h5>
+
+<p>找到可用的 <strong>free_area</strong> 之后， <code>__rmqueue_fallback</code> 调用 <code>try_to_steal_freepages</code> ，根据 <strong>fallback_type</strong> 移动空闲页框。</p>
+
+<p>内核中函数的注释为：</p>
+
+<blockquote>
+<p>切分一个大块的内存时，将所有空闲页框移动到首选的分配列表。如果fallback_type是可回收的内核分配，更积极主动的获取空闲页面的所有权。</p>
+
+<p>另一方面，不要改变 <strong>MIGRATE_CMA</strong> 内存块的migratetype，也不要将CMA的页框移动到其他的空闲列表中，我们不想从 <strong>MIGRATE_CMA</strong> 区域分配不可用的页框。</p>
+</blockquote>
+
+<p>函数中的 <strong>pageblock_order</strong> 变量定义在 <em>include/linux/pageblock-flags.h</em> ，如果开启了 <strong>CONFIG_HUGETLB_PAGE</strong> (默认开启)，并且没有通过内核配置提供order值，就采用 <strong>HUGETLB_PAGE_ORDER</strong> ，即9；否则为 <strong>MAX_ORDER-1</strong> ，即10。<br />
+<strong>page_group_by_mobility_disabled</strong> 变量在 <code>build_all_zonelists</code> 设置，如果系统中页框数量太低，将其置为1，关闭“group by mobility”。</p>
+
+<pre><code class="language-C">/*
+ @start_type为首选的迁移类型，即请求内存时的类型
+ @fallback_type为备选的类型，即通过fallbacks获取的类型 */
+static int try_to_steal_freepages(struct zone *zone, struct page *page,
+                  int start_type, int fallback_type)
+{
+    /* current_order为当前找到的内存块的阶数 */
+    int current_order = page_order(page);
+
+    /*
+     * When borrowing from MIGRATE_CMA, we need to release the excess
+     * buddy pages to CMA itself. We also ensure the freepage_migratetype
+     * is set to CMA so it is returned to the correct freelist in case
+     * the page ends up being not actually allocated from the pcp lists.
+     */
+    if (is_migrate_cma(fallback_type))
+        return fallback_type;
+
+    /* Take ownership for orders &gt;= pageblock_order */
+    if (current_order &gt;= pageblock_order) {
+        /*
+         change_pageblock_range将找到的内存块按照
+         pageblock_order的大小分割，都设置migratetype
+         为start_type，即首选的迁移类型 */
+        change_pageblock_range(page, current_order, start_type);
+        return start_type;
+    }
+
+    /*
+     下列情况还会将页框移动到，即更积极的获取空闲页框的
+     所有权：
+     1. 当前order大于等于pageblock_order的一半
+     2. 首选为可回收的迁移类型
+     3. 关闭了“group by mobility” */
+    if (current_order &gt;= pageblock_order / 2 ||
+        start_type == MIGRATE_RECLAIMABLE ||
+        page_group_by_mobility_disabled) {
+        int pages;
+
+        /* 将内存块移动到start_type的列表 */
+        pages = move_freepages_block(zone, page, start_type);
+
+        /* Claim the whole block if over half of it is free */
+        if (pages &gt;= (1 &lt;&lt; (pageblock_order-1)) ||
+                page_group_by_mobility_disabled) {
+
+            /*
+             move_freepages中设置migratetype的操作，可能没有
+             设置page的迁移类型——对齐到pageblock_nr_pages */
+            set_pageblock_migratetype(page, start_type);
+            return start_type;
+        }
+
+    }
+
+    return fallback_type;
+}
+</code></pre>
+
+<p>从代码可以看出，对于内存块阶数大于 <strong>pageblock_order</strong> 的情况，只是修改页框的migratetype，并没有真正移动空闲页；而“更积极的获取空闲页框的所有权”则意味着将空闲页框移动到指定的迁移类型的列表中。</p>
+
+<h5 id="3-3-2-2-2-move-freepages">3.3.2.2.2. move_freepages</h5>
+
+<p><code>try_to_steal_freepages</code> 调用 <code>move_freepages_block</code> 移动空闲页框，后者先获取内存块的起止物理页框号对应的 <strong>struct page</strong> ，并进行合法性检查(这里有个疑问，不知道为什么将起止pfn对齐到pageblock_nr_pages)，然后调用 <code>move_freepages</code> 函数，移动页框到参数指定的迁移类型。</p>
+
+<pre><code class="language-C">int move_freepages(struct zone *zone,
+              struct page *start_page, struct page *end_page,
+              int migratetype)
+{
+    struct page *page;
+    unsigned long order;
+    int pages_moved = 0;
+
+#ifndef CONFIG_HOLES_IN_ZONE
+    /*
+     * page_zone is not safe to call in this context when
+     * CONFIG_HOLES_IN_ZONE is set. This bug check is probably redundant
+     * anyway as we check zone boundaries in move_freepages_block().
+     * Remove at a later date when no bug reports exist related to
+     * grouping pages by mobility
+     */
+    BUG_ON(page_zone(start_page) != page_zone(end_page));
+#endif
+
+    for (page = start_page; page &lt;= end_page;) {
+        /* Make sure we are not inadvertently changing nodes */
+        VM_BUG_ON_PAGE(page_to_nid(page) != zone_to_nid(zone), page);
+
+        /*
+         这个函数有两个调用者，一个是正在说明的伙伴系统的
+         move_freepages_block，这种情况能够通过下列两项
+         检查；另一个是mm/page_isolation.c中的函数，可能
+         不会通过检查？ */
+        if (!pfn_valid_within(page_to_pfn(page))) {
+            page++;
+            continue;
+        }
+
+        if (!PageBuddy(page)) {
+            page++;
+            continue;
+        }
+
+        order = page_order(page);
+        /* 移动内存块到相同阶数、传入的迁移类型 */
+        list_move(&amp;page-&gt;lru,
+              &amp;zone-&gt;free_area[order].free_list[migratetype]);
+        /* 修改迁移类型 */
+        set_freepage_migratetype(page, migratetype);
+
+        /*
+         如果page没有通过上面两项检查，就会导致 1&lt;&lt;order
+         不等于 end_pfn - start_pfn */
+        page += 1 &lt;&lt; order;
+        pages_moved += 1 &lt;&lt; order;
+    }
+
+    return pages_moved;
+}
+</code></pre>
+
+<p>需要说明的是， <code>move_freepages</code> 每次都会获取page的order，order有多种可能值。</p>
+
+<h1 id="4-总结">4. 总结</h1>
+
+<p><code>__alloc_pages_nodemask</code> 函数首先调用 <code>get_page_from_freelist</code> ，尝试获取空闲页。<br />
+为了保证函数的执行速度， <code>get_page_from_freelist</code> 会使用zlcache加快空闲页框的查找速度。</p>
+
+<p><code>get_page_from_freelist</code> 会执行两次扫描，第一次扫描考虑所有的限制条件，包括cpuset，<strong>ALLOC_FAIR</strong> 标志，dirty限制，不考虑远程节点；第二次扫描会忽略 <strong>ALLOC_FAIR</strong> 标志，考虑远程节点。</p>
+
+<p>对于zone中空闲页框数低于watermark的情况， <code>get_page_from_freelist</code> 调用 <code>zone_reclaim</code> ，尝试从zone中回收页框，回收流程在《mm-buddy_allocator页框回收》介绍。</p>
 
     </div>
 
@@ -884,10 +1075,13 @@ EXPORT_SYMBOL(__free_pages);
 </div><footer class="post-footer">
       <div class="post-tags">
           <a href="/tags/kernel-sources/">kernel-sources</a>
+          <a href="/tags/memory/">memory</a>
           <a href="/tags/buddy-allocator/">buddy-allocator</a>
-          <a href="/tags/page_alloc/">page_alloc</a>
-          <a href="/tags/__alloc_pages_nodemask/">__alloc_pages_nodemask</a>
           <a href="/tags/kmalloc/">kmalloc</a>
+          <a href="/tags/expand/">expand</a>
+          <a href="/tags/get_page_from_freelist/">get_page_from_freelist</a>
+          <a href="/tags/__alloc_pages_nodemask/">__alloc_pages_nodemask</a>
+          <a href="/tags/zlcache/">zlcache</a>
           </div>
       <nav class="post-nav">
         

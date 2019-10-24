@@ -30,6 +30,24 @@
     </item>
     
     <item>
+      <title>expand</title>
+      <link>https://globsguo.github.io/tags/expand/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/expand/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>get_page_from_freelist</title>
+      <link>https://globsguo.github.io/tags/get_page_from_freelist/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/get_page_from_freelist/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>kernel-sources</title>
       <link>https://globsguo.github.io/tags/kernel-sources/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
@@ -66,11 +84,11 @@
     </item>
     
     <item>
-      <title>page_alloc</title>
-      <link>https://globsguo.github.io/tags/page_alloc/</link>
+      <title>zlcache</title>
+      <link>https://globsguo.github.io/tags/zlcache/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/tags/page_alloc/</guid>
+      <guid>https://globsguo.github.io/tags/zlcache/</guid>
       <description></description>
     </item>
     

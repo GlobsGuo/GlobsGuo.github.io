@@ -16,6 +16,20 @@
   </url>
   
   <url>
+    <loc>https://globsguo.github.io/tags/expand/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/get_page_from_freelist/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -44,7 +58,7 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/post/mm-buddy_allocator/</loc>
+    <loc>https://globsguo.github.io/post/mm-buddy_allocator_page_allocation-1/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -65,13 +79,6 @@
   </url>
   
   <url>
-    <loc>https://globsguo.github.io/tags/page_alloc/</loc>
-    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
     <loc>https://globsguo.github.io/post/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
@@ -80,6 +87,13 @@
   
   <url>
     <loc>https://globsguo.github.io/tags/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/zlcache/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
