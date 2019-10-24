@@ -6,7 +6,7 @@
     <description>Recent content in NODE_DATA on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 23 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/node_data/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>mm-buddy_allocator初始化</title>
       <link>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</guid>
       <description>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存</description>

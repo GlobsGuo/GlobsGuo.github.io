@@ -2,64 +2,92 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://globsguo.github.io/tags/__alloc_pages_nodemask/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
     <loc>https://globsguo.github.io/tags/buddy-allocator/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/tags/kernel-sources/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/kmalloc/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/tags/memory/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/post/mm-buddy_allocator/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/tags/node_data/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://globsguo.github.io/tags/page_alloc/</loc>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/post/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/tags/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>https://globsguo.github.io/tags/zonelist/</loc>
-    <lastmod>2019-10-23T00:00:00+00:00</lastmod>
+    <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -73,13 +101,6 @@
   
   <url>
     <loc>https://globsguo.github.io/tags/kfree/</loc>
-    <lastmod>2019-10-21T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  
-  <url>
-    <loc>https://globsguo.github.io/tags/kmalloc/</loc>
     <lastmod>2019-10-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

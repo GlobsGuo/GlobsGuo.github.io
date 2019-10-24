@@ -6,15 +6,24 @@
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 23 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>__alloc_pages_nodemask</title>
+      <link>https://globsguo.github.io/tags/__alloc_pages_nodemask/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/__alloc_pages_nodemask/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>buddy-allocator</title>
       <link>https://globsguo.github.io/tags/buddy-allocator/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/buddy-allocator/</guid>
       <description></description>
@@ -23,16 +32,25 @@
     <item>
       <title>kernel-sources</title>
       <link>https://globsguo.github.io/tags/kernel-sources/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>kmalloc</title>
+      <link>https://globsguo.github.io/tags/kmalloc/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/kmalloc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>memory</title>
       <link>https://globsguo.github.io/tags/memory/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/memory/</guid>
       <description></description>
@@ -41,16 +59,25 @@
     <item>
       <title>NODE_DATA</title>
       <link>https://globsguo.github.io/tags/node_data/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/node_data/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>page_alloc</title>
+      <link>https://globsguo.github.io/tags/page_alloc/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/page_alloc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>zonelist</title>
       <link>https://globsguo.github.io/tags/zonelist/</link>
-      <pubDate>Wed, 23 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/zonelist/</guid>
       <description></description>
@@ -71,15 +98,6 @@
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/kfree/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>kmalloc</title>
-      <link>https://globsguo.github.io/tags/kmalloc/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/tags/kmalloc/</guid>
       <description></description>
     </item>
     

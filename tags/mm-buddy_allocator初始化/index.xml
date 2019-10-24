@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>zonelist on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/zonelist/</link>
-    <description>Recent content in zonelist on Globs&#39; Catchall</description>
+    <title>mm-buddy_allocator初始化 on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/mm-buddy_allocator%E5%88%9D%E5%A7%8B%E5%8C%96/</link>
+    <description>Recent content in mm-buddy_allocator初始化 on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/zonelist/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://globsguo.github.io/tags/mm-buddy_allocator%E5%88%9D%E5%A7%8B%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>mm-buddy_allocator初始化</title>
+      <title></title>
       <link>https://globsguo.github.io/post/mm-buddy_allocator_initialization/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
