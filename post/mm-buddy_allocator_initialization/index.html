@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-24T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-24T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="8516">
+<meta itemprop="wordCount" content="9190">
 
 
 
@@ -125,8 +125,8 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-24 </span>
         
-          <span class="more-meta"> 8516 words </span>
-          <span class="more-meta"> 17 mins read </span>
+          <span class="more-meta"> 9190 words </span>
+          <span class="more-meta"> 19 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -213,50 +213,92 @@
 <h2 id="1-1-stuct-pglist-data-node-data">1.1. stuct pglist_data *node_data[]</h2>
 
 <p>x86架构下，变量 <strong>struct pglist_data *node_data[]</strong> 保存系统中的所有节点信息，定义在 <em>arch/x86/mm/numa.c</em> 中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">pglist_data</span> <span class="p">{</span>
+    <span class="cm">/* 节点包含的所有zone信息 */</span>
+    <span class="k">struct</span> <span class="n">zone</span> <span class="n">node_zones</span><span class="p">[</span><span class="n">MAX_NR_ZONES</span><span class="p">];</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="n">node_zonelists</span><span class="p">[</span><span class="n">MAX_ZONELISTS</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">nr_zones</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_MEMORY_HOTPLUG
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     * Must be held any time you expect node_start_pfn, node_present_pages
+</span><span class="cm">     * or node_spanned_pages stay constant.  Holding this will also
+</span><span class="cm">     * guarantee that any pfn_valid() stays that way.
+</span><span class="cm">     *
+</span><span class="cm">     * pgdat_resize_lock() and pgdat_resize_unlock() are provided to
+</span><span class="cm">     * manipulate node_size_lock without checking for CONFIG_MEMORY_HOTPLUG.
+</span><span class="cm">     *
+</span><span class="cm">     * Nests above zone-&gt;lock and zone-&gt;span_seqlock
+</span><span class="cm">     */</span>
+    <span class="n">spinlock_t</span> <span class="n">node_size_lock</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_start_pfn</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_present_pages</span><span class="p">;</span> <span class="cm">/* total number of physical pages */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_spanned_pages</span><span class="p">;</span> <span class="cm">/* total size of physical page
+</span><span class="cm">                         range, including holes */</span>
+    <span class="kt">int</span> <span class="n">node_id</span><span class="p">;</span>
+    <span class="n">wait_queue_head_t</span> <span class="n">kswapd_wait</span><span class="p">;</span>
+    <span class="n">wait_queue_head_t</span> <span class="n">pfmemalloc_wait</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">task_struct</span> <span class="o">*</span><span class="n">kswapd</span><span class="p">;</span> <span class="cm">/* Protected by
+</span><span class="cm">                       mem_hotplug_begin/end() */</span>
+    <span class="kt">int</span> <span class="n">kswapd_max_order</span><span class="p">;</span>
+    <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">classzone_idx</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_NUMA_BALANCING
+</span><span class="cp"></span>    <span class="cm">/* Lock serializing the migrate rate limiting window */</span>
+    <span class="n">spinlock_t</span> <span class="n">numabalancing_migrate_lock</span><span class="p">;</span>
 
-<pre><code class="language-c">typedef struct pglist_data {
-    /* 节点包含的所有zone信息 */
-    struct zone node_zones[MAX_NR_ZONES];
-    struct zonelist node_zonelists[MAX_ZONELISTS];
-    int nr_zones;
-#ifdef CONFIG_MEMORY_HOTPLUG
-    /*
-     * Must be held any time you expect node_start_pfn, node_present_pages
-     * or node_spanned_pages stay constant.  Holding this will also
-     * guarantee that any pfn_valid() stays that way.
-     *
-     * pgdat_resize_lock() and pgdat_resize_unlock() are provided to
-     * manipulate node_size_lock without checking for CONFIG_MEMORY_HOTPLUG.
-     *
-     * Nests above zone-&gt;lock and zone-&gt;span_seqlock
-     */
-    spinlock_t node_size_lock;
-#endif
-    unsigned long node_start_pfn;
-    unsigned long node_present_pages; /* total number of physical pages */
-    unsigned long node_spanned_pages; /* total size of physical page
-                         range, including holes */
-    int node_id;
-    wait_queue_head_t kswapd_wait;
-    wait_queue_head_t pfmemalloc_wait;
-    struct task_struct *kswapd; /* Protected by
-                       mem_hotplug_begin/end() */
-    int kswapd_max_order;
-    enum zone_type classzone_idx;
-#ifdef CONFIG_NUMA_BALANCING
-    /* Lock serializing the migrate rate limiting window */
-    spinlock_t numabalancing_migrate_lock;
+    <span class="cm">/* Rate limiting time interval */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">numabalancing_migrate_next_window</span><span class="p">;</span>
 
-    /* Rate limiting time interval */
-    unsigned long numabalancing_migrate_next_window;
-
-    /* Number of pages migrated during the rate limiting time interval */
-    unsigned long numabalancing_migrate_nr_pages;
-#endif
-} pg_data_t;
-
-</code></pre>
-
+    <span class="cm">/* Number of pages migrated during the rate limiting time interval */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">numabalancing_migrate_nr_pages</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="p">}</span> <span class="n">pg_data_t</span><span class="p">;</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="1-2-node-data-的初始化">1.2. <strong>node_data</strong> 的初始化</h2>
 
 <p><em>arch/x86/include/asm/mmzone_64.h</em> 中定义了访问 <strong>node_data</strong> 变量的宏 <code>#define NODE_DATA(nid) (node_data[nid])</code> ，内核中的代码大多使用这个宏访问 <strong>node_data</strong> 变量。</p>
@@ -287,90 +329,171 @@
 </ul>
 
 <p>需要说明的是，实际测试时，根据boot log， <code>x86_numa_init</code> 的执行过程如下：</p>
-
-<pre><code class="language-C">void __init x86_numa_init(void)
-{
-    if (!numa_off) {      // 通常为false，即默认启用NUMA
-#ifdef CONFIG_ACPI_NUMA   // x86-64通常为true
-        /*
-         numa_init函数执行时，会调用x86_acpi_numa_init函数，
-         主要是转化ACPI的SRAT和SLIT的操作。从boot log来看，
-         函数返回值为负数，导致numa_init函数退出 */
-        if (!numa_init(x86_acpi_numa_init))
-            return;
-#endif
-#ifdef CONFIG_AMD_NUMA  // x86-64为true
-        /*
-         amd_numa_init函数从北桥的PCI配置空间获取
-         NUMA信息，如果返回值为负数 */
-        if (!numa_init(amd_numa_init))
-            return;
-#endif
-    }
-    /* 函数执行dummy_numa_init */
-    numa_init(dummy_numa_init);
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">x86_numa_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">numa_off</span><span class="p">)</span> <span class="p">{</span>      <span class="c1">// 通常为false，即默认启用NUMA
+</span><span class="c1"></span><span class="cp">#ifdef CONFIG_ACPI_NUMA   </span><span class="c1">// x86-64通常为true
+</span><span class="c1"></span>        <span class="cm">/*
+</span><span class="cm">         numa_init函数执行时，会调用x86_acpi_numa_init函数，
+</span><span class="cm">         主要是转化ACPI的SRAT和SLIT的操作。从boot log来看，
+</span><span class="cm">         函数返回值为负数，导致numa_init函数退出 */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">numa_init</span><span class="p">(</span><span class="n">x86_acpi_numa_init</span><span class="p">))</span>
+            <span class="k">return</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp">#ifdef CONFIG_AMD_NUMA  </span><span class="c1">// x86-64为true
+</span><span class="c1"></span>        <span class="cm">/*
+</span><span class="cm">         amd_numa_init函数从北桥的PCI配置空间获取
+</span><span class="cm">         NUMA信息，如果返回值为负数 */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">numa_init</span><span class="p">(</span><span class="n">amd_numa_init</span><span class="p">))</span>
+            <span class="k">return</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="p">}</span>
+    <span class="cm">/* 函数执行dummy_numa_init */</span>
+    <span class="n">numa_init</span><span class="p">(</span><span class="n">dummy_numa_init</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>也就是说，默认情况下，x86架构开启NUMA配置， <code>x86_numa_init</code> 函数首先执行 <code>x86_acpi_numa_init</code> 函数，尝试从ACPI的SRAT中获取NUMA信息，成功的话函数直接退出；否则再调用 <code>amd_numa_init</code> ，从北桥的PCI配置空间获取NUMA信息，成功的话直接退出；否则再调用 <code>dummy_numa_init</code> ，直接将 <strong>0 - max_pfn</strong> 范围的物理页框作为节点0(这个范围内可能有空洞)。</p>
 
 <p>不论是哪种方式，成功获取到NUMA信息后，都会将其添加到 <strong>numa_meminofo</strong> 变量。这个变量由 <code>numa_init</code> 调用函数 <code>numa_register_memblks</code> 时作为参数传递，添加到 <strong>memblock</strong> 变量，同时传递给 <code>setup_node_data</code> 函数，即每个节点的起始页框索引。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/* Initialize NODE_DATA for a node on the local memory */</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="n">__init</span> <span class="nf">setup_node_data</span><span class="p">(</span><span class="kt">int</span> <span class="n">nid</span><span class="p">,</span> <span class="n">u64</span> <span class="n">start</span><span class="p">,</span> <span class="n">u64</span> <span class="n">end</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="n">size_t</span> <span class="n">nd_size</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">pg_data_t</span><span class="p">),</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+    <span class="n">u64</span> <span class="n">nd_pa</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">nd</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">tnid</span><span class="p">;</span>
 
-<pre><code class="language-C">/* Initialize NODE_DATA for a node on the local memory */
-static void __init setup_node_data(int nid, u64 start, u64 end)
-{
-    const size_t nd_size = roundup(sizeof(pg_data_t), PAGE_SIZE);
-    u64 nd_pa;
-    void *nd;
-    int tnid;
+    <span class="cm">/*
+</span><span class="cm">     * Don&#39;t confuse VM with a node that doesn&#39;t have the
+</span><span class="cm">     * minimum amount of memory:
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">end</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">NODE_MIN_SIZE</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">;</span>
 
-    /*
-     * Don't confuse VM with a node that doesn't have the
-     * minimum amount of memory:
-     */
-    if (end &amp;&amp; (end - start) &lt; NODE_MIN_SIZE)
-        return;
+    <span class="cm">/* ZONE_ALIGN = 8MB */</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">roundup</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">ZONE_ALIGN</span><span class="p">);</span>
 
-    /* ZONE_ALIGN = 8MB */
-    start = roundup(start, ZONE_ALIGN);
+    <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;Initmem setup node %d [mem %#010Lx-%#010Lx]</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+           <span class="n">nid</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
 
-    printk(KERN_INFO &quot;Initmem setup node %d [mem %#010Lx-%#010Lx]\n&quot;,
-           nid, start, end - 1);
+    <span class="cm">/*
+</span><span class="cm">     * Allocate node data.  Try node-local memory and then any node.
+</span><span class="cm">     * Never allocate in DMA zone.
+</span><span class="cm">     */</span>
+    <span class="n">nd_pa</span> <span class="o">=</span> <span class="n">memblock_alloc_nid</span><span class="p">(</span><span class="n">nd_size</span><span class="p">,</span> <span class="n">SMP_CACHE_BYTES</span><span class="p">,</span> <span class="n">nid</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">nd_pa</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">nd_pa</span> <span class="o">=</span> <span class="n">__memblock_alloc_base</span><span class="p">(</span><span class="n">nd_size</span><span class="p">,</span> <span class="n">SMP_CACHE_BYTES</span><span class="p">,</span>
+                          <span class="n">MEMBLOCK_ALLOC_ACCESSIBLE</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">nd_pa</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">pr_err</span><span class="p">(</span><span class="s">&#34;Cannot find %zu bytes in node %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                   <span class="n">nd_size</span><span class="p">,</span> <span class="n">nid</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">nd</span> <span class="o">=</span> <span class="n">__va</span><span class="p">(</span><span class="n">nd_pa</span><span class="p">);</span>
 
-    /*
-     * Allocate node data.  Try node-local memory and then any node.
-     * Never allocate in DMA zone.
-     */
-    nd_pa = memblock_alloc_nid(nd_size, SMP_CACHE_BYTES, nid);
-    if (!nd_pa) {
-        nd_pa = __memblock_alloc_base(nd_size, SMP_CACHE_BYTES,
-                          MEMBLOCK_ALLOC_ACCESSIBLE);
-        if (!nd_pa) {
-            pr_err(&quot;Cannot find %zu bytes in node %d\n&quot;,
-                   nd_size, nid);
-            return;
-        }
-    }
-    nd = __va(nd_pa);
+    <span class="cm">/* report and initialize */</span>
+    <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;  NODE_DATA [mem %#010Lx-%#010Lx]</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+           <span class="n">nd_pa</span><span class="p">,</span> <span class="n">nd_pa</span> <span class="o">+</span> <span class="n">nd_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">tnid</span> <span class="o">=</span> <span class="n">early_pfn_to_nid</span><span class="p">(</span><span class="n">nd_pa</span> <span class="o">&gt;&gt;</span> <span class="n">PAGE_SHIFT</span><span class="p">);</span>
+    <span class="cm">/* 分配node_data的节点和当前内存节点不一致 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">tnid</span> <span class="o">!=</span> <span class="n">nid</span><span class="p">)</span>
+        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_INFO</span> <span class="s">&#34;    NODE_DATA(%d) on node %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">tnid</span><span class="p">);</span>
 
-    /* report and initialize */
-    printk(KERN_INFO &quot;  NODE_DATA [mem %#010Lx-%#010Lx]\n&quot;,
-           nd_pa, nd_pa + nd_size - 1);
-    tnid = early_pfn_to_nid(nd_pa &gt;&gt; PAGE_SHIFT);
-    /* 分配node_data的节点和当前内存节点不一致 */
-    if (tnid != nid)
-        printk(KERN_INFO &quot;    NODE_DATA(%d) on node %d\n&quot;, nid, tnid);
+    <span class="n">node_data</span><span class="p">[</span><span class="n">nid</span><span class="p">]</span> <span class="o">=</span> <span class="n">nd</span><span class="p">;</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pg_data_t</span><span class="p">));</span>
+    <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_id</span> <span class="o">=</span> <span class="n">nid</span><span class="p">;</span>
+    <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_start_pfn</span> <span class="o">=</span> <span class="n">start</span> <span class="o">&gt;&gt;</span> <span class="n">PAGE_SHIFT</span><span class="p">;</span>
+    <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_spanned_pages</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">PAGE_SHIFT</span><span class="p">;</span>
 
-    node_data[nid] = nd;
-    memset(NODE_DATA(nid), 0, sizeof(pg_data_t));
-    NODE_DATA(nid)-&gt;node_id = nid;
-    NODE_DATA(nid)-&gt;node_start_pfn = start &gt;&gt; PAGE_SHIFT;
-    NODE_DATA(nid)-&gt;node_spanned_pages = (end - start) &gt;&gt; PAGE_SHIFT;
-
-    node_set_online(nid);
-}
-</code></pre>
-
+    <span class="n">node_set_online</span><span class="p">(</span><span class="n">nid</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="1-2-2-free-area-init-node">1.2.2. free_area_init_node</h3>
 
 <p><code>setup_node_data</code> 函数只会初始化 <strong>pg_data_t</strong> 的部分成员变量(节点信息，起始页框信息)，其余成员变量的初始化在函数 <code>free_area_init_node</code> 完成，两个函数的调用路径的先后顺序如下：</p>
@@ -413,54 +536,102 @@ static void __init setup_node_data(int nid, u64 start, u64 end)
 </ul>
 
 <p><code>setup_node_data</code> 使用的NUMA信息来自ACPI表或者BIOS-e820，可能包含空洞，PFN的范围不准确； <code>free_area_init_node</code> 使用的内存信息来自 <strong>struct memblock memblock</strong> 变量，用 <strong>memblock</strong> 的信息对NUMA信息进一步修正( <strong>memblock</strong> 定义在 <em>mm/memblock.c</em> 中，保存始化阶段通过 <code>memblock_reserve</code> 、 <code>memblock_set_node</code> 函数保留的内存信息)：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/*
+</span><span class="cm"> 执行上面的函数路径时，
+</span><span class="cm"> @zones_size = NULL
+</span><span class="cm"> @zholes_size = NULL */</span>
+<span class="kt">void</span> <span class="n">__paginginit</span> <span class="nf">free_area_init_node</span><span class="p">(</span><span class="kt">int</span> <span class="n">nid</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">zones_size</span><span class="p">,</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_start_pfn</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">zholes_size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* 获取指定nid的pg_data_t指针 */</span>
+    <span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span> <span class="o">=</span> <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">start_pfn</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">end_pfn</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-<pre><code class="language-C">/*
- 执行上面的函数路径时，
- @zones_size = NULL
- @zholes_size = NULL */
-void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
-        unsigned long node_start_pfn, unsigned long *zholes_size)
-{
-    /* 获取指定nid的pg_data_t指针 */
-    pg_data_t *pgdat = NODE_DATA(nid);
-    unsigned long start_pfn = 0;
-    unsigned long end_pfn = 0;
+    <span class="cm">/* pg_data_t should be reset to zero when it&#39;s allocated */</span>
+    <span class="cm">/* struct pglist_data *node_data[MAX_NUMNODES] */</span>
+    <span class="n">WARN_ON</span><span class="p">(</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">nr_zones</span> <span class="o">||</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">classzone_idx</span><span class="p">);</span>
 
-    /* pg_data_t should be reset to zero when it's allocated */
-    /* struct pglist_data *node_data[MAX_NUMNODES] */
-    WARN_ON(pgdat-&gt;nr_zones || pgdat-&gt;classzone_idx);
-
-    pgdat-&gt;node_id = nid;
-    pgdat-&gt;node_start_pfn = node_start_pfn;
-#ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP    //true
-    /*
-     根据struct memblock memblock提供的信息获取给定
-     node的起始页框。如果节点没有可用内存，起始
-     和结束页框号都设置为0，并输出警告信息 */
-    get_pfn_range_for_nid(nid, &amp;start_pfn, &amp;end_pfn);
-#endif
-    /*
-     计算node中的所有页面数
-     pgdata-&gt;node_spanned_pages = 页面总数
-     pgdata-&gt;node_present_pages = 总数 - hole */
-    calculate_node_totalpages(pgdat, start_pfn, end_pfn,
-                  zones_size, zholes_size);
-    /* x86_64下函数为空 */
-    alloc_node_mem_map(pgdat);
-#ifdef CONFIG_FLAT_NODE_MEM_MAP     //false
-    printk(KERN_DEBUG &quot;free_area_init_node: node %d, pgdat %08lx, node_mem_map %08lx\n&quot;,
-        nid, (unsigned long)pgdat,
-        (unsigned long)pgdat-&gt;node_mem_map);
-#endif
-    /*
-     初始化pgdata中的成员变量，以及包含的每个zone的信息
-     @zones_size = NULL
-     @zholes_size = NULL */
-    free_area_init_core(pgdat, start_pfn, end_pfn,
-                zones_size, zholes_size);
-}
-</code></pre>
-
+    <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_id</span> <span class="o">=</span> <span class="n">nid</span><span class="p">;</span>
+    <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_start_pfn</span> <span class="o">=</span> <span class="n">node_start_pfn</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP    </span><span class="c1">//true
+</span><span class="c1"></span>    <span class="cm">/*
+</span><span class="cm">     根据struct memblock memblock提供的信息获取给定
+</span><span class="cm">     node的起始页框。如果节点没有可用内存，起始
+</span><span class="cm">     和结束页框号都设置为0，并输出警告信息 */</span>
+    <span class="n">get_pfn_range_for_nid</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">start_pfn</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">end_pfn</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     计算node中的所有页面数
+</span><span class="cm">     pgdata-&gt;node_spanned_pages = 页面总数
+</span><span class="cm">     pgdata-&gt;node_present_pages = 总数 - hole */</span>
+    <span class="n">calculate_node_totalpages</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">start_pfn</span><span class="p">,</span> <span class="n">end_pfn</span><span class="p">,</span>
+                  <span class="n">zones_size</span><span class="p">,</span> <span class="n">zholes_size</span><span class="p">);</span>
+    <span class="cm">/* x86_64下函数为空 */</span>
+    <span class="n">alloc_node_mem_map</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
+<span class="cp">#ifdef CONFIG_FLAT_NODE_MEM_MAP     </span><span class="c1">//false
+</span><span class="c1"></span>    <span class="n">printk</span><span class="p">(</span><span class="n">KERN_DEBUG</span> <span class="s">&#34;free_area_init_node: node %d, pgdat %08lx, node_mem_map %08lx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+        <span class="n">nid</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="n">pgdat</span><span class="p">,</span>
+        <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_mem_map</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     初始化pgdata中的成员变量，以及包含的每个zone的信息
+</span><span class="cm">     @zones_size = NULL
+</span><span class="cm">     @zholes_size = NULL */</span>
+    <span class="n">free_area_init_core</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">start_pfn</span><span class="p">,</span> <span class="n">end_pfn</span><span class="p">,</span>
+                <span class="n">zones_size</span><span class="p">,</span> <span class="n">zholes_size</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>至此，变量 <strong>node_data</strong> 初始化完毕，包含的节点信息供后续的内存初始化操作使用。</p>
 
 <h2 id="1-3-zonelist的初始化">1.3. zonelist的初始化</h2>
@@ -468,56 +639,105 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 <p><code>start_kernel</code> 调用 <code>build_all_zonelists</code> 初始化内存区域表，即 <strong>pg_data_t</strong> 的 <strong>node_zonelists</strong> 成员。</p>
 
 <p><code>build_all_zonelists</code> 调用 <code>__build_all_zonelists</code> ，后者分别调用 <code>build_zonelists</code> 和 <code>build_zonelist_cache</code> 完成zonelist的初始化：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">int</span> <span class="nf">__build_all_zonelists</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">nid</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">cpu</span><span class="p">;</span>
+    <span class="n">pg_data_t</span> <span class="o">*</span><span class="n">self</span> <span class="o">=</span> <span class="n">data</span><span class="p">;</span>
 
-<pre><code class="language-C">static int __build_all_zonelists(void *data)
-{
-    int nid;
-    int cpu;
-    pg_data_t *self = data;
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>    <span class="cm">/* node_load数组记录每个内存节点的负载情况 */</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">node_load</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">node_load</span><span class="p">));</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     self指针在响应内存的热插拔时为pg_data_t，
+</span><span class="cm">     否则为NULL。这个分支用来执行内存的热插拔操作 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">self</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">node_online</span><span class="p">(</span><span class="n">self</span><span class="o">-&gt;</span><span class="n">node_id</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">build_zonelists</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+        <span class="n">build_zonelist_cache</span><span class="p">(</span><span class="n">self</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/* 为每个在线的节点创建zonelist，以及zlcache */</span>
+    <span class="n">for_each_online_node</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span> <span class="o">=</span> <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">);</span>
 
-#ifdef CONFIG_NUMA
-    /* node_load数组记录每个内存节点的负载情况 */
-    memset(node_load, 0, sizeof(node_load));
-#endif
-    /*
-     self指针在响应内存的热插拔时为pg_data_t，
-     否则为NULL。这个分支用来执行内存的热插拔操作 */
-    if (self &amp;&amp; !node_online(self-&gt;node_id)) {
-        build_zonelists(self);
-        build_zonelist_cache(self);
-    }
-    /* 为每个在线的节点创建zonelist，以及zlcache */
-    for_each_online_node(nid) {
-        pg_data_t *pgdat = NODE_DATA(nid);
+        <span class="n">build_zonelists</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
+        <span class="n">build_zonelist_cache</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
+    <span class="p">}</span>
 
-        build_zonelists(pgdat);
-        build_zonelist_cache(pgdat);
-    }
+    <span class="n">for_each_possible_cpu</span><span class="p">(</span><span class="n">cpu</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">setup_pageset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">per_cpu</span><span class="p">(</span><span class="n">boot_pageset</span><span class="p">,</span> <span class="n">cpu</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
 
-    for_each_possible_cpu(cpu) {
-        setup_pageset(&amp;per_cpu(boot_pageset, cpu), 0);
+<span class="cp">#ifdef CONFIG_HAVE_MEMORYLESS_NODES   </span><span class="c1">// x86默认为false
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">cpu_online</span><span class="p">(</span><span class="n">cpu</span><span class="p">))</span>
+            <span class="n">set_cpu_numa_mem</span><span class="p">(</span><span class="n">cpu</span><span class="p">,</span> <span class="n">local_memory_node</span><span class="p">(</span><span class="n">cpu_to_node</span><span class="p">(</span><span class="n">cpu</span><span class="p">)));</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="p">}</span>
 
-#ifdef CONFIG_HAVE_MEMORYLESS_NODES   // x86默认为false
-        if (cpu_online(cpu))
-            set_cpu_numa_mem(cpu, local_memory_node(cpu_to_node(cpu)));
-#endif
-    }
-
-    return 0;
-}
-</code></pre>
-
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><strong>struct zonelist</strong> 结构如下，</p>
-
-<pre><code class="language-C">struct zonelist {
-    struct zonelist_cache *zlcache_ptr;          // NULL or &amp;zlcache
-    struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];
-#ifdef CONFIG_NUMA
-    struct zonelist_cache zlcache;               // optional ...
-#endif
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">zonelist</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">zonelist_cache</span> <span class="o">*</span><span class="n">zlcache_ptr</span><span class="p">;</span>          <span class="c1">// NULL or &amp;zlcache
+</span><span class="c1"></span>    <span class="k">struct</span> <span class="n">zoneref</span> <span class="n">_zonerefs</span><span class="p">[</span><span class="n">MAX_ZONES_PER_ZONELIST</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>    <span class="k">struct</span> <span class="n">zonelist_cache</span> <span class="n">zlcache</span><span class="p">;</span>               <span class="c1">// optional ...
+</span><span class="c1"></span><span class="cp">#endif
+</span><span class="cp"></span><span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><strong>MAX_ZONES_PER_ZONELIST</strong> 为系统中的节点数和zone类型数的乘积，假如系统中共有2各节点，zone有3种类型(DMA，DMA32，NORMAL)，则  <strong>_zonerefs</strong>  的长度为6 + 1 = 7。数组的最后一个元素总是设置为空，作为结束标志。</p>
 
 <h3 id="1-3-1-build-zonelists">1.3.1. build_zonelists</h3>
@@ -535,140 +755,264 @@ void __paginginit free_area_init_node(int nid, unsigned long *zones_size,
 </ul>
 
 <p>zonelist的备选node通过函数 <code>find_next_best_node</code> 确定：备选node不能已经包含在zonelist中，应该是距离当前节点次近的节点，不属于任何CPU的节点更佳——这些节点没有分配内存的压力。距离根据距离数组计算——数组中包含系统中所有节点间的距离。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">build_zonelists</span><span class="p">(</span><span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">load</span><span class="p">;</span>
+    <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">i</span><span class="p">;</span>
+    <span class="n">nodemask_t</span> <span class="n">used_mask</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">local_node</span><span class="p">,</span> <span class="n">prev_node</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">order</span> <span class="o">=</span> <span class="n">current_zonelist_order</span><span class="p">;</span>
 
-<pre><code class="language-C">static void build_zonelists(pg_data_t *pgdat)
-{
-    int j, node, load;
-    enum zone_type i;
-    nodemask_t used_mask;
-    int local_node, prev_node;
-    struct zonelist *zonelist;
-    int order = current_zonelist_order;
+    <span class="cm">/* initialize zonelists */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">MAX_ZONELISTS</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">zonelist</span> <span class="o">=</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_zonelists</span> <span class="o">+</span> <span class="n">i</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         为了加速zonelist的读取操作，_zonerefs包含
+</span><span class="cm">         正在读取的zone的索引，避免访问大的数据结构 */</span>
+        <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">zone</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">zone_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
 
-    /* initialize zonelists */
-    for (i = 0; i &lt; MAX_ZONELISTS; i++) {
-        zonelist = pgdat-&gt;node_zonelists + i;
-        /*
-         为了加速zonelist的读取操作，_zonerefs包含
-         正在读取的zone的索引，避免访问大的数据结构 */
-        zonelist-&gt;_zonerefs[0].zone = NULL;
-        zonelist-&gt;_zonerefs[0].zone_idx = 0;
-    }
+    <span class="cm">/* NUMA-aware ordering of nodes */</span>
+    <span class="n">local_node</span> <span class="o">=</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_id</span><span class="p">;</span>
+    <span class="n">load</span> <span class="o">=</span> <span class="n">nr_online_nodes</span><span class="p">;</span>
+    <span class="n">prev_node</span> <span class="o">=</span> <span class="n">local_node</span><span class="p">;</span>
+    <span class="n">nodes_clear</span><span class="p">(</span><span class="n">used_mask</span><span class="p">);</span>
+    <span class="cm">/*
+</span><span class="cm">     代码中此变量的注释写道：
+</span><span class="cm">     创建zonelist时会按照zone type从高到低的顺序
+</span><span class="cm">     排列，可能出现高位内存即normal内存消耗殆尽，而
+</span><span class="cm">     DMA内存还没有使用的情况，导致页面的分配操作被
+</span><span class="cm">     较远的节点响应。
+</span><span class="cm">     结合下面的代码，这个数组用来记录创建zonelist时
+</span><span class="cm">     每个node出现的先后顺序，按照和当前节点的距离
+</span><span class="cm">     降序排列。 */</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">node_order</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">node_order</span><span class="p">));</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-    /* NUMA-aware ordering of nodes */
-    local_node = pgdat-&gt;node_id;
-    load = nr_online_nodes;
-    prev_node = local_node;
-    nodes_clear(used_mask);
-    /*
-     代码中此变量的注释写道：
-     创建zonelist时会按照zone type从高到低的顺序
-     排列，可能出现高位内存即normal内存消耗殆尽，而
-     DMA内存还没有使用的情况，导致页面的分配操作被
-     较远的节点响应。
-     结合下面的代码，这个数组用来记录创建zonelist时
-     每个node出现的先后顺序，按照和当前节点的距离
-     降序排列。 */
-    memset(node_order, 0, sizeof(node_order));
-    j = 0;
+    <span class="cm">/* 寻找可以作为备选节点的node */</span>
+    <span class="k">while</span> <span class="p">((</span><span class="n">node</span> <span class="o">=</span> <span class="n">find_next_best_node</span><span class="p">(</span><span class="n">local_node</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">used_mask</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         * We don&#39;t want to pressure a particular node.
+</span><span class="cm">         * So adding penalty to the first node in same
+</span><span class="cm">         * distance group to make it round-robin.
+</span><span class="cm">         */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">node_distance</span><span class="p">(</span><span class="n">local_node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="o">!=</span>
+            <span class="n">node_distance</span><span class="p">(</span><span class="n">local_node</span><span class="p">,</span> <span class="n">prev_node</span><span class="p">))</span>
+            <span class="n">node_load</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">;</span>
 
-    /* 寻找可以作为备选节点的node */
-    while ((node = find_next_best_node(local_node, &amp;used_mask)) &gt;= 0) {
-        /*
-         * We don't want to pressure a particular node.
-         * So adding penalty to the first node in same
-         * distance group to make it round-robin.
-         */
-        if (node_distance(local_node, node) !=
-            node_distance(local_node, prev_node))
-            node_load[node] = load;
-
-        prev_node = node;
-        /* load供find_next_best_node函数寻找下一个备选节点
-           时作为参考依据 */
-        load--;
-        if (order == ZONELIST_ORDER_NODE)
-            /*
-             zonelist首先按照节点的距离排序，然后按照节点内
-             zone类型排序。这种情况能够保证最大局部性：normal
-             内存消耗完之后，继续消耗本节点内的DMA内存。最后
-             才会转向其他的节点，但是可能会耗尽DMA内存。 */
-            build_zonelists_in_node_order(pgdat, node);
-        else
-            node_order[j++] = node; /* remember order */
-    }
-    /*
-     根据node_order数组按照距离由小到大添加所有节点
-     同一类型的zone，这种方式可以避免耗尽DMA内存 */
-    if (order == ZONELIST_ORDER_ZONE) {
-        /* calculate node order -- i.e., DMA last! */
-        build_zonelists_in_zone_order(pgdat, j);
-    }
-    /*
-     创建支持GFP_THISNODE的zonelist，即没有备选节点的
-     node_zonelists[1]。这种情况下，系统为非NUMA，只
-     需要将节点0添加到zonelist两种即可 */
-    build_thisnode_zonelists(pgdat);
-}
-
-</code></pre>
-
+        <span class="n">prev_node</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span>
+        <span class="cm">/* load供find_next_best_node函数寻找下一个备选节点
+</span><span class="cm">           时作为参考依据 */</span>
+        <span class="n">load</span><span class="o">--</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">order</span> <span class="o">==</span> <span class="n">ZONELIST_ORDER_NODE</span><span class="p">)</span>
+            <span class="cm">/*
+</span><span class="cm">             zonelist首先按照节点的距离排序，然后按照节点内
+</span><span class="cm">             zone类型排序。这种情况能够保证最大局部性：normal
+</span><span class="cm">             内存消耗完之后，继续消耗本节点内的DMA内存。最后
+</span><span class="cm">             才会转向其他的节点，但是可能会耗尽DMA内存。 */</span>
+            <span class="n">build_zonelists_in_node_order</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">node</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="n">node_order</span><span class="p">[</span><span class="n">j</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="p">;</span> <span class="cm">/* remember order */</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     根据node_order数组按照距离由小到大添加所有节点
+</span><span class="cm">     同一类型的zone，这种方式可以避免耗尽DMA内存 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">order</span> <span class="o">==</span> <span class="n">ZONELIST_ORDER_ZONE</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* calculate node order -- i.e., DMA last! */</span>
+        <span class="n">build_zonelists_in_zone_order</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">j</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     创建支持GFP_THISNODE的zonelist，即没有备选节点的
+</span><span class="cm">     node_zonelists[1]。这种情况下，系统为非NUMA，只
+</span><span class="cm">     需要将节点0添加到zonelist两种即可 */</span>
+    <span class="n">build_thisnode_zonelists</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>可以看到，创建zonelist时，有两种策略，一种为了保证最大程度的局部性，即 <code>build_zonelists_in_node_order</code> ；一种为了避免DMA内存被耗尽，即 <code>build_zonelists_in_zone_order</code> 。两种策略可以通过grub参数“numa_zonelist_order”设置，也可以通过sysctl设置。</p>
 
 <h4 id="1-3-1-1-build-zonelists-in-node-order">1.3.1.1. build_zonelists_in_node_order</h4>
 
 <p><code>build_zonelists_in_node_order</code> 找到传入的 <strong>pgdata</strong> 的 <strong>node_zonelists[0]</strong> 中第一个没有设置(为NULL)的 <strong>_zonerefs</strong> ，即 <strong>_zonerefs</strong> 中的最后一个元素，然后将 <strong>zonelist</strong> 中包含的所有zone按照类型从高到低的顺序添加到 <strong>_zonerefs</strong> 中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">build_zonelists_in_node_order</span><span class="p">(</span><span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">,</span> <span class="kt">int</span> <span class="n">node</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">j</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">;</span>
 
-<pre><code class="language-C">static void build_zonelists_in_node_order(pg_data_t *pgdat, int node)
-{
-    int j;
-    struct zonelist *zonelist;
-
-    zonelist = &amp;pgdat-&gt;node_zonelists[0];
-    /* 获取_zonerefs中最后一个元素的索引j */
-    for (j = 0; zonelist-&gt;_zonerefs[j].zone != NULL; j++)
-        ;
-    /* 将zonelist中的所有zone按照类型由高到低的顺序添加到
-       _zonerefs中从j开始的位置 */
-    j = build_zonelists_node(NODE_DATA(node), zonelist, j);
-    /* 设置_zonerefs中的最后一个元素为空，作为结束标志 */
-    zonelist-&gt;_zonerefs[j].zone = NULL;
-    zonelist-&gt;_zonerefs[j].zone_idx = 0;
-}
-</code></pre>
-
+    <span class="n">zonelist</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_zonelists</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="cm">/* 获取_zonerefs中最后一个元素的索引j */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">zone</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+        <span class="p">;</span>
+    <span class="cm">/* 将zonelist中的所有zone按照类型由高到低的顺序添加到
+</span><span class="cm">       _zonerefs中从j开始的位置 */</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">build_zonelists_node</span><span class="p">(</span><span class="n">NODE_DATA</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">zonelist</span><span class="p">,</span> <span class="n">j</span><span class="p">);</span>
+    <span class="cm">/* 设置_zonerefs中的最后一个元素为空，作为结束标志 */</span>
+    <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">zone</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">zone_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="1-3-1-2-build-zonelists-in-zone-order">1.3.1.2. build_zonelists_in_zone_order</h4>
 
 <p><code>build_zonelists_in_zone_order</code> 则根据 <strong>node_order</strong> 数组中按照距当前节点的距离保存的内存节点先将同一类型的每个节点的所有zone添加，然后添加其他类型的zone，按照类型从高到低的顺序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">build_zonelists_in_zone_order</span><span class="p">(</span><span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nr_nodes</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">pos</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">node</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">zone_type</span><span class="p">;</span>      <span class="cm">/* needs to be signed */</span>
+    <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">z</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">;</span>
 
-<pre><code class="language-C">static void build_zonelists_in_zone_order(pg_data_t *pgdat, int nr_nodes)
-{
-    int pos, j, node;
-    int zone_type;      /* needs to be signed */
-    struct zone *z;
-    struct zonelist *zonelist;
-
-    zonelist = &amp;pgdat-&gt;node_zonelists[0];
-    pos = 0;
-    /* 按照zone类型从高到底的顺序 */
-    for (zone_type = MAX_NR_ZONES - 1; zone_type &gt;= 0; zone_type--) {
-        for (j = 0; j &lt; nr_nodes; j++) {
-            node = node_order[j];
-            z = &amp;NODE_DATA(node)-&gt;node_zones[zone_type];
-            /* zone有效 */
-            if (populated_zone(z)) {
-                zoneref_set_zone(z,
-                    &amp;zonelist-&gt;_zonerefs[pos++]);
-                check_highest_zone(zone_type);
-            }
-        }
-    }
-    /* 设置最后一个_zonerefs为空，作为结束标志 */
-    zonelist-&gt;_zonerefs[pos].zone = NULL;
-    zonelist-&gt;_zonerefs[pos].zone_idx = 0;
-}
-</code></pre>
-
+    <span class="n">zonelist</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_zonelists</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="cm">/* 按照zone类型从高到底的顺序 */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">zone_type</span> <span class="o">=</span> <span class="n">MAX_NR_ZONES</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">zone_type</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">zone_type</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nr_nodes</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node_order</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">NODE_DATA</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_zones</span><span class="p">[</span><span class="n">zone_type</span><span class="p">];</span>
+            <span class="cm">/* zone有效 */</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">populated_zone</span><span class="p">(</span><span class="n">z</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">zoneref_set_zone</span><span class="p">(</span><span class="n">z</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">pos</span><span class="o">++</span><span class="p">]);</span>
+                <span class="n">check_highest_zone</span><span class="p">(</span><span class="n">zone_type</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="cm">/* 设置最后一个_zonerefs为空，作为结束标志 */</span>
+    <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">zone</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">zone_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="1-3-1-3-示例说明">1.3.1.3. 示例说明</h4>
 
 <p>假设系统中有两个内存节点0和1，每个节点都有ZONE_DMA，ZONE_DMA32，ZONE_NORMAL三种类型的区域，则NODE_DATA(0)的<strong>zonelist-&gt;_zonerefs</strong>在两种情况下初始化后分别为：</p>
@@ -689,14 +1033,22 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <p><code>build_zonelist_cache</code> 初始化 <strong>struct zonelist</strong> 中的剩余两个成员变量： <strong>zlcache_ptr</strong> 和 <strong>zlcache</strong> 。</p>
 
 <p><strong>struct zonelist_cache</strong> 缓存每个zonelist的关键信息，以便在<code>get_page_from_freelist()</code>函数中扫描空闲页面时减小高速缓存的footprint。</p>
-
-<pre><code class="language-C">struct zonelist_cache {
-    unsigned short z_to_n[MAX_ZONES_PER_ZONELIST];      /* zone-&gt;nid */
-    DECLARE_BITMAP(fullzones, MAX_ZONES_PER_ZONELIST);  /* zone full? */
-    unsigned long last_full_zap;        /* when last zap'd (jiffies) */
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">zonelist_cache</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">short</span> <span class="n">z_to_n</span><span class="p">[</span><span class="n">MAX_ZONES_PER_ZONELIST</span><span class="p">];</span>      <span class="cm">/* zone-&gt;nid */</span>
+    <span class="n">DECLARE_BITMAP</span><span class="p">(</span><span class="n">fullzones</span><span class="p">,</span> <span class="n">MAX_ZONES_PER_ZONELIST</span><span class="p">);</span>  <span class="cm">/* zone full? */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">last_full_zap</span><span class="p">;</span>        <span class="cm">/* when last zap&#39;d (jiffies) */</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>位图 <strong>fullzones</strong> 追踪上次zero&rsquo;d fullzones之后，zonelist中缺少空闲内存的zone信息。</p>
 
 <p>数组 <strong>z_to_n[]</strong> 将zonelist中的每个zone映射到所属的节点的ID，以便快速确认该节点是否包含在当前进程的 <strong>mems_allowed</strong> 中。</p>
@@ -710,27 +1062,48 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <h4 id="1-3-2-2-zlcache的初始化">1.3.2.2. zlcache的初始化</h4>
 
 <p>函数 <code>build_zonelist_cache</code> 完成zlcache的初始化，</p>
-
-<pre><code class="language-C">static void build_zonelist_cache(pg_data_t *pgdat)
-{
-    struct zonelist *zonelist;
-    struct zonelist_cache *zlc;
-    struct zoneref *z;
-    /*
-     只需要初始化node_zonelists[0]，即有备选节点的
-     zonelist；没有备选节点的zonelist不需要zlcache
-     来减小zonelist的footprint */
-    zonelist = &amp;pgdat-&gt;node_zonelists[0];
-    /* zlcache_ptr指向自身的zlcache即可 */
-    zonelist-&gt;zlcache_ptr = zlc = &amp;zonelist-&gt;zlcache;
-    /* 初始化fullzones位图 */
-    bitmap_zero(zlc-&gt;fullzones, MAX_ZONES_PER_ZONELIST);
-    /* 将zonelist中的每个zone所属的节点信息保存在z_to_n[] */
-    for (z = zonelist-&gt;_zonerefs; z-&gt;zone; z++)
-        zlc-&gt;z_to_n[z - zonelist-&gt;_zonerefs] = zonelist_node_idx(z);
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">build_zonelist_cache</span><span class="p">(</span><span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zonelist_cache</span> <span class="o">*</span><span class="n">zlc</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zoneref</span> <span class="o">*</span><span class="n">z</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     只需要初始化node_zonelists[0]，即有备选节点的
+</span><span class="cm">     zonelist；没有备选节点的zonelist不需要zlcache
+</span><span class="cm">     来减小zonelist的footprint */</span>
+    <span class="n">zonelist</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_zonelists</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="cm">/* zlcache_ptr指向自身的zlcache即可 */</span>
+    <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">zlcache_ptr</span> <span class="o">=</span> <span class="n">zlc</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">zlcache</span><span class="p">;</span>
+    <span class="cm">/* 初始化fullzones位图 */</span>
+    <span class="n">bitmap_zero</span><span class="p">(</span><span class="n">zlc</span><span class="o">-&gt;</span><span class="n">fullzones</span><span class="p">,</span> <span class="n">MAX_ZONES_PER_ZONELIST</span><span class="p">);</span>
+    <span class="cm">/* 将zonelist中的每个zone所属的节点信息保存在z_to_n[] */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">z</span> <span class="o">=</span> <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">;</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">zone</span><span class="p">;</span> <span class="n">z</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">zlc</span><span class="o">-&gt;</span><span class="n">z_to_n</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">]</span> <span class="o">=</span> <span class="n">zonelist_node_idx</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="1-3-3-zonelist的额外说明">1.3.3. zonelist的额外说明</h3>
 
 <p><strong>struct zonelist_cache</strong> 的成员属于 <strong>struct zonelist</strong> 。但是， <strong>MPOL_BIND</strong> 内存策略的zonelist结构体长度不同，通常更短—— <strong>MPOL_BIND</strong> 策略不需要 <strong>zonelist_cache</strong> 成员，因此我们将固定长度的成员放在zonelist结构体的起始位置，以 <strong>zonelist_cache</strong> 结尾。</p>
@@ -751,105 +1124,201 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <p>根据物理内存的使用方式，内核将物理内存分为多个内存区域(zone)，每个zone用 <strong>struct zone</strong> 来描述。以x86_64架构为例，内核包括ZONE_DMA，ZONE_DMA32，ZONE_NORMAL，ZONE_MOVABLE四种。</p>
 
 <p>定义在 <em>include/linux/mmzone.h</em> 中的 <strong>zone_type</strong> ：</p>
-
-<pre><code class="language-C">enum zone_type {
-#ifdef CONFIG_ZONE_DMA
-    /*
-     用于不能寻址所有内存地址的DMA设备
-     x86下为 &lt;16MB的地址 */
-    ZONE_DMA,
-#endif
-#ifdef CONFIG_ZONE_DMA32
-    /*
-     x86_64同时支持只能在16MB以下的地址空间
-     执行DMA操作的设备和可以在4GB以下的地址
-     空间执行DMA操作的32bit设备，因此需要
-     两个DMA内存区域 */
-    ZONE_DMA32,
-#endif
-    ZONE_NORMAL,
-#ifdef CONFIG_HIGHMEM
-    /*
-     只有内核将这些区域映射到自己的地址空间
-     后才能正常访问，比如i386下内核要访问
-     900MB以上的地址空间
-     32bit的x86架构，为高于896MB的所有物理
-     内存，其他架构为空 */
-    ZONE_HIGHMEM,
-#endif
-    ZONE_MOVABLE,
-    __MAX_NR_ZONES
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">enum</span> <span class="n">zone_type</span> <span class="p">{</span>
+<span class="cp">#ifdef CONFIG_ZONE_DMA
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     用于不能寻址所有内存地址的DMA设备
+</span><span class="cm">     x86下为 &lt;16MB的地址 */</span>
+    <span class="n">ZONE_DMA</span><span class="p">,</span>
+<span class="cp">#endif
+</span><span class="cp">#ifdef CONFIG_ZONE_DMA32
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     x86_64同时支持只能在16MB以下的地址空间
+</span><span class="cm">     执行DMA操作的设备和可以在4GB以下的地址
+</span><span class="cm">     空间执行DMA操作的32bit设备，因此需要
+</span><span class="cm">     两个DMA内存区域 */</span>
+    <span class="n">ZONE_DMA32</span><span class="p">,</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="n">ZONE_NORMAL</span><span class="p">,</span>
+<span class="cp">#ifdef CONFIG_HIGHMEM
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     只有内核将这些区域映射到自己的地址空间
+</span><span class="cm">     后才能正常访问，比如i386下内核要访问
+</span><span class="cm">     900MB以上的地址空间
+</span><span class="cm">     32bit的x86架构，为高于896MB的所有物理
+</span><span class="cm">     内存，其他架构为空 */</span>
+    <span class="n">ZONE_HIGHMEM</span><span class="p">,</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="n">ZONE_MOVABLE</span><span class="p">,</span>
+    <span class="n">__MAX_NR_ZONES</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="2-1-struct-zone">2.1. struct zone</h2>
 
 <p>Linux内核用 <strong>struct zone</strong> 描述内存区域：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">zone</span> <span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">watermark</span><span class="p">[</span><span class="n">NR_WMARK</span><span class="p">];</span>
+    <span class="kt">long</span> <span class="n">lowmem_reserve</span><span class="p">[</span><span class="n">MAX_NR_ZONES</span><span class="p">];</span>
 
-<pre><code class="language-C">struct zone {
-    unsigned long watermark[NR_WMARK];
-    long lowmem_reserve[MAX_NR_ZONES];
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>    <span class="kt">int</span> <span class="n">node</span><span class="p">;</span>  <span class="cm">/* zone所属的内存节点 */</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">inactive_ratio</span><span class="p">;</span>
 
-#ifdef CONFIG_NUMA
-    int node;  /* zone所属的内存节点 */
-#endif
-    unsigned int inactive_ratio;
+    <span class="k">struct</span> <span class="n">pglist_data</span> <span class="o">*</span><span class="n">zone_pgdat</span><span class="p">;</span>  <span class="cm">/* zone所属的pg_data_t */</span>
+    <span class="k">struct</span> <span class="n">per_cpu_pageset</span> <span class="n">__percpu</span> <span class="o">*</span><span class="n">pageset</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">dirty_balance_reserve</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     * zone reclaim becomes active if more unmapped pages exist.
+</span><span class="cm">     */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">min_unmapped_pages</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">min_slab_pages</span><span class="p">;</span>
+<span class="cp">#endif </span><span class="cm">/* CONFIG_NUMA */</span><span class="cp">
+</span><span class="cp"></span>    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">zone_start_pfn</span><span class="p">;</span> <span class="cm">/* zone的起始PFN */</span>
 
-    struct pglist_data *zone_pgdat;  /* zone所属的pg_data_t */
-    struct per_cpu_pageset __percpu *pageset;
-    unsigned long dirty_balance_reserve;
-#ifdef CONFIG_NUMA
-    /*
-     * zone reclaim becomes active if more unmapped pages exist.
-     */
-    unsigned long       min_unmapped_pages;
-    unsigned long       min_slab_pages;
-#endif /* CONFIG_NUMA */
-    unsigned long       zone_start_pfn; /* zone的起始PFN */
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">managed_pages</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">spanned_pages</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">present_pages</span><span class="p">;</span>
 
-    unsigned long       managed_pages;
-    unsigned long       spanned_pages;
-    unsigned long       present_pages;
+    <span class="k">const</span> <span class="kt">char</span>      <span class="o">*</span><span class="n">name</span><span class="p">;</span>  <span class="cm">/* zone的名称 */</span>
+    <span class="kt">int</span>         <span class="n">nr_migrate_reserve_block</span><span class="p">;</span>
 
-    const char      *name;  /* zone的名称 */
-    int         nr_migrate_reserve_block;
+    <span class="n">wait_queue_head_t</span>   <span class="o">*</span><span class="n">wait_table</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">wait_table_hash_nr_entries</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">wait_table_bits</span><span class="p">;</span>
 
-    wait_queue_head_t   *wait_table;
-    unsigned long       wait_table_hash_nr_entries;
-    unsigned long       wait_table_bits;
+    <span class="n">ZONE_PADDING</span><span class="p">(</span><span class="n">_pad1_</span><span class="p">)</span>
 
-    ZONE_PADDING(_pad1_)
+    <span class="cm">/* Write-intensive fields used from the page allocator */</span>
+    <span class="n">spinlock_t</span>      <span class="n">lock</span><span class="p">;</span>
 
-    /* Write-intensive fields used from the page allocator */
-    spinlock_t      lock;
+    <span class="cm">/* free areas of different sizes */</span>
+    <span class="k">struct</span> <span class="n">free_area</span>    <span class="n">free_area</span><span class="p">[</span><span class="n">MAX_ORDER</span><span class="p">];</span>
 
-    /* free areas of different sizes */
-    struct free_area    free_area[MAX_ORDER];
+    <span class="cm">/* zone flags, see below */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span>       <span class="n">flags</span><span class="p">;</span>
 
-    /* zone flags, see below */
-    unsigned long       flags;
+    <span class="n">ZONE_PADDING</span><span class="p">(</span><span class="n">_pad2_</span><span class="p">)</span>
+    <span class="cm">/* Fields commonly accessed by the page reclaim scanner */</span>
+    <span class="n">spinlock_t</span>      <span class="n">lru_lock</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">lruvec</span>       <span class="n">lruvec</span><span class="p">;</span>
 
-    ZONE_PADDING(_pad2_)
-    /* Fields commonly accessed by the page reclaim scanner */
-    spinlock_t      lru_lock;
-    struct lruvec       lruvec;
+    <span class="cm">/* Evictions &amp; activations on the inactive file list */</span>
+    <span class="n">atomic_long_t</span>       <span class="n">inactive_age</span><span class="p">;</span>
 
-    /* Evictions &amp; activations on the inactive file list */
-    atomic_long_t       inactive_age;
+    <span class="cm">/*
+</span><span class="cm">     * When free pages are below this point, additional steps are taken
+</span><span class="cm">     * when reading the number of free pages to avoid per-cpu counter
+</span><span class="cm">     * drift allowing watermarks to be breached
+</span><span class="cm">     */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">percpu_drift_mark</span><span class="p">;</span>
 
-    /*
-     * When free pages are below this point, additional steps are taken
-     * when reading the number of free pages to avoid per-cpu counter
-     * drift allowing watermarks to be breached
-     */
-    unsigned long percpu_drift_mark;
-
-    ZONE_PADDING(_pad3_)
-    /* Zone statistics */
-    atomic_long_t       vm_stat[NR_VM_ZONE_STAT_ITEMS];
-};
-</code></pre>
-
+    <span class="n">ZONE_PADDING</span><span class="p">(</span><span class="n">_pad3_</span><span class="p">)</span>
+    <span class="cm">/* Zone statistics */</span>
+    <span class="n">atomic_long_t</span>       <span class="n">vm_stat</span><span class="p">[</span><span class="n">NR_VM_ZONE_STAT_ITEMS</span><span class="p">];</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="2-1-1-struct-zone的成员变量">2.1.1. struct zone的成员变量</h3>
 
 <h4 id="2-1-1-1-watermark">2.1.1.1. watermark</h4>
@@ -938,121 +1407,236 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 </ul>
 
 <p><code>free_area_init_node</code> 主要初始化内存节点的信息，而 <code>free_area_init_core</code> 则初始化节点内的所有内存区域的信息，</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="n">__paginginit</span> <span class="nf">free_area_init_core</span><span class="p">(</span><span class="k">struct</span> <span class="n">pglist_data</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">,</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_start_pfn</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">node_end_pfn</span><span class="p">,</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">zones_size</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">zholes_size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">j</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nid</span> <span class="o">=</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_id</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">zone_start_pfn</span> <span class="o">=</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_start_pfn</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     resize用来支持内存的热插拔，这个函数在开启
+</span><span class="cm">     CONFIG_MEMORY_HOTPLUG时初始化pgdat中的
+</span><span class="cm">     node_size_lock自旋锁 */</span>
+    <span class="n">pgdat_resize_init</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
+<span class="cp">#ifdef CONFIG_NUMA_BALANCING
+</span><span class="cp"></span>    <span class="cm">/* 和内存负载均衡相关的参数，此处不多介绍 */</span>
+    <span class="n">spin_lock_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">numabalancing_migrate_lock</span><span class="p">);</span>
+    <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">numabalancing_migrate_nr_pages</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">numabalancing_migrate_next_window</span> <span class="o">=</span> <span class="n">jiffies</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     初始化两个等待队列：
+</span><span class="cm">     kswap_wait用来唤醒kswapd进程执行内存回收操作
+</span><span class="cm">     pfmemalloc_wait暂时不清楚用途 */</span>
+    <span class="n">init_waitqueue_head</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">kswapd_wait</span><span class="p">);</span>
+    <span class="n">init_waitqueue_head</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">pfmemalloc_wait</span><span class="p">);</span>
+    <span class="cm">/* 和cgroup相关的初始化 */</span>
+    <span class="n">pgdat_page_cgroup_init</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
 
-<pre><code class="language-C">static void __paginginit free_area_init_core(struct pglist_data *pgdat,
-        unsigned long node_start_pfn, unsigned long node_end_pfn,
-        unsigned long *zones_size, unsigned long *zholes_size)
-{
-    enum zone_type j;
-    int nid = pgdat-&gt;node_id;
-    unsigned long zone_start_pfn = pgdat-&gt;node_start_pfn;
-    int ret;
-    /*
-     resize用来支持内存的热插拔，这个函数在开启
-     CONFIG_MEMORY_HOTPLUG时初始化pgdat中的
-     node_size_lock自旋锁 */
-    pgdat_resize_init(pgdat);
-#ifdef CONFIG_NUMA_BALANCING
-    /* 和内存负载均衡相关的参数，此处不多介绍 */
-    spin_lock_init(&amp;pgdat-&gt;numabalancing_migrate_lock);
-    pgdat-&gt;numabalancing_migrate_nr_pages = 0;
-    pgdat-&gt;numabalancing_migrate_next_window = jiffies;
-#endif
-    /*
-     初始化两个等待队列：
-     kswap_wait用来唤醒kswapd进程执行内存回收操作
-     pfmemalloc_wait暂时不清楚用途 */
-    init_waitqueue_head(&amp;pgdat-&gt;kswapd_wait);
-    init_waitqueue_head(&amp;pgdat-&gt;pfmemalloc_wait);
-    /* 和cgroup相关的初始化 */
-    pgdat_page_cgroup_init(pgdat);
+    <span class="cm">/* 初始化pg_data_t中包含的每个zone的信息 */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">MAX_NR_ZONES</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span> <span class="o">=</span> <span class="n">pgdat</span><span class="o">-&gt;</span><span class="n">node_zones</span> <span class="o">+</span> <span class="n">j</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span><span class="p">,</span> <span class="n">realsize</span><span class="p">,</span> <span class="n">freesize</span><span class="p">,</span> <span class="n">memmap_pages</span><span class="p">;</span>
 
-    /* 初始化pg_data_t中包含的每个zone的信息 */
-    for (j = 0; j &lt; MAX_NR_ZONES; j++) {
-        struct zone *zone = pgdat-&gt;node_zones + j;
-        unsigned long size, realsize, freesize, memmap_pages;
+        <span class="n">size</span> <span class="o">=</span> <span class="n">zone_spanned_pages_in_node</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">node_start_pfn</span><span class="p">,</span>
+                          <span class="n">node_end_pfn</span><span class="p">,</span> <span class="n">zones_size</span><span class="p">);</span>
+        <span class="n">realsize</span> <span class="o">=</span> <span class="n">freesize</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">zone_absent_pages_in_node</span><span class="p">(</span><span class="n">nid</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span>
+                                <span class="n">node_start_pfn</span><span class="p">,</span>
+                                <span class="n">node_end_pfn</span><span class="p">,</span>
+                                <span class="n">zholes_size</span><span class="p">);</span>
 
-        size = zone_spanned_pages_in_node(nid, j, node_start_pfn,
-                          node_end_pfn, zones_size);
-        realsize = freesize = size - zone_absent_pages_in_node(nid, j,
-                                node_start_pfn,
-                                node_end_pfn,
-                                zholes_size);
+        <span class="cm">/*
+</span><span class="cm">         * Adjust freesize so that it accounts for how much memory
+</span><span class="cm">         * is used by this zone for memmap. This affects the watermark
+</span><span class="cm">         * and per-cpu initialisations
+</span><span class="cm">         */</span>
+        <span class="n">memmap_pages</span> <span class="o">=</span> <span class="n">calc_memmap_size</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">realsize</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">freesize</span> <span class="o">&gt;=</span> <span class="n">memmap_pages</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">freesize</span> <span class="o">-=</span> <span class="n">memmap_pages</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">memmap_pages</span><span class="p">)</span>
+                <span class="n">printk</span><span class="p">(</span><span class="n">KERN_DEBUG</span>
+                       <span class="s">&#34;  %s zone: %lu pages used for memmap</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                       <span class="n">zone_names</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">memmap_pages</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span>
+            <span class="n">printk</span><span class="p">(</span><span class="n">KERN_WARNING</span>
+                <span class="s">&#34;  %s zone: %lu pages exceeds freesize %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                <span class="n">zone_names</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">memmap_pages</span><span class="p">,</span> <span class="n">freesize</span><span class="p">);</span>
 
-        /*
-         * Adjust freesize so that it accounts for how much memory
-         * is used by this zone for memmap. This affects the watermark
-         * and per-cpu initialisations
-         */
-        memmap_pages = calc_memmap_size(size, realsize);
-        if (freesize &gt;= memmap_pages) {
-            freesize -= memmap_pages;
-            if (memmap_pages)
-                printk(KERN_DEBUG
-                       &quot;  %s zone: %lu pages used for memmap\n&quot;,
-                       zone_names[j], memmap_pages);
-        } else
-            printk(KERN_WARNING
-                &quot;  %s zone: %lu pages exceeds freesize %lu\n&quot;,
-                zone_names[j], memmap_pages, freesize);
+        <span class="cm">/* Account for reserved pages */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">freesize</span> <span class="o">&gt;</span> <span class="n">dma_reserve</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">freesize</span> <span class="o">-=</span> <span class="n">dma_reserve</span><span class="p">;</span>
+            <span class="n">printk</span><span class="p">(</span><span class="n">KERN_DEBUG</span> <span class="s">&#34;  %s zone: %lu pages reserved</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                    <span class="n">zone_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dma_reserve</span><span class="p">);</span>
+        <span class="p">}</span>
 
-        /* Account for reserved pages */
-        if (j == 0 &amp;&amp; freesize &gt; dma_reserve) {
-            freesize -= dma_reserve;
-            printk(KERN_DEBUG &quot;  %s zone: %lu pages reserved\n&quot;,
-                    zone_names[0], dma_reserve);
-        }
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_highmem_idx</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">nr_kernel_pages</span> <span class="o">+=</span> <span class="n">freesize</span><span class="p">;</span>
+        <span class="cm">/* Charge for highmem memmap if there are enough kernel pages */</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">nr_kernel_pages</span> <span class="o">&gt;</span> <span class="n">memmap_pages</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">nr_kernel_pages</span> <span class="o">-=</span> <span class="n">memmap_pages</span><span class="p">;</span>
+        <span class="n">nr_all_pages</span> <span class="o">+=</span> <span class="n">freesize</span><span class="p">;</span>
 
-        if (!is_highmem_idx(j))
-            nr_kernel_pages += freesize;
-        /* Charge for highmem memmap if there are enough kernel pages */
-        else if (nr_kernel_pages &gt; memmap_pages * 2)
-            nr_kernel_pages -= memmap_pages;
-        nr_all_pages += freesize;
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">spanned_pages</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">present_pages</span> <span class="o">=</span> <span class="n">realsize</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         * Set an approximate value for lowmem here, it will be adjusted
+</span><span class="cm">         * when the bootmem allocator frees pages into the buddy system.
+</span><span class="cm">         * And all highmem pages will be managed by the buddy system.
+</span><span class="cm">         */</span>
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">managed_pages</span> <span class="o">=</span> <span class="n">is_highmem_idx</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">?</span> <span class="nl">realsize</span> <span class="p">:</span> <span class="n">freesize</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">node</span> <span class="o">=</span> <span class="n">nid</span><span class="p">;</span>
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">min_unmapped_pages</span> <span class="o">=</span> <span class="p">(</span><span class="n">freesize</span><span class="o">*</span><span class="n">sysctl_min_unmapped_ratio</span><span class="p">)</span>
+                        <span class="o">/</span> <span class="mi">100</span><span class="p">;</span>
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">min_slab_pages</span> <span class="o">=</span> <span class="p">(</span><span class="n">freesize</span> <span class="o">*</span> <span class="n">sysctl_min_slab_ratio</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span>        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">name</span> <span class="o">=</span> <span class="n">zone_names</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="n">spin_lock_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+        <span class="n">spin_lock_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lru_lock</span><span class="p">);</span>
+        <span class="n">zone_seqlock_init</span><span class="p">(</span><span class="n">zone</span><span class="p">);</span>
+        <span class="n">zone</span><span class="o">-&gt;</span><span class="n">zone_pgdat</span> <span class="o">=</span> <span class="n">pgdat</span><span class="p">;</span>
+        <span class="cm">/* 初始化per-cpu成员变量pageset */</span>
+        <span class="n">zone_pcp_init</span><span class="p">(</span><span class="n">zone</span><span class="p">);</span>
 
-        zone-&gt;spanned_pages = size;
-        zone-&gt;present_pages = realsize;
-        /*
-         * Set an approximate value for lowmem here, it will be adjusted
-         * when the bootmem allocator frees pages into the buddy system.
-         * And all highmem pages will be managed by the buddy system.
-         */
-        zone-&gt;managed_pages = is_highmem_idx(j) ? realsize : freesize;
-#ifdef CONFIG_NUMA
-        zone-&gt;node = nid;
-        zone-&gt;min_unmapped_pages = (freesize*sysctl_min_unmapped_ratio)
-                        / 100;
-        zone-&gt;min_slab_pages = (freesize * sysctl_min_slab_ratio) / 100;
-#endif
-        zone-&gt;name = zone_names[j];
-        spin_lock_init(&amp;zone-&gt;lock);
-        spin_lock_init(&amp;zone-&gt;lru_lock);
-        zone_seqlock_init(zone);
-        zone-&gt;zone_pgdat = pgdat;
-        /* 初始化per-cpu成员变量pageset */
-        zone_pcp_init(zone);
+        <span class="cm">/* For bootup, initialized properly in watermark setup */</span>
+        <span class="n">mod_zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_ALLOC_BATCH</span><span class="p">,</span> <span class="n">zone</span><span class="o">-&gt;</span><span class="n">managed_pages</span><span class="p">);</span>
+        <span class="cm">/* 初始化成员变量lruvec */</span>
+        <span class="n">lruvec_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lruvec</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">size</span><span class="p">)</span>
+            <span class="k">continue</span><span class="p">;</span>
 
-        /* For bootup, initialized properly in watermark setup */
-        mod_zone_page_state(zone, NR_ALLOC_BATCH, zone-&gt;managed_pages);
-        /* 初始化成员变量lruvec */
-        lruvec_init(&amp;zone-&gt;lruvec);
-        if (!size)
-            continue;
-
-        set_pageblock_order();
-        /* sparse模型下为空 */
-        setup_usemap(pgdat, zone, zone_start_pfn, size);
-        /* 初始化zone的wait_table和free_area域 */
-        ret = init_currently_empty_zone(zone, zone_start_pfn,
-                        size, MEMMAP_EARLY);
-        BUG_ON(ret);
-        /* 设置zone内页框对应的struct page信息 */
-        memmap_init(size, nid, j, zone_start_pfn);
-        zone_start_pfn += size;
-    }
-}
-</code></pre>
-
+        <span class="n">set_pageblock_order</span><span class="p">();</span>
+        <span class="cm">/* sparse模型下为空 */</span>
+        <span class="n">setup_usemap</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="n">zone_start_pfn</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+        <span class="cm">/* 初始化zone的wait_table和free_area域 */</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">init_currently_empty_zone</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">zone_start_pfn</span><span class="p">,</span>
+                        <span class="n">size</span><span class="p">,</span> <span class="n">MEMMAP_EARLY</span><span class="p">);</span>
+        <span class="n">BUG_ON</span><span class="p">(</span><span class="n">ret</span><span class="p">);</span>
+        <span class="cm">/* 设置zone内页框对应的struct page信息 */</span>
+        <span class="n">memmap_init</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">zone_start_pfn</span><span class="p">);</span>
+        <span class="n">zone_start_pfn</span> <span class="o">+=</span> <span class="n">size</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="3-zone-pcp-init">3. zone_pcp_init</h1>
 
 <p><code>free_area_init_core</code> 还会调用 <code>zone_pcp_init</code> 初始化 <strong>struct zone</strong> 的成员 <strong>struct per_cpu_pageset __percpu *pageset</strong> ，即《深入理解Linux内核》一书中第八章内存管理的“每cpu页框高速缓存”一节。</p>
@@ -1066,28 +1650,47 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <p>这里的“每CPU”页框高速缓存就是 <strong>struct per_cpu_pageset</strong> ，定义在 <em>include/linux/mmzone.h</em> 。书中还说每个 <strong>per_cpu_pageset</strong> 对象都包含两个 <strong>struct per_cpu_pages</strong> 对象，一个热高速缓存，一个冷高速缓存——这个是2.6内核的实现，3.16只包含一个 <strong>per_cpu_pages</strong> 对象。</p>
 
 <p><strong>struct per_cpu_pages</strong> 定义如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">per_cpu_pages</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">count</span><span class="p">;</span>      <span class="cm">/* 高速缓存中页框数 */</span>
+    <span class="kt">int</span> <span class="n">high</span><span class="p">;</span>       <span class="cm">/* 上界，表示高速缓存用尽 */</span>
+    <span class="kt">int</span> <span class="n">batch</span><span class="p">;</span>      <span class="cm">/* 添加/移除操作的页框数 */</span>
 
-<pre><code class="language-C">struct per_cpu_pages {
-    int count;      /* 高速缓存中页框数 */
-    int high;       /* 上界，表示高速缓存用尽 */
-    int batch;      /* 添加/移除操作的页框数 */
-
-    /* Lists of pages, one per migrate type stored on the pcp-lists */
-    struct list_head lists[MIGRATE_PCPTYPES];
-};
-</code></pre>
-
+    <span class="cm">/* Lists of pages, one per migrate type stored on the pcp-lists */</span>
+    <span class="k">struct</span> <span class="n">list_head</span> <span class="n">lists</span><span class="p">[</span><span class="n">MIGRATE_PCPTYPES</span><span class="p">];</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="3-1-boot-pageset">3.1. boot_pageset</h2>
 
 <p><code>zone_pcp_init</code> 直接将zone的pageset指向定义在 <em>mm/page_alloc.c</em> 中的 <strong>boot_pageset</strong> 变量，这个变量在 <code>__build_all_zonelists</code> 函数中通过 <code>setup_pageset</code> 初始化：</p>
-
-<pre><code class="language-C">static void setup_pageset(struct per_cpu_pageset *p, unsigned long batch)
-{
-    pageset_init(p);
-    pageset_set_batch(p, batch);
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">setup_pageset</span><span class="p">(</span><span class="k">struct</span> <span class="n">per_cpu_pageset</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">batch</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">pageset_init</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+    <span class="n">pageset_set_batch</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">batch</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>其中 <code>pageset_init</code> 初始化 <strong>struct per_cpu_pageset</strong> 的每个成员； <code>pageset_set_batch</code> 设置per-cpu页框高速缓存的batch为传入的值，即0。</p>
 
 <h2 id="3-2-rmqueue-bulk">3.2. rmqueue_bulk</h2>
@@ -1108,141 +1711,270 @@ buddy allocator分配内存页时，会调用 <code>rmqueue_bulk</code> 分配�
 
 <p><code>free_area_init_core</code> 调用的另一个函数 <code>memmap_init</code> ，x86架构下定义为 <code>memmap_init_zone</code> 。<br />
 这个函数主要设置zone中每个page的具体信息，即 <strong>struct page</strong> 的各个成员变量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__meminit</span> <span class="nf">memmap_init_zone</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nid</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">zone</span><span class="p">,</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">start_pfn</span><span class="p">,</span> <span class="k">enum</span> <span class="n">memmap_context</span> <span class="n">context</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">end_pfn</span> <span class="o">=</span> <span class="n">start_pfn</span> <span class="o">+</span> <span class="n">size</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pfn</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">z</span><span class="p">;</span>
 
-<pre><code class="language-C">void __meminit memmap_init_zone(unsigned long size, int nid, unsigned long zone,
-        unsigned long start_pfn, enum memmap_context context)
-{
-    struct page *page;
-    unsigned long end_pfn = start_pfn + size;
-    unsigned long pfn;
-    struct zone *z;
+    <span class="k">if</span> <span class="p">(</span><span class="n">highest_memmap_pfn</span> <span class="o">&lt;</span> <span class="n">end_pfn</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">highest_memmap_pfn</span> <span class="o">=</span> <span class="n">end_pfn</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
 
-    if (highest_memmap_pfn &lt; end_pfn - 1)
-        highest_memmap_pfn = end_pfn - 1;
+    <span class="n">z</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_zones</span><span class="p">[</span><span class="n">zone</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pfn</span> <span class="o">=</span> <span class="n">start_pfn</span><span class="p">;</span> <span class="n">pfn</span> <span class="o">&lt;</span> <span class="n">end_pfn</span><span class="p">;</span> <span class="n">pfn</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         * There can be holes in boot-time mem_map[]s
+</span><span class="cm">         * handed to this function.  They do not
+</span><span class="cm">         * exist on hotplugged memory.
+</span><span class="cm">         */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">context</span> <span class="o">==</span> <span class="n">MEMMAP_EARLY</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">early_pfn_valid</span><span class="p">(</span><span class="n">pfn</span><span class="p">))</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">early_pfn_in_nid</span><span class="p">(</span><span class="n">pfn</span><span class="p">,</span> <span class="n">nid</span><span class="p">))</span>
+                <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">pfn_to_page</span><span class="p">(</span><span class="n">pfn</span><span class="p">);</span>
+        <span class="cm">/*
+</span><span class="cm">         下列操作设置struct page的各个成员：
+</span><span class="cm">         flag域的zone，nodeid，memsection，
+</span><span class="cm">         _count = -1，
+</span><span class="cm">         _mapcount = 1，
+</span><span class="cm">         _last_cpuid = 0xff，
+</span><span class="cm">         flag域的reserved标志 */</span>
+        <span class="n">set_page_links</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">pfn</span><span class="p">);</span>
+        <span class="n">mminit_verify_page_links</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">pfn</span><span class="p">);</span>
+        <span class="n">init_page_count</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+        <span class="n">page_mapcount_reset</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+        <span class="n">page_cpupid_reset_last</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+        <span class="n">SetPageReserved</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
 
-    z = &amp;NODE_DATA(nid)-&gt;node_zones[zone];
-    for (pfn = start_pfn; pfn &lt; end_pfn; pfn++) {
-        /*
-         * There can be holes in boot-time mem_map[]s
-         * handed to this function.  They do not
-         * exist on hotplugged memory.
-         */
-        if (context == MEMMAP_EARLY) {
-            if (!early_pfn_valid(pfn))
-                continue;
-            if (!early_pfn_in_nid(pfn, nid))
-                continue;
-        }
-        page = pfn_to_page(pfn);
-        /*
-         下列操作设置struct page的各个成员：
-         flag域的zone，nodeid，memsection，
-         _count = -1，
-         _mapcount = 1，
-         _last_cpuid = 0xff，
-         flag域的reserved标志 */
-        set_page_links(page, zone, nid, pfn);
-        mminit_verify_page_links(page, zone, nid, pfn);
-        init_page_count(page);
-        page_mapcount_reset(page);
-        page_cpupid_reset_last(page);
-        SetPageReserved(page);
+        <span class="k">if</span> <span class="p">((</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">zone_start_pfn</span> <span class="o">&lt;=</span> <span class="n">pfn</span><span class="p">)</span>
+            <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">pfn</span> <span class="o">&lt;</span> <span class="n">zone_end_pfn</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+            <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">pfn</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pageblock_nr_pages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="n">set_pageblock_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">MIGRATE_MOVABLE</span><span class="p">);</span>
 
-        if ((z-&gt;zone_start_pfn &lt;= pfn)
-            &amp;&amp; (pfn &lt; zone_end_pfn(z))
-            &amp;&amp; !(pfn &amp; (pageblock_nr_pages - 1)))
-            set_pageblock_migratetype(page, MIGRATE_MOVABLE);
-
-        INIT_LIST_HEAD(&amp;page-&gt;lru);
-#ifdef WANT_PAGE_VIRTUAL    //x86 下未定义
-        /* The shift won't overflow because ZONE_NORMAL is below 4G. */
-        if (!is_highmem_idx(zone))
-            set_page_address(page, __va(pfn &lt;&lt; PAGE_SHIFT));
-#endif
-    }
-}
-</code></pre>
-
+        <span class="n">INIT_LIST_HEAD</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">);</span>
+<span class="cp">#ifdef WANT_PAGE_VIRTUAL    </span><span class="c1">//x86 下未定义
+</span><span class="c1"></span>        <span class="cm">/* The shift won&#39;t overflow because ZONE_NORMAL is below 4G. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_highmem_idx</span><span class="p">(</span><span class="n">zone</span><span class="p">))</span>
+            <span class="n">set_page_address</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">__va</span><span class="p">(</span><span class="n">pfn</span> <span class="o">&lt;&lt;</span> <span class="n">PAGE_SHIFT</span><span class="p">));</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="p">}</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="4-3-free-all-bootmem">4.3. free_all_bootmem</h2>
 
 <p><strong>free_area</strong> 初始化的过程，是在 <code>free_all_bootmem</code> 函数，这个函数由 <em>arch/x86/mm/init_64.c</em> 中的 <code>mem_init</code> 调用。<br />
 x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因此采用 <em>mm/nobootmem.c</em> 中的定义，调用 <code>free_low_memory_core_early</code> 函数完成主要工作：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">__init</span> <span class="nf">free_low_memory_core_early</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">phys_addr_t</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">;</span>
+    <span class="n">u64</span> <span class="n">i</span><span class="p">;</span>
 
-<pre><code class="language-C">static unsigned long __init free_low_memory_core_early(void)
-{
-    unsigned long count = 0;
-    phys_addr_t start, end;
-    u64 i;
+    <span class="n">for_each_free_mem_range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">NUMA_NO_NODE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">start</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">end</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="n">__free_memory_core</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">);</span>
 
-    for_each_free_mem_range(i, NUMA_NO_NODE, &amp;start, &amp;end, NULL)
-        count += __free_memory_core(start, end);
+<span class="cp">#ifdef CONFIG_ARCH_DISCARD_MEMBLOCK </span><span class="c1">//x86下默认定义
+</span><span class="c1"></span>    <span class="p">{</span>
+        <span class="n">phys_addr_t</span> <span class="n">size</span><span class="p">;</span>
 
-#ifdef CONFIG_ARCH_DISCARD_MEMBLOCK //x86下默认定义
-    {
-        phys_addr_t size;
+        <span class="cm">/* Free memblock.reserved array if it was allocated */</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">get_allocated_memblock_reserved_regions_info</span><span class="p">(</span><span class="o">&amp;</span><span class="n">start</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="n">__free_memory_core</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">size</span><span class="p">);</span>
 
-        /* Free memblock.reserved array if it was allocated */
-        size = get_allocated_memblock_reserved_regions_info(&amp;start);
-        if (size)
-            count += __free_memory_core(start, start + size);
-
-        /* Free memblock.memory array if it was allocated */
-        size = get_allocated_memblock_memory_regions_info(&amp;start);
-        if (size)
-            count += __free_memory_core(start, start + size);
-    }
-#endif
-
-    return count;
-}
-</code></pre>
-
+        <span class="cm">/* Free memblock.memory array if it was allocated */</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">get_allocated_memblock_memory_regions_info</span><span class="p">(</span><span class="o">&amp;</span><span class="n">start</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="n">__free_memory_core</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span><span class="cp"></span>
+    <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>函数主要通过 <code>__free_memory_core</code> 释放 <strong>memblock</strong> 中保存的内存块，后者调用 <code>__free_pages_memory</code> ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="n">__init</span> <span class="nf">__free_pages_memory</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">start</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">end</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">order</span><span class="p">;</span>
 
-<pre><code class="language-C">static void __init __free_pages_memory(unsigned long start, unsigned long end)
-{
-    int order;
+    <span class="k">while</span> <span class="p">(</span><span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         MAX_ORDER = 11，__ffs返回start中最高位的索引，
+</span><span class="cm">         因此，start越大，order可能越大，但是最大不会
+</span><span class="cm">         超过10 */</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">MAX_ORDER</span> <span class="o">-</span> <span class="mi">1UL</span><span class="p">,</span> <span class="n">__ffs</span><span class="p">(</span><span class="n">start</span><span class="p">));</span>
+        <span class="cm">/* 将order限制在合法的范围内 */</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">)</span>
+            <span class="n">order</span><span class="o">--</span><span class="p">;</span>
 
-    while (start &lt; end) {
-        /*
-         MAX_ORDER = 11，__ffs返回start中最高位的索引，
-         因此，start越大，order可能越大，但是最大不会
-         超过10 */
-        order = min(MAX_ORDER - 1UL, __ffs(start));
-        /* 将order限制在合法的范围内 */
-        while (start + (1UL &lt;&lt; order) &gt; end)
-            order--;
+        <span class="n">__free_pages_bootmem</span><span class="p">(</span><span class="n">pfn_to_page</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">order</span><span class="p">);</span>
 
-        __free_pages_bootmem(pfn_to_page(start), order);
-
-        start += (1UL &lt;&lt; order);
-    }
-}
-</code></pre>
-
+        <span class="n">start</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>__free_pages_memory</code>最终会调用 <em>mm/page_alloc.c</em> 中的 <code>__free_pages_bootmem</code> ，传入起始页面和释放的order：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">__free_pages_bootmem</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">nr_pages</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">loop</span><span class="p">;</span>
 
-<pre><code class="language-C">void __init __free_pages_bootmem(struct page *page, unsigned int order)
-{
-    unsigned int nr_pages = 1 &lt;&lt; order;
-    struct page *p = page;
-    unsigned int loop;
+    <span class="n">prefetchw</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">loop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">loop</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">nr_pages</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span> <span class="n">loop</span><span class="o">++</span><span class="p">,</span> <span class="n">p</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">prefetchw</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">__ClearPageReserved</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+        <span class="n">set_page_count</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">__ClearPageReserved</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+    <span class="n">set_page_count</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
 
-    prefetchw(p);
-    for (loop = 0; loop &lt; (nr_pages - 1); loop++, p++) {
-        prefetchw(p + 1);
-        __ClearPageReserved(p);
-        set_page_count(p, 0);
-    }
-    __ClearPageReserved(p);
-    set_page_count(p, 0);
-
-    page_zone(page)-&gt;managed_pages += nr_pages;
-    set_page_refcounted(page);
-    __free_pages(page, order);
-}
-</code></pre>
-
+    <span class="n">page_zone</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">managed_pages</span> <span class="o">+=</span> <span class="n">nr_pages</span><span class="p">;</span>
+    <span class="n">set_page_refcounted</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="n">__free_pages</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>__free_pages_bootmem</code> 清除之前的reserved标志，先将 <strong>_count</strong> 设置为0，之后再设置为1，然后调用 <code>__free_pages</code>，将page释放到buddy系统。</p>
 
 <p><code>__free_pages</code> 是伙伴系统释放内存页的函数，放在下一篇buddy allocator进行说明。</p>
@@ -1361,7 +2093,7 @@ buddy allocator的具体执行流程，在下一篇文章介绍。</p>
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>

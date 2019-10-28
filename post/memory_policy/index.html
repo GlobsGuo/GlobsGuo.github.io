@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-12T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="5382">
+<meta itemprop="wordCount" content="5389">
 
 
 
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-12 </span>
         
-          <span class="more-meta"> 5382 words </span>
+          <span class="more-meta"> 5389 words </span>
           <span class="more-meta"> 11 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -278,29 +278,44 @@ MPOL_F_RELATIVE_NODES不能和MPOL_F_STATIC_NODES同时使用，也不能用于�
 <p>Linux提供了三个控制内存策略的系统调用，这些API通常只会影响调用进程、调用进程的地址空间、或者映射到调用进程的地址空间的共享对象。</p>
 
 <h2 id="3-1-设置-进程的-内存策略">3.1. 设置(进程的)内存策略</h2>
-
-<pre><code class="language-C">long set_mempolicy(int mode, const unsigned long *nmask,  
-            unsigned long maxnode)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">long</span> <span class="n">set_mempolicy</span><span class="p">(</span><span class="kt">int</span> <span class="n">mode</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">nmask</span><span class="p">,</span>  
+            <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">maxnode</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>设置调用进程的进程内存策略为参数mode指明的模式，nmask指明的节点。nmask指明的节点至少包含maxnode。可选的模式标志可以通过mode参数的组合传递。</p>
 
 <h2 id="3-2-获取-进程的-内存策略或者相关的信息">3.2. 获取(进程的)内存策略或者相关的信息</h2>
-
-<pre><code class="language-C">long get_mempolicy(int *mode, const unsigned long *nmask,  
-            unsigned long maxnode, void *addr, int flags)
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">long</span> <span class="n">get_mempolicy</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">mode</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">nmask</span><span class="p">,</span>  
+            <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">maxnode</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>查询调用进程的进程内存策略，或者指明的虚拟地址策略或者location，取决于flags参数。</p>
 
 <h2 id="3-3-安装vma-共享的内存策略到一段地址空间">3.3. 安装VMA/共享的内存策略到一段地址空间</h2>
-
-<pre><code class="language-C">long bind(void *start, unsigned long len, int mode,
-            const unsigned long *nmask,
-            unsigned long maxnode, unsigned flags)
-
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">long</span> <span class="n">bind</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">start</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">len</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mode</span><span class="p">,</span>
+            <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">nmask</span><span class="p">,</span>
+            <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">maxnode</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">flags</span><span class="p">)</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>mbind()</code>安装(mode, nmask, maxnodes)指明的VMA策略到调用进程通过start和len参数确定的地址空间，额外的操作可以通过flags参数指明。</p>
 
 <h1 id="4-command-line-interface">4. Command Line Interface</h1>
@@ -421,7 +436,7 @@ MPOL_F_RELATIVE_NODES不能和MPOL_F_STATIC_NODES同时使用，也不能用于�
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>

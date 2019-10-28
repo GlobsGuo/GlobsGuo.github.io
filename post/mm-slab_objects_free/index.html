@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Globs Guo" /><meta name="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {" />
+<meta name="author" content="Globs Guo" /><meta name="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5" />
 
 
 
@@ -39,25 +39,25 @@
 
 
 <meta property="og:title" content="mm-slab对象的回收" />
-<meta property="og:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {" />
+<meta property="og:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm-slab_objects_free/" />
 <meta property="article:published_time" content="2019-10-21T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
 <meta itemprop="name" content="mm-slab对象的回收">
-<meta itemprop="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {">
+<meta itemprop="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5">
 
 
 <meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="5559">
+<meta itemprop="wordCount" content="6004">
 
 
 
 <meta itemprop="keywords" content="kernel-sources,memory,kmem_cache,slub,kmalloc_caches,kmalloc,kfree,slab_free," />
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="mm-slab对象的回收"/>
-<meta name="twitter:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 void kfree(const void *x) {"/>
+<meta name="twitter:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-21 </span>
         
-          <span class="more-meta"> 5559 words </span>
+          <span class="more-meta"> 6004 words </span>
           <span class="more-meta"> 12 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -162,91 +162,171 @@
 <h1 id="1-kfree">1. kfree</h1>
 
 <p>通过 <code>kfree</code> 函数释放 <code>kmalloc</code> 申请的内存时，对应的函数定义在 <em>mm/slub.c</em> 中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="nf">kfree</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">x</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">object</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">x</span><span class="p">;</span>
 
-<pre><code class="language-C">void kfree(const void *x)
-{
-    struct page *page;
-    void *object = (void *)x;
-
-    trace_kfree(_RET_IP_, x);
-    /* 地址为空直接返回 */
-    if (unlikely(ZERO_OR_NULL_PTR(x)))
-        return;
-    /* 通过内核虚拟地址获取对应的struct page * */
-    page = virt_to_head_page(x);
-    /* slab分配器没有管理这个内存页 */
-    if (unlikely(!PageSlab(page))) {
-        BUG_ON(!PageCompound(page));
-        kfree_hook(x);
-        /* 直接通过伙伴系统释放内存页 */
-        __free_kmem_pages(page, compound_order(page));
-        return;
-    }
-    /* struct page中包含内存页的slab信息，包括该内存页
-       所属的slab cache，*/
-    slab_free(page-&gt;slab_cache, page, object, _RET_IP_);
-}
-EXPORT_SYMBOL(kfree);
-</code></pre>
-
+    <span class="n">trace_kfree</span><span class="p">(</span><span class="n">_RET_IP_</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
+    <span class="cm">/* 地址为空直接返回 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">ZERO_OR_NULL_PTR</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="cm">/* 通过内核虚拟地址获取对应的struct page * */</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">virt_to_head_page</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+    <span class="cm">/* slab分配器没有管理这个内存页 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">PageSlab</span><span class="p">(</span><span class="n">page</span><span class="p">)))</span> <span class="p">{</span>
+        <span class="n">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">PageCompound</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+        <span class="n">kfree_hook</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+        <span class="cm">/* 直接通过伙伴系统释放内存页 */</span>
+        <span class="n">__free_kmem_pages</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">compound_order</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/* struct page中包含内存页的slab信息，包括该内存页
+</span><span class="cm">       所属的slab cache，*/</span>
+    <span class="n">slab_free</span><span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">slab_cache</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">object</span><span class="p">,</span> <span class="n">_RET_IP_</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kfree</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="2-slab-free-mm-slub-c">2. slab_free( <em>mm/slub.c</em> )</h1>
 
 <p>如果 <code>kfree</code> 的参数地址所在的页面属于slab分配器，通过 <code>slab_free</code> 函数释放。 <code>slab_free</code> 函数也有两个分支，快路径和慢路径。</p>
 
 <p>如果 <code>kfree</code> 的对象属于当前的cpu slab，执行快路径；否则执行慢路径。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="n">__always_inline</span> <span class="kt">void</span> <span class="nf">slab_free</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span>
+            <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">addr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">object</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">x</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">kmem_cache_cpu</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">tid</span><span class="p">;</span>
 
-<pre><code class="language-C">static __always_inline void slab_free(struct kmem_cache *s,
-            struct page *page, void *x, unsigned long addr)
-{
-    void **object = (void *)x;
-    struct kmem_cache_cpu *c;
-    unsigned long tid;
+    <span class="n">slab_free_hook</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span>
 
-    slab_free_hook(s, x);
+<span class="nl">redo</span><span class="p">:</span>
+    <span class="cm">/*
+</span><span class="cm">     * Determine the currently cpus per cpu slab.
+</span><span class="cm">     * The cpu may change afterward. However that does not matter since
+</span><span class="cm">     * data is retrieved via this pointer. If we are on the same cpu
+</span><span class="cm">     * during the cmpxchg then the free will succedd.
+</span><span class="cm">     */</span>
+    <span class="n">preempt_disable</span><span class="p">();</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">this_cpu_ptr</span><span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">cpu_slab</span><span class="p">);</span>
 
-redo:
-    /*
-     * Determine the currently cpus per cpu slab.
-     * The cpu may change afterward. However that does not matter since
-     * data is retrieved via this pointer. If we are on the same cpu
-     * during the cmpxchg then the free will succedd.
-     */
-    preempt_disable();
-    c = this_cpu_ptr(s-&gt;cpu_slab);
+    <span class="n">tid</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">tid</span><span class="p">;</span>
+    <span class="n">preempt_enable</span><span class="p">();</span>
+    <span class="cm">/*
+</span><span class="cm">     释放的对象所在的内存页刚好是当前CPU正在使用的
+</span><span class="cm">     slab，执行快路径，只需要添加到freelist中 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">likely</span><span class="p">(</span><span class="n">page</span> <span class="o">==</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">page</span><span class="p">))</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         设置要释放的对象指向当前的空闲对象，即把释放的对象
+</span><span class="cm">         添加到CPU的freelist中 */</span>
+        <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">object</span><span class="p">,</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">);</span>
+        <span class="cm">/*
+</span><span class="cm">         更新slab cache的cpu_slab变量，指向
+</span><span class="cm">         最新的freelist，并且更新tid */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">this_cpu_cmpxchg_double</span><span class="p">(</span>
+                <span class="n">s</span><span class="o">-&gt;</span><span class="n">cpu_slab</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">,</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">cpu_slab</span><span class="o">-&gt;</span><span class="n">tid</span><span class="p">,</span>
+                <span class="n">c</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">,</span> <span class="n">tid</span><span class="p">,</span>
+                <span class="n">object</span><span class="p">,</span> <span class="n">next_tid</span><span class="p">(</span><span class="n">tid</span><span class="p">))))</span> <span class="p">{</span>
 
-    tid = c-&gt;tid;
-    preempt_enable();
-    /*
-     释放的对象所在的内存页刚好是当前CPU正在使用的
-     slab，执行快路径，只需要添加到freelist中 */
-    if (likely(page == c-&gt;page)) {
-        /*
-         设置要释放的对象指向当前的空闲对象，即把释放的对象
-         添加到CPU的freelist中 */
-        set_freepointer(s, object, c-&gt;freelist);
-        /*
-         更新slab cache的cpu_slab变量，指向
-         最新的freelist，并且更新tid */
-        if (unlikely(!this_cpu_cmpxchg_double(
-                s-&gt;cpu_slab-&gt;freelist, s-&gt;cpu_slab-&gt;tid,
-                c-&gt;freelist, tid,
-                object, next_tid(tid)))) {
+            <span class="n">note_cmpxchg_failure</span><span class="p">(</span><span class="s">&#34;slab_free&#34;</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">tid</span><span class="p">);</span>
+            <span class="k">goto</span> <span class="n">redo</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_FASTPATH</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span>
+        <span class="cm">/*
+</span><span class="cm">         page不是当前CPU正在分配对象的slab，执行慢路径。
+</span><span class="cm">         可能是以下情况：
+</span><span class="cm">         1. 释放的对象属于当前CPU的partial表
+</span><span class="cm">         2. 释放的对象属于其他CPU的slab  */</span>
+        <span class="n">__slab_free</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">addr</span><span class="p">);</span>
 
-            note_cmpxchg_failure(&quot;slab_free&quot;, s, tid);
-            goto redo;
-        }
-        stat(s, FREE_FASTPATH);
-    } else
-        /*
-         page不是当前CPU正在分配对象的slab，执行慢路径。
-         可能是以下情况：
-         1. 释放的对象属于当前CPU的partial表
-         2. 释放的对象属于其他CPU的slab  */
-        __slab_free(s, page, x, addr);
-
-}
-</code></pre>
-
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="3-slab-free-mm-slub-c">3. __slab_free( <em>mm/slub.c</em> )</h1>
 
 <p>慢路径释放slab时，涉及到多个名称相近的变量，先对这些变量进行说明。</p>
@@ -298,128 +378,250 @@ slab中已经分配的对象的数量</li>
 
 <p>和快路径 <code>slab_free</code> 不同，执行慢路径的原因是 <code>kfree</code> 释放的对象所属的内存页不是当前CPU正在分配对象的slab。<br />
 因此，函数释放对象的时候修改的是 <strong>struct page</strong> 内的 <strong>freelist</strong> 指针，而不是CPU的freelist。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">__slab_free</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+            <span class="kt">void</span> <span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">addr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">prior</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">object</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">x</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">was_frozen</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="n">new</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">counters</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">kmem_cache_node</span> <span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">uninitialized_var</span><span class="p">(</span><span class="n">flags</span><span class="p">);</span>
 
-<pre><code class="language-C">static void __slab_free(struct kmem_cache *s, struct page *page,
-            void *x, unsigned long addr)
-{
-    void *prior;
-    void **object = (void *)x;
-    int was_frozen;
-    struct page new;
-    unsigned long counters;
-    struct kmem_cache_node *n = NULL;
-    unsigned long uninitialized_var(flags);
+    <span class="p">...</span>
+    <span class="cm">/* do-while循环保证更改成功 */</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">n</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">prior</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">;</span>
+        <span class="n">counters</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">counters</span><span class="p">;</span>
+        <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">object</span><span class="p">,</span> <span class="n">prior</span><span class="p">);</span>
+        <span class="cm">/*
+</span><span class="cm">         counters的赋值操作会将和其位于相同union内的
+</span><span class="cm">         inuse，objects，frozen字段赋值 */</span>
+        <span class="n">new</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">counters</span><span class="p">;</span>
+        <span class="n">was_frozen</span> <span class="o">=</span> <span class="n">new</span><span class="p">.</span><span class="n">frozen</span><span class="p">;</span>
+        <span class="n">new</span><span class="p">.</span><span class="n">inuse</span><span class="o">--</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         !new.inuse = true，slab中没有分配出去的对象，目前我
+</span><span class="cm">         只想到了一种情况，即当前释放的对象是slab中的最后一个
+</span><span class="cm">         对象，释放之后slab为空。
+</span><span class="cm">         !prior = true，slab中没有可用的对象，即slab为满。
+</span><span class="cm">         !was_frozen = true，slab没有被冻结，即不属于某一个CPU
+</span><span class="cm">         的slab cache  */</span>
+        <span class="k">if</span> <span class="p">((</span><span class="o">!</span><span class="n">new</span><span class="p">.</span><span class="n">inuse</span> <span class="o">||</span> <span class="o">!</span><span class="n">prior</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">was_frozen</span><span class="p">)</span> <span class="p">{</span>
+            <span class="cm">/*
+</span><span class="cm">             slab为满，释放当前对象后会变成partial，而且
+</span><span class="cm">             不属于某一个CPU的slab cache，将其冻结，使其
+</span><span class="cm">             属于当前CPU的slab cache */</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">kmem_cache_has_cpu_partial</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">prior</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">new</span><span class="p">.</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="cm">/*
+</span><span class="cm">                 释放当前的对象后slab为空，先获取节点信息，
+</span><span class="cm">                 并且获取修改slab list所需的锁，以便之后
+</span><span class="cm">                 释放空slab */</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+                <span class="cm">/*
+</span><span class="cm">                 只有当前slab为空时才需要获取锁，并且在执行
+</span><span class="cm">                 释放操作后释放锁 */</span>
+                <span class="n">spin_lock_irqsave</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">cmpxchg_double_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+        <span class="n">prior</span><span class="p">,</span> <span class="n">counters</span><span class="p">,</span>
+        <span class="n">object</span><span class="p">,</span> <span class="n">new</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+        <span class="s">&#34;__slab_free&#34;</span><span class="p">));</span>
+    <span class="cm">/*
+</span><span class="cm">     n为空的可能性较大，即当前释放的对象是slab中的最后一个对象
+</span><span class="cm">     的可能性较小。其他的可能情况为：
+</span><span class="cm">     1. slab已满，并且slab不属于某个CPU
+</span><span class="cm">     2. slab已经属于某个CPU
+</span><span class="cm">     3. 无论slab是否属于某个CPU，slab的freelist不为空，且inuse
+</span><span class="cm">     字段不为0 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">likely</span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">))</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         刚刚执行的冻结操作，将内存页添加到当前CPU的slab
+</span><span class="cm">         cache的partial表。
+</span><span class="cm">         这里put_cpu_partial函数将新的slab添加到partial
+</span><span class="cm">         表时，如果当前CPU中已有的partial对象大于slab
+</span><span class="cm">         cache的cpu_partial值，就会将当前CPU中的所有的
+</span><span class="cm">         partial slab解冻，并且在节点中的partial slab
+</span><span class="cm">         的数量不小于slab cache的cpu_partial值的情况下，
+</span><span class="cm">         释放解冻的slab；否则将解冻的slab添加到节点的
+</span><span class="cm">         partial表中。 */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">new</span><span class="p">.</span><span class="n">frozen</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">was_frozen</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">put_cpu_partial</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">CPU_PARTIAL_FREE</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="cm">/*
+</span><span class="cm">         slab已经属于其他CPU的slab cache，当前的CPU不是冻结
+</span><span class="cm">         slab的CPU，无法执行其他的操作；这种情况下也没有获取
+</span><span class="cm">         锁的操作，因此也不需要释放  */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">was_frozen</span><span class="p">)</span>
+            <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_FROZEN</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     释放当前对象后slab为空，并且节点的partial slab数量仍然
+</span><span class="cm">     大于slab cache中的最小阈值，可以直接将slab释放 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">new</span><span class="p">.</span><span class="n">inuse</span> <span class="o">&amp;&amp;</span> <span class="n">n</span><span class="o">-&gt;</span><span class="n">nr_partial</span> <span class="o">&gt;</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">min_partial</span><span class="p">))</span>
+        <span class="k">goto</span> <span class="n">slab_empty</span><span class="p">;</span>
 
-    ...
-    /* do-while循环保证更改成功 */
-    do {
-        if (unlikely(n)) {
-            spin_unlock_irqrestore(&amp;n-&gt;list_lock, flags);
-            n = NULL;
-        }
-        prior = page-&gt;freelist;
-        counters = page-&gt;counters;
-        set_freepointer(s, object, prior);
-        /*
-         counters的赋值操作会将和其位于相同union内的
-         inuse，objects，frozen字段赋值 */
-        new.counters = counters;
-        was_frozen = new.frozen;
-        new.inuse--;
-        /*
-         !new.inuse = true，slab中没有分配出去的对象，目前我
-         只想到了一种情况，即当前释放的对象是slab中的最后一个
-         对象，释放之后slab为空。
-         !prior = true，slab中没有可用的对象，即slab为满。
-         !was_frozen = true，slab没有被冻结，即不属于某一个CPU
-         的slab cache  */
-        if ((!new.inuse || !prior) &amp;&amp; !was_frozen) {
-            /*
-             slab为满，释放当前对象后会变成partial，而且
-             不属于某一个CPU的slab cache，将其冻结，使其
-             属于当前CPU的slab cache */
-            if (kmem_cache_has_cpu_partial(s) &amp;&amp; !prior) {
-                new.frozen = 1;
-            } else {
-                /*
-                 释放当前的对象后slab为空，先获取节点信息，
-                 并且获取修改slab list所需的锁，以便之后
-                 释放空slab */
-                n = get_node(s, page_to_nid(page));
-                /*
-                 只有当前slab为空时才需要获取锁，并且在执行
-                 释放操作后释放锁 */
-                spin_lock_irqsave(&amp;n-&gt;list_lock, flags);
-            }
-        }
-    } while (!cmpxchg_double_slab(s, page,
-        prior, counters,
-        object, new.counters,
-        &quot;__slab_free&quot;));
-    /*
-     n为空的可能性较大，即当前释放的对象是slab中的最后一个对象
-     的可能性较小。其他的可能情况为：
-     1. slab已满，并且slab不属于某个CPU
-     2. slab已经属于某个CPU
-     3. 无论slab是否属于某个CPU，slab的freelist不为空，且inuse
-     字段不为0 */
-    if (likely(!n)) {
-        /*
-         刚刚执行的冻结操作，将内存页添加到当前CPU的slab
-         cache的partial表。
-         这里put_cpu_partial函数将新的slab添加到partial
-         表时，如果当前CPU中已有的partial对象大于slab
-         cache的cpu_partial值，就会将当前CPU中的所有的
-         partial slab解冻，并且在节点中的partial slab
-         的数量不小于slab cache的cpu_partial值的情况下，
-         释放解冻的slab；否则将解冻的slab添加到节点的
-         partial表中。 */
-        if (new.frozen &amp;&amp; !was_frozen) {
-            put_cpu_partial(s, page, 1);
-            stat(s, CPU_PARTIAL_FREE);
-        }
-        /*
-         slab已经属于其他CPU的slab cache，当前的CPU不是冻结
-         slab的CPU，无法执行其他的操作；这种情况下也没有获取
-         锁的操作，因此也不需要释放  */
-        if (was_frozen)
-            stat(s, FREE_FROZEN);
-        return;
-    }
-    /*
-     释放当前对象后slab为空，并且节点的partial slab数量仍然
-     大于slab cache中的最小阈值，可以直接将slab释放 */
-    if (unlikely(!new.inuse &amp;&amp; n-&gt;nr_partial &gt; s-&gt;min_partial))
-        goto slab_empty;
+    <span class="cm">/* slab从full变为partial */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">kmem_cache_has_cpu_partial</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">prior</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">kmem_cache_debug</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="n">remove_full</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+        <span class="n">add_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">DEACTIVATE_TO_TAIL</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_ADD_PARTIAL</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+    <span class="k">return</span><span class="p">;</span>
 
-    /* slab从full变为partial */
-    if (!kmem_cache_has_cpu_partial(s) &amp;&amp; unlikely(!prior)) {
-        if (kmem_cache_debug(s))
-            remove_full(s, n, page);
-        add_partial(n, page, DEACTIVATE_TO_TAIL);
-        stat(s, FREE_ADD_PARTIAL);
-    }
-    spin_unlock_irqrestore(&amp;n-&gt;list_lock, flags);
-    return;
-
-slab_empty:
-    /* 当前释放的对象是slab中的最后一个对象 */
-    if (prior) {
-        /* 当前slab有多个对象 */
-        remove_partial(n, page);
-        stat(s, FREE_REMOVE_PARTIAL);
-    } else {
-        /* 当前slab只有一个对象，导致位于full表 */
-        remove_full(s, n, page);
-    }
-    /* 释放获取的锁 */
-    spin_unlock_irqrestore(&amp;n-&gt;list_lock, flags);
-    stat(s, FREE_SLAB);
-    /* 释放slab */
-    discard_slab(s, page);
-}
-</code></pre>
-
+<span class="nl">slab_empty</span><span class="p">:</span>
+    <span class="cm">/* 当前释放的对象是slab中的最后一个对象 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">prior</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* 当前slab有多个对象 */</span>
+        <span class="n">remove_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_REMOVE_PARTIAL</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* 当前slab只有一个对象，导致位于full表 */</span>
+        <span class="n">remove_full</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/* 释放获取的锁 */</span>
+    <span class="n">spin_unlock_irqrestore</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+    <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
+    <span class="cm">/* 释放slab */</span>
+    <span class="n">discard_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="4-slab的操作函数">4. slab的操作函数</h1>
 
 <p><code>__slab_free</code> 函数调用了多个操作slab的函数，包括 <code>put_cpu_partial</code> ， <code>add_partial</code> ， <code>remove_partial</code> ， <code>remove_full</code> ， <code>discard_slab</code> 。</p>
@@ -440,96 +642,181 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
 <h3 id="4-1-1-unfreeze-partials">4.1.1. <code>unfreeze_partials</code></h3>
 
 <p><code>put_cpu_partial</code> 调用 <code>unfreeze_partial</code> 函数时，传入的参数为操作的slab cache和当前CPU的slab cache对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">unfreeze_partials</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span>
+        <span class="k">struct</span> <span class="n">kmem_cache_cpu</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="cp">#ifdef CONFIG_SLUB_CPU_PARTIAL  </span><span class="cm">/* x86默认开启 */</span><span class="cp">
+</span><span class="cp"></span>    <span class="k">struct</span> <span class="n">kmem_cache_node</span> <span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">n2</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="cm">/* discard_page中保存要释放的slab */</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="o">*</span><span class="n">discard_page</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">((</span><span class="n">page</span> <span class="o">=</span> <span class="n">c</span><span class="o">-&gt;</span><span class="n">partial</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">page</span> <span class="n">new</span><span class="p">;</span>
+        <span class="k">struct</span> <span class="n">page</span> <span class="n">old</span><span class="p">;</span>
 
-<pre><code class="language-C">static void unfreeze_partials(struct kmem_cache *s,
-        struct kmem_cache_cpu *c)
-{
-#ifdef CONFIG_SLUB_CPU_PARTIAL  /* x86默认开启 */
-    struct kmem_cache_node *n = NULL, *n2 = NULL;
-    /* discard_page中保存要释放的slab */
-    struct page *page, *discard_page = NULL;
-    while ((page = c-&gt;partial)) {
-        struct page new;
-        struct page old;
+        <span class="cm">/*
+</span><span class="cm">         配合while语句遍历当前CPU的slab cache中
+</span><span class="cm">         所有的partial slab */</span>
+        <span class="n">c</span><span class="o">-&gt;</span><span class="n">partial</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="cm">/* 获取当前slab所属的kmem_cache_node */</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
 
-        /*
-         配合while语句遍历当前CPU的slab cache中
-         所有的partial slab */
-        c-&gt;partial = page-&gt;next;
-        /* 获取当前slab所属的kmem_cache_node */
-        n2 = get_node(s, page_to_nid(page));
-        if (n != n2) {
-            if (n)
-                spin_unlock(&amp;n-&gt;list_lock);
+            <span class="n">n</span> <span class="o">=</span> <span class="n">n2</span><span class="p">;</span>
+            <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="cm">/* 将frozen从1设置为0 */</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="n">old</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">;</span>
+            <span class="n">old</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">counters</span><span class="p">;</span>
+            <span class="n">VM_BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">old</span><span class="p">.</span><span class="n">frozen</span><span class="p">);</span>
 
-            n = n2;
-            spin_lock(&amp;n-&gt;list_lock);
-        }
-        /* 将frozen从1设置为0 */
-        do {
-            old.freelist = page-&gt;freelist;
-            old.counters = page-&gt;counters;
-            VM_BUG_ON(!old.frozen);
+            <span class="n">new</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">old</span><span class="p">.</span><span class="n">counters</span><span class="p">;</span>
+            <span class="n">new</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">old</span><span class="p">.</span><span class="n">freelist</span><span class="p">;</span>
 
-            new.counters = old.counters;
-            new.freelist = old.freelist;
+            <span class="n">new</span><span class="p">.</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">__cmpxchg_double_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+                <span class="n">old</span><span class="p">.</span><span class="n">freelist</span><span class="p">,</span> <span class="n">old</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+                <span class="n">new</span><span class="p">.</span><span class="n">freelist</span><span class="p">,</span> <span class="n">new</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+                <span class="s">&#34;unfreezing slab&#34;</span><span class="p">));</span>
+        <span class="cm">/*
+</span><span class="cm">         !new.inuse为真表示slab为空
+</span><span class="cm">         如果slab空，并且节点中部分空slab的数量nr_partial不小于
+</span><span class="cm">         slab cache中指明的最小值min_partial，可以将当前的slab
+</span><span class="cm">         释放，先添加到discad_page中 */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">new</span><span class="p">.</span><span class="n">inuse</span> <span class="o">&amp;&amp;</span> <span class="n">n</span><span class="o">-&gt;</span><span class="n">nr_partial</span> <span class="o">&gt;=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">min_partial</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">page</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">discard_page</span><span class="p">;</span>
+            <span class="n">discard_page</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="cm">/* 添加到节点的partial list中 */</span>
+            <span class="n">add_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">DEACTIVATE_TO_TAIL</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_ADD_PARTIAL</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-            new.frozen = 0;
-        } while (!__cmpxchg_double_slab(s, page,
-                old.freelist, old.counters,
-                new.freelist, new.counters,
-                &quot;unfreezing slab&quot;));
-        /*
-         !new.inuse为真表示slab为空
-         如果slab空，并且节点中部分空slab的数量nr_partial不小于
-         slab cache中指明的最小值min_partial，可以将当前的slab
-         释放，先添加到discad_page中 */
-        if (unlikely(!new.inuse &amp;&amp; n-&gt;nr_partial &gt;= s-&gt;min_partial)) {
-            page-&gt;next = discard_page;
-            discard_page = page;
-        } else {
-            /* 添加到节点的partial list中 */
-            add_partial(n, page, DEACTIVATE_TO_TAIL);
-            stat(s, FREE_ADD_PARTIAL);
-        }
-    }
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
 
-    if (n)
-        spin_unlock(&amp;n-&gt;list_lock);
-
-    /* 将所有可以释放的slab释放 */
-    while (discard_page) {
-        page = discard_page;
-        discard_page = discard_page-&gt;next;
-        stat(s, DEACTIVATE_EMPTY);
-        discard_slab(s, page);
-        stat(s, FREE_SLAB);
-    }
-#endif
-}
-</code></pre>
-
+    <span class="cm">/* 将所有可以释放的slab释放 */</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">discard_page</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">discard_page</span><span class="p">;</span>
+        <span class="n">discard_page</span> <span class="o">=</span> <span class="n">discard_page</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">DEACTIVATE_EMPTY</span><span class="p">);</span>
+        <span class="n">discard_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="4-2-add-partial-remove-partial-remove-full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></h2>
 
 <p>三个函数都是操作 <strong>struct page</strong> 的 <strong>struct list_head lru</strong> 成员，即从双向链表中直接删除slab项，并且设置 <code>lru-&gt;prev = LIST_POISON2</code> ， <code>lru-&gt;next = LIST_POISON1</code> 。</p>
 
 <p>需要说明的是，在 <strong>struct page</strong> 中， <strong>lru</strong> 和 <strong>next</strong> ， <strong>pages</strong> ， <strong>pobjects</strong> 等成员位于一个union中：</p>
-
-<pre><code class="language-C">struct page {
-    ...
-    union {
-        struct list_head lru;
-        struct {
-            struct page *next;
-            int pages;
-            int pobjects;
-        };
-        ...
-    };
-    ...
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">page</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">list_head</span> <span class="n">lru</span><span class="p">;</span>
+        <span class="k">struct</span> <span class="p">{</span>
+            <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+            <span class="kt">int</span> <span class="n">pages</span><span class="p">;</span>
+            <span class="kt">int</span> <span class="n">pobjects</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="p">...</span>
+    <span class="p">};</span>
+    <span class="p">...</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>也就是说，在执行删除操作时，赋值 <code>lru-&gt;next</code> 和 <code>lru-&gt;prev</code> 会使 <strong>struct page *next</strong> 指向 <strong>LIST_POISON1</strong> ，其他地方比如 <code>unfreeze_partials</code> 函数通过 <strong>next</strong> 遍历partial表，不会访问已经删除的slab。</p>
 
 <h2 id="4-3-discard-slab">4.3. <code>discard_slab</code></h2>
@@ -539,54 +826,101 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
 <p><code>discard_slab</code> 首先调用 <code>dec_slabs_node</code> 将要删除的slab包含对象的数量从slab cache中删除，并且减少节点的 <strong>nr_slabs</strong> ，然后调用 <code>free_slab</code> 函数。</p>
 
 <p><code>free_slab</code> 根据slab cache的标志执行不同的分支，这里介绍 <code>__free_slab</code> 分支。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">__free_slab</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* 获取页面的order */</span>
+    <span class="kt">int</span> <span class="n">order</span> <span class="o">=</span> <span class="n">compound_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">pages</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">;</span>
 
-<pre><code class="language-C">static void __free_slab(struct kmem_cache *s, struct page *page)
-{
-    /* 获取页面的order */
-    int order = compound_order(page);
-    int pages = 1 &lt;&lt; order;
+    <span class="p">...</span>
 
-    ...
-
-    kmemcheck_free_shadow(page, compound_order(page));
-    /* 修改zone-&gt;vm_stat和全局统计变量vm_stat */
-    mod_zone_page_state(page_zone(page),
-        (s-&gt;flags &amp; SLAB_RECLAIM_ACCOUNT) ?
-        NR_SLAB_RECLAIMABLE : NR_SLAB_UNRECLAIMABLE,
-        -pages);
-    /* 清除page的标志位 */
-    __ClearPageSlabPfmemalloc(page);
-    __ClearPageSlab(page);
-    /* 设置page-&gt;_mapcount = -1 */
-    page_mapcount_reset(page);
-    if (current-&gt;reclaim_state)
-        current-&gt;reclaim_state-&gt;reclaimed_slab += pages;
-    /* 通过伙伴系统释放页面 */
-    __free_pages(page, order);
-    /* 从memcg系统删除 */
-    memcg_uncharge_slab(s, order);
-}
-</code></pre>
-
+    <span class="n">kmemcheck_free_shadow</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">compound_order</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+    <span class="cm">/* 修改zone-&gt;vm_stat和全局统计变量vm_stat */</span>
+    <span class="n">mod_zone_page_state</span><span class="p">(</span><span class="n">page_zone</span><span class="p">(</span><span class="n">page</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">SLAB_RECLAIM_ACCOUNT</span><span class="p">)</span> <span class="o">?</span>
+        <span class="nl">NR_SLAB_RECLAIMABLE</span> <span class="p">:</span> <span class="n">NR_SLAB_UNRECLAIMABLE</span><span class="p">,</span>
+        <span class="o">-</span><span class="n">pages</span><span class="p">);</span>
+    <span class="cm">/* 清除page的标志位 */</span>
+    <span class="n">__ClearPageSlabPfmemalloc</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="n">__ClearPageSlab</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="cm">/* 设置page-&gt;_mapcount = -1 */</span>
+    <span class="n">page_mapcount_reset</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">reclaim_state</span><span class="p">)</span>
+        <span class="n">current</span><span class="o">-&gt;</span><span class="n">reclaim_state</span><span class="o">-&gt;</span><span class="n">reclaimed_slab</span> <span class="o">+=</span> <span class="n">pages</span><span class="p">;</span>
+    <span class="cm">/* 通过伙伴系统释放页面 */</span>
+    <span class="n">__free_pages</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
+    <span class="cm">/* 从memcg系统删除 */</span>
+    <span class="n">memcg_uncharge_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>其中，清除标志位的函数都通过 <em>include/linux/page-flags.h</em> 中的宏定义，包括以双下划线开头的和不以双下划线开头的，后者是原子的，前者不是原子的。</p>
-
-<pre><code class="language-C">#define SETPAGEFLAG(uname, lname)                   \
-static inline void SetPage##uname(struct page *page)            \
-            { set_bit(PG_##lname, &amp;page-&gt;flags); }
-
-#define CLEARPAGEFLAG(uname, lname)                 \
-static inline void ClearPage##uname(struct page *page)          \
-            { clear_bit(PG_##lname, &amp;page-&gt;flags); }
-
-#define __SETPAGEFLAG(uname, lname)                 \
-static inline void __SetPage##uname(struct page *page)          \
-            { __set_bit(PG_##lname, &amp;page-&gt;flags); }
-
-#define __CLEARPAGEFLAG(uname, lname)                   \
-static inline void __ClearPage##uname(struct page *page)        \
-            { __clear_bit(PG_##lname, &amp;page-&gt;flags); }
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cp">#define SETPAGEFLAG(uname, lname)                   \
+</span><span class="cp">static inline void SetPage##uname(struct page *page)            \
+</span><span class="cp">            { set_bit(PG_##lname, &amp;page-&gt;flags); }
+</span><span class="cp"></span>
+<span class="cp">#define CLEARPAGEFLAG(uname, lname)                 \
+</span><span class="cp">static inline void ClearPage##uname(struct page *page)          \
+</span><span class="cp">            { clear_bit(PG_##lname, &amp;page-&gt;flags); }
+</span><span class="cp"></span>
+<span class="cp">#define __SETPAGEFLAG(uname, lname)                 \
+</span><span class="cp">static inline void __SetPage##uname(struct page *page)          \
+</span><span class="cp">            { __set_bit(PG_##lname, &amp;page-&gt;flags); }
+</span><span class="cp"></span>
+<span class="cp">#define __CLEARPAGEFLAG(uname, lname)                   \
+</span><span class="cp">static inline void __ClearPage##uname(struct page *page)        \
+</span><span class="cp">            { __clear_bit(PG_##lname, &amp;page-&gt;flags); }</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="5-deactivate-slab">5. deactivate_slab</h1>
 
 <p>虽然释放slab对象的过程中没有调用 <code>deactivate_slab</code> 函数，但是在slab分配对象的慢路径 <code>__slab_alloc</code> 执行的过程中，如果CPU正在使用的slab不属于当前的节点，或者slab设置了pfmemalloc标志，但是请求对象时没有设置ALLOC_NO_WATERMARK，就会将slab移除，放到节点的partial list中</p>
@@ -595,141 +929,276 @@ static inline void __ClearPage##uname(struct page *page)        \
 而且，从代码来看，前一种情况的可能性较小，更多的情况是通过后一种路径调用函数，因此默认将移除的slab放到表头。</p>
 
 <p>此处说明 <code>deactivate_slab</code> 时，假定通过 <code>__slab_alloc</code> 函数调用，即 <code>deactivate_slab(s, page, c-&gt;freelist)</code> ，则 <strong>page</strong> 为当前CPU正在使用的slab， <strong>freelist</strong> 不为空， <strong>page</strong> 可能位于当前的节点。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">deactivate_slab</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+                <span class="kt">void</span> <span class="o">*</span><span class="n">freelist</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">enum</span> <span class="n">slab_modes</span> <span class="p">{</span> <span class="n">M_NONE</span><span class="p">,</span> <span class="n">M_PARTIAL</span><span class="p">,</span> <span class="n">M_FULL</span><span class="p">,</span> <span class="n">M_FREE</span> <span class="p">};</span>
+    <span class="cm">/* n指向要移除的slab所属的内存节点 */</span>
+    <span class="k">struct</span> <span class="n">kmem_cache_node</span> <span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
+    <span class="kt">int</span> <span class="n">lock</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">enum</span> <span class="n">slab_modes</span> <span class="n">l</span> <span class="o">=</span> <span class="n">M_NONE</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">M_NONE</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">nextfree</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     默认情况下，移除的slab放到表头，因为是通过flush_slab
+</span><span class="cm">     调用，放到表头之后可在短时间内再次使用 */</span>
+    <span class="kt">int</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">DEACTIVATE_TO_HEAD</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="n">new</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="n">old</span><span class="p">;</span>
 
-<pre><code class="language-C">static void deactivate_slab(struct kmem_cache *s, struct page *page,
-                void *freelist)
-{
-    enum slab_modes { M_NONE, M_PARTIAL, M_FULL, M_FREE };
-    /* n指向要移除的slab所属的内存节点 */
-    struct kmem_cache_node *n = get_node(s, page_to_nid(page));
-    int lock = 0;
-    enum slab_modes l = M_NONE, m = M_NONE;
-    void *nextfree;
-    /*
-     默认情况下，移除的slab放到表头，因为是通过flush_slab
-     调用，放到表头之后可在短时间内再次使用 */
-    int tail = DEACTIVATE_TO_HEAD;
-    struct page new;
-    struct page old;
+    <span class="cm">/*
+</span><span class="cm">     如果page-&gt;freelist不等于空，说明其他CPU曾经释放对象
+</span><span class="cm">     到当前要移除的slab中，将其放到表尾 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">DEACTIVATE_REMOTE_FREES</span><span class="p">);</span>
+        <span class="n">tail</span> <span class="o">=</span> <span class="n">DEACTIVATE_TO_TAIL</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     如果freelist不为空，并且要移除的slab中有其他CPU释放的
+</span><span class="cm">     可用对象，则移除这些对象，将freelist指向slab最后一个
+</span><span class="cm">     可用的对象 */</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">freelist</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">nextfree</span> <span class="o">=</span> <span class="n">get_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">freelist</span><span class="p">)))</span> <span class="p">{</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">prior</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">counters</span><span class="p">;</span>
 
-    /*
-     如果page-&gt;freelist不等于空，说明其他CPU曾经释放对象
-     到当前要移除的slab中，将其放到表尾 */
-    if (page-&gt;freelist) {
-        stat(s, DEACTIVATE_REMOTE_FREES);
-        tail = DEACTIVATE_TO_TAIL;
-    }
-    /*
-     如果freelist不为空，并且要移除的slab中有其他CPU释放的
-     可用对象，则移除这些对象，将freelist指向slab最后一个
-     可用的对象 */
-    while (freelist &amp;&amp; (nextfree = get_freepointer(s, freelist))) {
-        void *prior;
-        unsigned long counters;
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="n">prior</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">;</span>
+            <span class="n">counters</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">counters</span><span class="p">;</span>
+            <span class="cm">/* 将freelist指向page-&gt;freelist */</span>
+            <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">freelist</span><span class="p">,</span> <span class="n">prior</span><span class="p">);</span>
+            <span class="n">new</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">counters</span><span class="p">;</span>
+            <span class="n">new</span><span class="p">.</span><span class="n">inuse</span><span class="o">--</span><span class="p">;</span>
+            <span class="n">VM_BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">new</span><span class="p">.</span><span class="n">frozen</span><span class="p">);</span>
 
-        do {
-            prior = page-&gt;freelist;
-            counters = page-&gt;counters;
-            /* 将freelist指向page-&gt;freelist */
-            set_freepointer(s, freelist, prior);
-            new.counters = counters;
-            new.inuse--;
-            VM_BUG_ON(!new.frozen);
+        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">__cmpxchg_double_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+            <span class="n">prior</span><span class="p">,</span> <span class="n">counters</span><span class="p">,</span>
+            <span class="n">freelist</span><span class="p">,</span> <span class="n">new</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+            <span class="s">&#34;drain percpu freelist&#34;</span><span class="p">));</span>
 
-        } while (!__cmpxchg_double_slab(s, page,
-            prior, counters,
-            freelist, new.counters,
-            &quot;drain percpu freelist&quot;));
+        <span class="n">freelist</span> <span class="o">=</span> <span class="n">nextfree</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="nl">redo</span><span class="p">:</span>
 
-        freelist = nextfree;
-    }
-redo:
+    <span class="n">old</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">;</span>
+    <span class="n">old</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">counters</span><span class="p">;</span>
+    <span class="n">VM_BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">old</span><span class="p">.</span><span class="n">frozen</span><span class="p">);</span>
 
-    old.freelist = page-&gt;freelist;
-    old.counters = page-&gt;counters;
-    VM_BUG_ON(!old.frozen);
+    <span class="cm">/* Determine target state of the slab */</span>
+    <span class="n">new</span><span class="p">.</span><span class="n">counters</span> <span class="o">=</span> <span class="n">old</span><span class="p">.</span><span class="n">counters</span><span class="p">;</span>
+    <span class="cm">/* 此时freelist指向移除的slab的最后一个可用对象 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">freelist</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">new</span><span class="p">.</span><span class="n">inuse</span><span class="o">--</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         将freelist指向page-&gt;freelist，即slab中
+</span><span class="cm">         最后一个空闲对象 */</span>
+        <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">freelist</span><span class="p">,</span> <span class="n">old</span><span class="p">.</span><span class="n">freelist</span><span class="p">);</span>
+        <span class="n">new</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">freelist</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span>
+        <span class="cm">/* new.freelist = old.freelist = page-&gt;freelist */</span>
+        <span class="n">new</span><span class="p">.</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">old</span><span class="p">.</span><span class="n">freelist</span><span class="p">;</span>
+    <span class="cm">/* 解冻 */</span>
+    <span class="n">new</span><span class="p">.</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-    /* Determine target state of the slab */
-    new.counters = old.counters;
-    /* 此时freelist指向移除的slab的最后一个可用对象 */
-    if (freelist) {
-        new.inuse--;
-        /*
-         将freelist指向page-&gt;freelist，即slab中
-         最后一个空闲对象 */
-        set_freepointer(s, freelist, old.freelist);
-        new.freelist = freelist;
-    } else
-        /* new.freelist = old.freelist = page-&gt;freelist */
-        new.freelist = old.freelist;
-    /* 解冻 */
-    new.frozen = 0;
+    <span class="cm">/*
+</span><span class="cm">     slab为空，并且节点的partial slab数量大于最小值，
+</span><span class="cm">     可以释放要移除的slab，设置为M_FREE状态 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">new</span><span class="p">.</span><span class="n">inuse</span> <span class="o">&amp;&amp;</span> <span class="n">n</span><span class="o">-&gt;</span><span class="n">nr_partial</span> <span class="o">&gt;=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">min_partial</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">M_FREE</span><span class="p">;</span>
+    <span class="cm">/* slab的freelist有可用对象，应该放到partial表 */</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">new</span><span class="p">.</span><span class="n">freelist</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">M_PARTIAL</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">lock</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">lock</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="cm">/* 否则是M_FULL */</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">M_FULL</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">kmem_cache_debug</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">lock</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">lock</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-    /*
-     slab为空，并且节点的partial slab数量大于最小值，
-     可以释放要移除的slab，设置为M_FREE状态 */
-    if (!new.inuse &amp;&amp; n-&gt;nr_partial &gt;= s-&gt;min_partial)
-        m = M_FREE;
-    /* slab的freelist有可用对象，应该放到partial表 */
-    else if (new.freelist) {
-        m = M_PARTIAL;
-        if (!lock) {
-            lock = 1;
-            spin_lock(&amp;n-&gt;list_lock);
-        }
-    /* 否则是M_FULL */
-    } else {
-        m = M_FULL;
-        if (kmem_cache_debug(s) &amp;&amp; !lock) {
-            lock = 1;
-            spin_lock(&amp;n-&gt;list_lock);
-        }
-    }
+    <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">!=</span> <span class="n">m</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="n">M_PARTIAL</span><span class="p">)</span>
 
-    if (l != m) {
-        if (l == M_PARTIAL)
+            <span class="n">remove_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
 
-            remove_partial(n, page);
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="n">M_FULL</span><span class="p">)</span>
 
-        else if (l == M_FULL)
+            <span class="n">remove_full</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
 
-            remove_full(s, n, page);
+        <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="n">M_PARTIAL</span><span class="p">)</span> <span class="p">{</span>
 
-        if (m == M_PARTIAL) {
+            <span class="n">add_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">tail</span><span class="p">);</span>
+            <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tail</span><span class="p">);</span>
 
-            add_partial(n, page, tail);
-            stat(s, tail);
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="n">M_FULL</span><span class="p">)</span> <span class="p">{</span>
 
-        } else if (m == M_FULL) {
+            <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">DEACTIVATE_FULL</span><span class="p">);</span>
+            <span class="n">add_full</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
 
-            stat(s, DEACTIVATE_FULL);
-            add_full(s, n, page);
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-        }
-    }
+    <span class="n">l</span> <span class="o">=</span> <span class="n">m</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     如果修改page的freelist失败，回到redo重新执行。
+</span><span class="cm">     这时需要根据l的状态先把之前添加到节点的slab移除，
+</span><span class="cm">     然后再插入，以保证一致性 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">__cmpxchg_double_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+                <span class="n">old</span><span class="p">.</span><span class="n">freelist</span><span class="p">,</span> <span class="n">old</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+                <span class="n">new</span><span class="p">.</span><span class="n">freelist</span><span class="p">,</span> <span class="n">new</span><span class="p">.</span><span class="n">counters</span><span class="p">,</span>
+                <span class="s">&#34;unfreezing slab&#34;</span><span class="p">))</span>
+        <span class="k">goto</span> <span class="n">redo</span><span class="p">;</span>
 
-    l = m;
-    /*
-     如果修改page的freelist失败，回到redo重新执行。
-     这时需要根据l的状态先把之前添加到节点的slab移除，
-     然后再插入，以保证一致性 */
-    if (!__cmpxchg_double_slab(s, page,
-                old.freelist, old.counters,
-                new.freelist, new.counters,
-                &quot;unfreezing slab&quot;))
-        goto redo;
+    <span class="k">if</span> <span class="p">(</span><span class="n">lock</span><span class="p">)</span>
+        <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">list_lock</span><span class="p">);</span>
 
-    if (lock)
-        spin_unlock(&amp;n-&gt;list_lock);
-
-    if (m == M_FREE) {
-        stat(s, DEACTIVATE_EMPTY);
-        discard_slab(s, page);
-        stat(s, FREE_SLAB);
-    }
-}
-</code></pre>
-
+    <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="n">M_FREE</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">DEACTIVATE_EMPTY</span><span class="p">);</span>
+        <span class="n">discard_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+        <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="6-总结">6. 总结</h1>
 
 <p>每个 <strong>struct kmem_cache</strong> 包含所有内存节点的partial slab信息，每个节点都有一个 <strong>struct list_head partial</strong> ，保存当前节点的所有partial slab；还有 <strong>unsigned long nr_partials</strong> 保存本节点partial slab的总数。</p>
@@ -852,7 +1321,7 @@ redo:
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>

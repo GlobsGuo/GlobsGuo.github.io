@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="4666">
+<meta itemprop="wordCount" content="5013">
 
 
 
@@ -125,8 +125,8 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-21 </span>
         
-          <span class="more-meta"> 4666 words </span>
-          <span class="more-meta"> 10 mins read </span>
+          <span class="more-meta"> 5013 words </span>
+          <span class="more-meta"> 11 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -259,63 +259,114 @@ cpu的可用对象数量的最大值</li>
 <p>开启 <strong>CONFIG_SLUB</strong> 时， <code>create_boot_cache</code> 只有创建 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 和 <strong>kmalloc_caches</strong> 时会调用。</p>
 
 <p><code>create_boot_cache</code> 会设置传入cache的一些成员变量，然后调用 <code>__kmem_cache_create</code> 函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">create_boot_cache</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">object_size</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span>
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">align</span> <span class="o">=</span> <span class="n">calculate_alignment</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">ARCH_KMALLOC_MINALIGN</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">__kmem_cache_create</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
 
-<pre><code class="language-C">void __init create_boot_cache(struct kmem_cache *s, const char *name, size_t size,
-        unsigned long flags)
-{
-    int err;
-    s-&gt;name = name;
-    s-&gt;size = s-&gt;object_size = size;
-    s-&gt;align = calculate_alignment(flags, ARCH_KMALLOC_MINALIGN, size);
-    err = __kmem_cache_create(s, flags);
+    <span class="k">if</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="n">panic</span><span class="p">(</span><span class="s">&#34;Creation of kmalloc slab %s size=%zu failed. Reason %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">err</span><span class="p">);</span>
 
-    if (err)
-        panic(&quot;Creation of kmalloc slab %s size=%zu failed. Reason %d\n&quot;,
-                    name, size, err);
-
-    s-&gt;refcount = -1;   /* Exempt from merging for now */
-}
-</code></pre>
-
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>   <span class="cm">/* Exempt from merging for now */</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><code>__kmem_cache_crete</code> 主要通过 <code>kmem_cache_open</code> 实现，这个函数除了设置cache的一些参数以外，还会调用 <code>init_kmem_cache_nodes</code> 和 <code>alloc_kmem_cache_cpus</code> ;前者用于初始化kmem_cache中的 <strong>struct kmem_cache_node *node[MAX_NUMNODES]</strong> 成员,
 后者用于分配 <strong>struct kmem_cache</strong> 中的per-cpu成员变量 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 。</p>
 
 <h2 id="2-1-init-kmem-cache-nodes">2.1. init_kmem_cache_nodes</h2>
 
 <p><code>init_kmem_cache_nodes</code> 函数根据当前slab系统的状态，为传入的 <strong>struct kmem_cache</strong> 对象分配 <strong>struct kmem_cache_node</strong> 类型的成员变量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">int</span> <span class="nf">init_kmem_cache_nodes</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">node</span><span class="p">;</span>
+    <span class="cm">/* 遍历每个具有normal内存的内存节点 */</span>
+    <span class="n">for_each_node_state</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">N_NORMAL_MEMORY</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">kmem_cache_node</span> <span class="o">*</span><span class="n">n</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         此时kmem_cache_node和kmem_cache两个slab
+</span><span class="cm">         cache还没有建立，不能使用 */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">slab_state</span> <span class="o">==</span> <span class="n">DOWN</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">early_kmem_cache_node_alloc</span><span class="p">(</span><span class="n">node</span><span class="p">);</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="cm">/*
+</span><span class="cm">         kmem_cache_node已经建立，直接从中分配一个
+</span><span class="cm">         struct kmem_cache_node对象 */</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">kmem_cache_alloc_node</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span>
+                        <span class="n">GFP_KERNEL</span><span class="p">,</span> <span class="n">node</span><span class="p">);</span>
 
-<pre><code class="language-C">static int init_kmem_cache_nodes(struct kmem_cache *s)
-{
-    int node;
-    /* 遍历每个具有normal内存的内存节点 */
-    for_each_node_state(node, N_NORMAL_MEMORY) {
-        struct kmem_cache_node *n;
-        /*
-         此时kmem_cache_node和kmem_cache两个slab
-         cache还没有建立，不能使用 */
-        if (slab_state == DOWN) {
-            early_kmem_cache_node_alloc(node);
-            continue;
-        }
-        /*
-         kmem_cache_node已经建立，直接从中分配一个
-         struct kmem_cache_node对象 */
-        n = kmem_cache_alloc_node(kmem_cache_node,
-                        GFP_KERNEL, node);
-
-        if (!n) {
-            free_kmem_cache_nodes(s);
-            return 0;
-        }
-        /* 设置kmem_cache的per-cpu变量指向正确的节点 */
-        s-&gt;node[node] = n;
-        /* 初始化kmem_cache_node的成员变量 */
-        init_kmem_cache_node(n);
-    }
-    return 1;
-}
-</code></pre>
-
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">free_kmem_cache_nodes</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="cm">/* 设置kmem_cache的per-cpu变量指向正确的节点 */</span>
+        <span class="n">s</span><span class="o">-&gt;</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>
+        <span class="cm">/* 初始化kmem_cache_node的成员变量 */</span>
+        <span class="n">init_kmem_cache_node</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="2-1-1-early-kmem-cache-node-alloc">2.1.1. early_kmem_cache_node_alloc</h3>
 
 <p>如果系统的slab系统还没有启动，即 <strong>slab_state = DOWN</strong> ，这发生在 <strong>kmalloc_caches</strong> 数组初始化之前——还没有调用 <code>create_kmalloc_caches</code> ，就通过 <code>early_kmem_cache_node_alloc</code> 分配并初始化 <strong>kmem_cache_node</strong> 。</p>
@@ -323,176 +374,332 @@ cpu的可用对象数量的最大值</li>
 <p>根据内核的代码，当且仅当创建 <strong>kmem_cache_node</strong> 和 <strong>kmem_cache_node</strong> 时，会执行 <code>early_kmem_cache_node_alloc</code> 函数。</p>
 
 <p>这个函数首先通过 <code>new_slab</code> 函数从指定的内存节点通过buddy allocator分配一个新的page给 <strong>kmem_cache_node</strong> 分配器，然后初始化struct page中和SLUB相关的信息，并且将page保存到 <strong>kmem_cache_node</strong> 的 <strong>node[]</strong> 域中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">early_kmem_cache_node_alloc</span><span class="p">(</span><span class="kt">int</span> <span class="n">node</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">kmem_cache_node</span> <span class="o">*</span><span class="n">n</span><span class="p">;</span>
 
-<pre><code class="language-C">static void early_kmem_cache_node_alloc(int node)
-{
-    struct page *page;
-    struct kmem_cache_node *n;
+    <span class="n">BUG_ON</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache_node</span><span class="p">));</span>
 
-    BUG_ON(kmem_cache_node-&gt;size &lt; sizeof(struct kmem_cache_node));
+    <span class="cm">/*
+</span><span class="cm">     调用伙伴系统的__alloc_pages_nodemask函数分配
+</span><span class="cm">     新的page给kmem_cache_node，并设置page的成员变量 */</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">new_slab</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span> <span class="n">GFP_NOWAIT</span><span class="p">,</span> <span class="n">node</span><span class="p">);</span>
 
-    /*
-     调用伙伴系统的__alloc_pages_nodemask函数分配
-     新的page给kmem_cache_node，并设置page的成员变量 */
-    page = new_slab(kmem_cache_node, GFP_NOWAIT, node);
+    <span class="n">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">page</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="o">!=</span> <span class="n">node</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">pr_err</span><span class="p">(</span><span class="s">&#34;SLUB: Unable to allocate memory from node %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">node</span><span class="p">);</span>
+        <span class="n">pr_err</span><span class="p">(</span><span class="s">&#34;SLUB: Allocating a useless per node structure in order to be able to continue</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/* 对于新分配的page，page-&gt;freelist为页面的起始地址 */</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span><span class="p">;</span>
+    <span class="n">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">);</span>
+    <span class="cm">/*
+</span><span class="cm">     page-&gt;freelist指向page的起始地址，
+</span><span class="cm">     即第一个可用的free object */</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">get_freepointer</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">inuse</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="cm">/* 保存到kmem_cache_node中对应的节点中 */</span>
+    <span class="n">kmem_cache_node</span><span class="o">-&gt;</span><span class="n">node</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>
+<span class="cp">#ifdef CONFIG_SLUB_DEBUG
+</span><span class="cp"></span>    <span class="cm">/* 根据kmem_cache_node的标志设置对象 */</span>
+    <span class="n">init_object</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">SLUB_RED_ACTIVE</span><span class="p">);</span>
+    <span class="n">init_tracking</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="cm">/*
+</span><span class="cm">     初始化cache node中partial list，nr_slabs，
+</span><span class="cm">     total_objects，full list */</span>
+    <span class="n">init_kmem_cache_node</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+    <span class="cm">/* 增加cache node的统计信息，包括nr_slabs，total_objects */</span>
+    <span class="n">inc_slabs_node</span><span class="p">(</span><span class="n">kmem_cache_node</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">objects</span><span class="p">);</span>
 
-    BUG_ON(!page);
-    if (page_to_nid(page) != node) {
-        pr_err(&quot;SLUB: Unable to allocate memory from node %d\n&quot;, node);
-        pr_err(&quot;SLUB: Allocating a useless per node structure in order to be able to continue\n&quot;);
-    }
-    /* 对于新分配的page，page-&gt;freelist为页面的起始地址 */
-    n = page-&gt;freelist;
-    BUG_ON(!n);
-    /*
-     page-&gt;freelist指向page的起始地址，
-     即第一个可用的free object */
-    page-&gt;freelist = get_freepointer(kmem_cache_node, n);
-    page-&gt;inuse = 1;
-    page-&gt;frozen = 0;
-    /* 保存到kmem_cache_node中对应的节点中 */
-    kmem_cache_node-&gt;node[node] = n;
-#ifdef CONFIG_SLUB_DEBUG
-    /* 根据kmem_cache_node的标志设置对象 */
-    init_object(kmem_cache_node, n, SLUB_RED_ACTIVE);
-    init_tracking(kmem_cache_node, n);
-#endif
-    /*
-     初始化cache node中partial list，nr_slabs，
-     total_objects，full list */
-    init_kmem_cache_node(n);
-    /* 增加cache node的统计信息，包括nr_slabs，total_objects */
-    inc_slabs_node(kmem_cache_node, node, page-&gt;objects);
-
-    /*
-     * No locks need to be taken here as it has just been
-     * initialized and there is no concurrent access.
-     */
-     /* 将page添加到node的partial list中 */
-    __add_partial(n, page, DEACTIVATE_TO_HEAD);
-}
-</code></pre>
-
+    <span class="cm">/*
+</span><span class="cm">     * No locks need to be taken here as it has just been
+</span><span class="cm">     * initialized and there is no concurrent access.
+</span><span class="cm">     */</span>
+     <span class="cm">/* 将page添加到node的partial list中 */</span>
+    <span class="n">__add_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">DEACTIVATE_TO_HEAD</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h4 id="2-1-1-1-new-slab">2.1.1.1. new_slab</h4>
 
 <p><code>early_kmem_cache_node_alloc</code> 首先调用 <code>new_slab</code> 为指定的内存节点分配用作slab的内存页，并且初始化其中的对象。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="nf">new_slab</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="n">gfp_t</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">int</span> <span class="n">node</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">start</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">last</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">order</span><span class="p">;</span>
 
-<pre><code class="language-C">static struct page *new_slab(struct kmem_cache *s, gfp_t flags, int node)
-{
-    struct page *page;
-    void *start;
-    void *last;
-    void *p;
-    int order;
+    <span class="n">BUG_ON</span><span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">GFP_SLAB_BUG_MASK</span><span class="p">);</span>
 
-    BUG_ON(flags &amp; GFP_SLAB_BUG_MASK);
+    <span class="cm">/* allocate_slab最终调用alloc_pages函数分配新的page，
+</span><span class="cm">       并且设置page-&gt;objects = s-&gt;oo.x。
+</span><span class="cm">       函数根据传入的kmem_cache-&gt;oo的大小分配指定数量的page。*/</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">allocate_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span>
+        <span class="n">flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">GFP_RECLAIM_MASK</span> <span class="o">|</span> <span class="n">GFP_CONSTRAINT_MASK</span><span class="p">),</span> <span class="n">node</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">page</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+    <span class="cm">/* 如果是复合页面，返回复合页面包含的page数；
+</span><span class="cm">       否则返回0 */</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">compound_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="cm">/* 将新的page包含的对象数添加到slab cache中对应的节点中，
+</span><span class="cm">       并增加slab的计数(每个page计为一个slab) */</span>
+    <span class="n">inc_slabs_node</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">),</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">objects</span><span class="p">);</span>
+    <span class="cm">/* 设置page所属的slab cache */</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">slab_cache</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+    <span class="cm">/* 设置page的PG_slab标志 */</span>
+    <span class="n">__SetPageSlab</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="cm">/* pfmemalloc标志 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">pfmemalloc</span><span class="p">)</span>
+        <span class="n">SetPageSlabPfmemalloc</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="cm">/* start设置为page的内核虚拟地址 */</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">page_address</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="cm">/* 设置slab cache为特定值 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">SLAB_POISON</span><span class="p">))</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">POISON_INUSE</span><span class="p">,</span> <span class="n">PAGE_SIZE</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">);</span>
 
-    /* allocate_slab最终调用alloc_pages函数分配新的page，
-       并且设置page-&gt;objects = s-&gt;oo.x。
-       函数根据传入的kmem_cache-&gt;oo的大小分配指定数量的page。*/
-    page = allocate_slab(s,
-        flags &amp; (GFP_RECLAIM_MASK | GFP_CONSTRAINT_MASK), node);
-    if (!page)
-        goto out;
-    /* 如果是复合页面，返回复合页面包含的page数；
-       否则返回0 */
-    order = compound_order(page);
-    /* 将新的page包含的对象数添加到slab cache中对应的节点中，
-       并增加slab的计数(每个page计为一个slab) */
-    inc_slabs_node(s, page_to_nid(page), page-&gt;objects);
-    /* 设置page所属的slab cache */
-    page-&gt;slab_cache = s;
-    /* 设置page的PG_slab标志 */
-    __SetPageSlab(page);
-    /* pfmemalloc标志 */
-    if (page-&gt;pfmemalloc)
-        SetPageSlabPfmemalloc(page);
-    /* start设置为page的内核虚拟地址 */
-    start = page_address(page);
-    /* 设置slab cache为特定值 */
-    if (unlikely(s-&gt;flags &amp; SLAB_POISON))
-        memset(start, POISON_INUSE, PAGE_SIZE &lt;&lt; order);
-
-    last = start;
-    /*
-     设置slab cache中的每个对象指向下一个对象，如果
-     slab cache定义了构造函数，用构造函数初始化对象 */
-    for_each_object(p, s, start, page-&gt;objects) {
-        setup_object(s, page, last);
-        set_freepointer(s, last, p);
-        last = p;
-    }
-    setup_object(s, page, last);
-    /* 最后一个object指向NULL */
-    set_freepointer(s, last, NULL);
-    /* 设置page-&gt;freelist为内存页的起始虚拟地址 */
-    page-&gt;freelist = start;
-    /* page-&gt;inuse等于页面中包含的对象的数量 */
-    page-&gt;inuse = page-&gt;objects;
-    page-&gt;frozen = 1;
-out:
-    return page;
-}
-</code></pre>
-
+    <span class="n">last</span> <span class="o">=</span> <span class="n">start</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     设置slab cache中的每个对象指向下一个对象，如果
+</span><span class="cm">     slab cache定义了构造函数，用构造函数初始化对象 */</span>
+    <span class="n">for_each_object</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">objects</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">setup_object</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last</span><span class="p">);</span>
+        <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="n">p</span><span class="p">);</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">setup_object</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last</span><span class="p">);</span>
+    <span class="cm">/* 最后一个object指向NULL */</span>
+    <span class="n">set_freepointer</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="cm">/* 设置page-&gt;freelist为内存页的起始虚拟地址 */</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">freelist</span> <span class="o">=</span> <span class="n">start</span><span class="p">;</span>
+    <span class="cm">/* page-&gt;inuse等于页面中包含的对象的数量 */</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">inuse</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">objects</span><span class="p">;</span>
+    <span class="n">page</span><span class="o">-&gt;</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="nl">out</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="2-1-2-kmem-cache-alloc-node">2.1.2. kmem_cache_alloc_node</h3>
 
 <p><code>kmem_cache_alloc_node</code> 函数和 <code>slab_alloc</code> 一样，通过 <code>slab_alloc_node</code> 实现，之后在介绍 <code>slab_alloc</code> 函数时详细说明。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="o">*</span><span class="nf">kmem_cache_alloc_node</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span> <span class="n">gfp_t</span> <span class="n">gfpflags</span><span class="p">,</span> <span class="kt">int</span> <span class="n">node</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ret</span> <span class="o">=</span> <span class="n">slab_alloc_node</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">gfpflags</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">_RET_IP_</span><span class="p">);</span>
 
-<pre><code class="language-C">void *kmem_cache_alloc_node(struct kmem_cache *s, gfp_t gfpflags, int node)
-{
-    void *ret = slab_alloc_node(s, gfpflags, node, _RET_IP_);
+    <span class="n">trace_kmem_cache_alloc_node</span><span class="p">(</span><span class="n">_RET_IP_</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">-&gt;</span><span class="n">object_size</span><span class="p">,</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">,</span> <span class="n">gfpflags</span><span class="p">,</span> <span class="n">node</span><span class="p">);</span>
 
-    trace_kmem_cache_alloc_node(_RET_IP_, ret,
-                    s-&gt;object_size, s-&gt;size, gfpflags, node);
-
-    return ret;
-}
-EXPORT_SYMBOL(kmem_cache_alloc_node);
-</code></pre>
-
+    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_alloc_node</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="2-2-alloc-kmem-cache-cpus">2.2. alloc_kmem_cache_cpus</h2>
 
 <p><code>kmem_cache_open</code> 函数调用 <code>init_kmem_cache_nodes</code> 后，接着调用 <code>alloc_kmem_cache_cpus</code> ，初始化 <strong>struct kmem_cache</strong> 结构体中的per-cpu成员 <strong>cpu_slab</strong> 。</p>
 
 <p><strong>cpu_slab</strong> 类型为 <strong>struct kmem_cache_cpu</strong> ，包含每个CPU的slab信息：</p>
-
-<pre><code class="language-C">struct kmem_cache_cpu {
-    void **freelist;    /* Pointer to next available object */
-    unsigned long tid;  /* Globally unique transaction id */
-    struct page *page;  /* The slab from which we are allocating */
-    struct page *partial;   /* Partially allocated frozen slabs */
-#ifdef CONFIG_SLUB_STATS
-    unsigned stat[NR_SLUB_STAT_ITEMS];
-#endif
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">kmem_cache_cpu</span> <span class="p">{</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">freelist</span><span class="p">;</span>    <span class="cm">/* Pointer to next available object */</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">tid</span><span class="p">;</span>  <span class="cm">/* Globally unique transaction id */</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>  <span class="cm">/* The slab from which we are allocating */</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">partial</span><span class="p">;</span>   <span class="cm">/* Partially allocated frozen slabs */</span>
+<span class="cp">#ifdef CONFIG_SLUB_STATS
+</span><span class="cp"></span>    <span class="kt">unsigned</span> <span class="n">stat</span><span class="p">[</span><span class="n">NR_SLUB_STAT_ITEMS</span><span class="p">];</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>对于多CPU系统而言，每一个slab cache对象，都包含系统中所有CPU的同种类型的slab信息——对于某种对象的slab cache，系统中的每个CPU都有一个slab用来响应对应CPU的对象分配请求。</p>
 
 <p>这些信息保存在 <strong>cpu_slab</strong> ，而 <strong>struct kmem_cache</strong> 包括所有CPU的slab信息。其中和 <strong>cpu_slab</strong> 相关的成员变量包括 <strong>cpu_partial</strong> ，即每个CPU需要保留的partial objects的数量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="nf">alloc_kmem_cache_cpus</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BUILD_BUG_ON</span><span class="p">(</span><span class="n">PERCPU_DYNAMIC_EARLY_SIZE</span> <span class="o">&lt;</span>
+            <span class="n">KMALLOC_SHIFT_HIGH</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache_cpu</span><span class="p">));</span>
 
-<pre><code class="language-C">static inline int alloc_kmem_cache_cpus(struct kmem_cache *s)
-{
-    BUILD_BUG_ON(PERCPU_DYNAMIC_EARLY_SIZE &lt;
-            KMALLOC_SHIFT_HIGH * sizeof(struct kmem_cache_cpu));
+    <span class="cm">/*
+</span><span class="cm">     * Must align to double word boundary for the double cmpxchg
+</span><span class="cm">     * instructions to work; see __pcpu_double_call_return_bool().
+</span><span class="cm">     */</span>
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">cpu_slab</span> <span class="o">=</span> <span class="n">__alloc_percpu</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache_cpu</span><span class="p">),</span>
+                     <span class="mi">2</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
 
-    /*
-     * Must align to double word boundary for the double cmpxchg
-     * instructions to work; see __pcpu_double_call_return_bool().
-     */
-    s-&gt;cpu_slab = __alloc_percpu(sizeof(struct kmem_cache_cpu),
-                     2 * sizeof(void *));
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">cpu_slab</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="cm">/* 初始化cpu_slab的tid为CPU ID */</span>
+    <span class="n">init_kmem_cache_cpus</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
 
-    if (!s-&gt;cpu_slab)
-        return 0;
-    /* 初始化cpu_slab的tid为CPU ID */
-    init_kmem_cache_cpus(s);
-
-    return 1;
-}
-</code></pre>
-
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>至此，slab系统的两个cache—— <strong>kmem_cache_node</strong> 和 <strong>kmem_cache</strong> 初始化完成，可以用来响应其他 <strong>struct kmem_cache_node</strong> 和 <strong>struct kmem_cache</strong> 对象的内存分配请求。</p>
 
 <h1 id="3-kmalloc-caches">3. kmalloc_caches</h1>
@@ -500,186 +707,356 @@ EXPORT_SYMBOL(kmem_cache_alloc_node);
 <p>分配kmalloc slab cache的关键变量是 <strong>kmalloc_caches</strong> ，定义在*mm/slab_common.c*中， <strong>struct kmem_cache *kmalloc_caches[KMALLOC_SHIFT_HIGH + 1]</strong> ，在 <code>create_kmalloc_caches</code> 函数中初始化。</p>
 
 <p>这个函数中，x86架构下 <strong>KMALLOC_SHIFT_LOW</strong> =3， <strong>KMALLOC_SHIFT_HIGH</strong> =13， <strong>KMALLOC_MIN_SIZE</strong> =8，许多修复 <strong>size_index</strong> 数组的条件语句不满足，此处省略不述：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">create_kmalloc_caches</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+    <span class="p">...</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="n">KMALLOC_SHIFT_LOW</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">KMALLOC_SHIFT_HIGH</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">kmalloc_caches</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+            <span class="cm">/* create_alloc_cache函数完成实际工作 */</span>
+            <span class="n">kmalloc_caches</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_kmalloc_cache</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span>
+                            <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+        <span class="p">}</span>
 
-<pre><code class="language-C">void __init create_kmalloc_caches(unsigned long flags)
-{
-    int i;
-    ...
-    for (i = KMALLOC_SHIFT_LOW; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
-        if (!kmalloc_caches[i]) {
-            /* create_alloc_cache函数完成实际工作 */
-            kmalloc_caches[i] = create_kmalloc_cache(NULL,
-                            1 &lt;&lt; i, flags);
-        }
+        <span class="cm">/*
+</span><span class="cm">         * Caches that are not of the two-to-the-power-of size.
+</span><span class="cm">         * These have to be created immediately after the
+</span><span class="cm">         * earlier power of two caches
+</span><span class="cm">         */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">KMALLOC_MIN_SIZE</span> <span class="o">&lt;=</span> <span class="mi">32</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">kmalloc_caches</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="n">kmalloc_caches</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_kmalloc_cache</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">96</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
 
-        /*
-         * Caches that are not of the two-to-the-power-of size.
-         * These have to be created immediately after the
-         * earlier power of two caches
-         */
-        if (KMALLOC_MIN_SIZE &lt;= 32 &amp;&amp; !kmalloc_caches[1] &amp;&amp; i == 6)
-            kmalloc_caches[1] = create_kmalloc_cache(NULL, 96, flags);
+        <span class="k">if</span> <span class="p">(</span><span class="n">KMALLOC_MIN_SIZE</span> <span class="o">&lt;=</span> <span class="mi">64</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">kmalloc_caches</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">7</span><span class="p">)</span>
+            <span class="n">kmalloc_caches</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_kmalloc_cache</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">192</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     现在，kmalloc_caches[]的大小为
+</span><span class="cm">     -，96，192，8，16 ... 2^13 */</span>
+    <span class="cm">/* Kmalloc array is now usable */</span>
+    <span class="n">slab_state</span> <span class="o">=</span> <span class="n">UP</span><span class="p">;</span>
+    <span class="cm">/* 设置slab的名称 */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">KMALLOC_SHIFT_HIGH</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="n">kmalloc_caches</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="kt">char</span> <span class="o">*</span><span class="n">n</span><span class="p">;</span>
 
-        if (KMALLOC_MIN_SIZE &lt;= 64 &amp;&amp; !kmalloc_caches[2] &amp;&amp; i == 7)
-            kmalloc_caches[2] = create_kmalloc_cache(NULL, 192, flags);
-    }
-    /*
-     现在，kmalloc_caches[]的大小为
-     -，96，192，8，16 ... 2^13 */
-    /* Kmalloc array is now usable */
-    slab_state = UP;
-    /* 设置slab的名称 */
-    for (i = 0; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
-        struct kmem_cache *s = kmalloc_caches[i];
-        char *n;
+        <span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">kasprintf</span><span class="p">(</span><span class="n">GFP_NOWAIT</span><span class="p">,</span> <span class="s">&#34;kmalloc-%d&#34;</span><span class="p">,</span> <span class="n">kmalloc_size</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
 
-        if (s) {
-            n = kasprintf(GFP_NOWAIT, &quot;kmalloc-%d&quot;, kmalloc_size(i));
+            <span class="n">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">);</span>
+            <span class="n">s</span><span class="o">-&gt;</span><span class="n">name</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="cp">#ifdef CONFIG_ZONE_DMA
+</span><span class="cp"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">KMALLOC_SHIFT_HIGH</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="n">kmalloc_caches</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
 
-            BUG_ON(!n);
-            s-&gt;name = n;
-        }
-    }
-    #ifdef CONFIG_ZONE_DMA
-    for (i = 0; i &lt;= KMALLOC_SHIFT_HIGH; i++) {
-        struct kmem_cache *s = kmalloc_caches[i];
+        <span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="n">kmalloc_size</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+            <span class="kt">char</span> <span class="o">*</span><span class="n">n</span> <span class="o">=</span> <span class="n">kasprintf</span><span class="p">(</span><span class="n">GFP_NOWAIT</span><span class="p">,</span>
+                 <span class="s">&#34;dma-kmalloc-%d&#34;</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
 
-        if (s) {
-            int size = kmalloc_size(i);
-            char *n = kasprintf(GFP_NOWAIT,
-                 &quot;dma-kmalloc-%d&quot;, size);
-
-            BUG_ON(!n);
-            kmalloc_dma_caches[i] = create_kmalloc_cache(n,
-                size, SLAB_CACHE_DMA | flags);
-        }
-    }
-#endif
-}
-</code></pre>
-
+            <span class="n">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">n</span><span class="p">);</span>
+            <span class="n">kmalloc_dma_caches</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_kmalloc_cache</span><span class="p">(</span><span class="n">n</span><span class="p">,</span>
+                <span class="n">size</span><span class="p">,</span> <span class="n">SLAB_CACHE_DMA</span> <span class="o">|</span> <span class="n">flags</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>结合此函数中创建 <strong>kmalloc_caches</strong> 的过程，可以理解*mm/slab_common.c*中 <strong>static s8 size_index[24]</strong> 数组的内容。</p>
 
 <h2 id="3-1-create-kmalloc-caches">3.1. create_kmalloc_caches</h2>
 
 <p><code>create_kmalloc_caches</code> 函数的主要工作通过 <code>create_kmalloc_cache</code> 实现，这个函数首先从 <strong>kmem_cache</strong> 中分配一个 <strong>struct kmem_cache</strong> 对象，然后调用 <code>create_boot_cache</code> 函数，设置创建的 <strong>kmem_cache</strong> 对象的参数，包括per-cpu成员变量；并且创建对应的sysfs目录，位于 <em>/sys/kernel/slab/&lt;kmem_cache name&gt;/</em> 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">__init</span> <span class="nf">create_kmalloc_cache</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span>
+                <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="n">kmem_cache_zalloc</span><span class="p">(</span><span class="n">kmem_cache</span><span class="p">,</span> <span class="n">GFP_NOWAIT</span><span class="p">);</span>
 
-<pre><code class="language-C">struct kmem_cache *__init create_kmalloc_cache(const char *name, size_t size,
-                unsigned long flags)
-{
-    struct kmem_cache *s = kmem_cache_zalloc(kmem_cache, GFP_NOWAIT);
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">panic</span><span class="p">(</span><span class="s">&#34;Out of memory when creating slab %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
 
-    if (!s)
-        panic(&quot;Out of memory when creating slab %s\n&quot;, name);
-
-    create_boot_cache(s, name, size, flags);
-    /* slab_cache是保存系统中所有slab cache的链表 */
-    list_add(&amp;s-&gt;list, &amp;slab_caches);
-    s-&gt;refcount = 1;
-    return s;
-}
-</code></pre>
-
+    <span class="n">create_boot_cache</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+    <span class="cm">/* slab_cache是保存系统中所有slab cache的链表 */</span>
+    <span class="n">list_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">list</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">slab_caches</span><span class="p">);</span>
+    <span class="n">s</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>可以看到，创建 <strong>kmalloc_caches</strong> 时，直接通过 <code>kmem_cache_zalloc</code> 从 <strong>kmem_cache</strong> slab cache中分配一个 <strong>struct kmem_cache</strong> 对象使用。</p>
 
 <h1 id="4-其他slab-cache的初始化">4. 其他slab cache的初始化</h1>
 
 <p>除了 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 、 <strong>kmalloc_caches</strong> 三个slab cache，内核中其他的slab cache的创建通过 <code>kmem_cache_create</code> 函数完成：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/*
+</span><span class="cm"> * kmem_cache_create - Create a cache.
+</span><span class="cm"> * @name: A string which is used in /proc/slabinfo to identify this cache.
+</span><span class="cm"> * @size: The size of objects to be created in this cache.
+</span><span class="cm"> * @align: The required alignment for the objects.
+</span><span class="cm"> * @flags: SLAB flags
+</span><span class="cm"> * @ctor: A constructor for the objects.
+</span><span class="cm"> *
+</span><span class="cm"> * Returns a ptr to the cache on success, NULL on failure.
+</span><span class="cm"> * Cannot be called within a interrupt, but can be interrupted.
+</span><span class="cm"> * The @ctor is run when new pages are allocated by the cache.
+</span><span class="cm"> *
+</span><span class="cm"> * The flags are
+</span><span class="cm"> *
+</span><span class="cm"> * %SLAB_POISON - Poison the slab with a known test pattern (a5a5a5a5)
+</span><span class="cm"> * to catch references to uninitialised memory.
+</span><span class="cm"> *
+</span><span class="cm"> * %SLAB_RED_ZONE - Insert `Red&#39; zones around the allocated memory to check
+</span><span class="cm"> * for buffer overruns.
+</span><span class="cm"> *
+</span><span class="cm"> * %SLAB_HWCACHE_ALIGN - Align the objects in this cache to a hardware
+</span><span class="cm"> * cacheline.  This can be beneficial if you&#39;re counting cycles as closely
+</span><span class="cm"> * as davem.
+</span><span class="cm"> */</span>
+<span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span>
+<span class="nf">kmem_cache_create</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">align</span><span class="p">,</span>
+          <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">ctor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="n">s</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">cache_name</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
 
-<pre><code class="language-C">/*
- * kmem_cache_create - Create a cache.
- * @name: A string which is used in /proc/slabinfo to identify this cache.
- * @size: The size of objects to be created in this cache.
- * @align: The required alignment for the objects.
- * @flags: SLAB flags
- * @ctor: A constructor for the objects.
- *
- * Returns a ptr to the cache on success, NULL on failure.
- * Cannot be called within a interrupt, but can be interrupted.
- * The @ctor is run when new pages are allocated by the cache.
- *
- * The flags are
- *
- * %SLAB_POISON - Poison the slab with a known test pattern (a5a5a5a5)
- * to catch references to uninitialised memory.
- *
- * %SLAB_RED_ZONE - Insert `Red' zones around the allocated memory to check
- * for buffer overruns.
- *
- * %SLAB_HWCACHE_ALIGN - Align the objects in this cache to a hardware
- * cacheline.  This can be beneficial if you're counting cycles as closely
- * as davem.
- */
-struct kmem_cache *
-kmem_cache_create(const char *name, size_t size, size_t align,
-          unsigned long flags, void (*ctor)(void *))
-{
-    struct kmem_cache *s;
-    char *cache_name;
-    int err;
+    <span class="n">get_online_cpus</span><span class="p">();</span>
+    <span class="n">get_online_mems</span><span class="p">();</span>
 
-    get_online_cpus();
-    get_online_mems();
+    <span class="n">mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">slab_mutex</span><span class="p">);</span>
 
-    mutex_lock(&amp;slab_mutex);
+    <span class="n">err</span> <span class="o">=</span> <span class="n">kmem_cache_sanity_check</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">out_unlock</span><span class="p">;</span>
+     <span class="cm">/*
+</span><span class="cm">     * Some allocators will constraint the set of valid flags to a subset
+</span><span class="cm">     * of all flags. We expect them to define CACHE_CREATE_MASK in this
+</span><span class="cm">     * case, and we&#39;ll just provide them with a sanitized version of the
+</span><span class="cm">     * passed flags.
+</span><span class="cm">     */</span>
+    <span class="n">flags</span> <span class="o">&amp;=</span> <span class="n">CACHE_CREATE_MASK</span><span class="p">;</span>
+    <span class="cm">/*
+</span><span class="cm">     寻找系统中是否有可以复用的slab cache。如果有，增加
+</span><span class="cm">     匹配的slab的引用计数，设置slab的参数；如果没有，则
+</span><span class="cm">     调用do_kmem_cache_create创建一个slab cache */</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">__kmem_cache_alias</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">ctor</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">out_unlock</span><span class="p">;</span>
 
-    err = kmem_cache_sanity_check(name, size);
-    if (err)
-        goto out_unlock;
-     /*
-     * Some allocators will constraint the set of valid flags to a subset
-     * of all flags. We expect them to define CACHE_CREATE_MASK in this
-     * case, and we'll just provide them with a sanitized version of the
-     * passed flags.
-     */
-    flags &amp;= CACHE_CREATE_MASK;
-    /*
-     寻找系统中是否有可以复用的slab cache。如果有，增加
-     匹配的slab的引用计数，设置slab的参数；如果没有，则
-     调用do_kmem_cache_create创建一个slab cache */
-    s = __kmem_cache_alias(name, size, align, flags, ctor);
-    if (s)
-        goto out_unlock;
+    <span class="n">cache_name</span> <span class="o">=</span> <span class="n">kstrdup</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cache_name</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+        <span class="k">goto</span> <span class="n">out_unlock</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/*
+</span><span class="cm">     和create_kmalloc_cache类似，先调用kmem_cache_zalloc
+</span><span class="cm">     分配一个kmem_cache对象，然后调用__kmem_cache_create
+</span><span class="cm">     执行kmem_cache的初始化 */</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">do_kmem_cache_create</span><span class="p">(</span><span class="n">cache_name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span>
+                 <span class="n">calculate_alignment</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span>
+                 <span class="n">flags</span><span class="p">,</span> <span class="n">ctor</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">IS_ERR</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">PTR_ERR</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+        <span class="n">kfree</span><span class="p">(</span><span class="n">cache_name</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    cache_name = kstrdup(name, GFP_KERNEL);
-    if (!cache_name) {
-        err = -ENOMEM;
-        goto out_unlock;
-    }
-    /*
-     和create_kmalloc_cache类似，先调用kmem_cache_zalloc
-     分配一个kmem_cache对象，然后调用__kmem_cache_create
-     执行kmem_cache的初始化 */
-    s = do_kmem_cache_create(cache_name, size, size,
-                 calculate_alignment(flags, align, size),
-                 flags, ctor, NULL, NULL);
-    if (IS_ERR(s)) {
-        err = PTR_ERR(s);
-        kfree(cache_name);
-    }
+<span class="nl">out_unlock</span><span class="p">:</span>
+    <span class="n">mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">slab_mutex</span><span class="p">);</span>
 
-out_unlock:
-    mutex_unlock(&amp;slab_mutex);
+    <span class="n">put_online_mems</span><span class="p">();</span>
+    <span class="n">put_online_cpus</span><span class="p">();</span>
 
-    put_online_mems();
-    put_online_cpus();
-
-    if (err) {
-        if (flags &amp; SLAB_PANIC)
-            panic(&quot;kmem_cache_create: Failed to create slab '%s'. Error %d\n&quot;,
-                name, err);
-        else {
-            printk(KERN_WARNING &quot;kmem_cache_create(%s) failed with error %d&quot;,
-                name, err);
-            dump_stack();
-        }
-        return NULL;
-    }
-    return s;
-}
-EXPORT_SYMBOL(kmem_cache_create);
-</code></pre>
-
+    <span class="k">if</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">SLAB_PANIC</span><span class="p">)</span>
+            <span class="n">panic</span><span class="p">(</span><span class="s">&#34;kmem_cache_create: Failed to create slab &#39;%s&#39;. Error %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">err</span><span class="p">);</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="n">printk</span><span class="p">(</span><span class="n">KERN_WARNING</span> <span class="s">&#34;kmem_cache_create(%s) failed with error %d&#34;</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">err</span><span class="p">);</span>
+            <span class="n">dump_stack</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_create</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="5-总结">5. 总结</h1>
 
 <p>从代码看，每一个slab cache通过一个 <strong>struct kmem_cache</strong> 对象描述；每个slab cache包含多个slab，每个slab通常为一个page；每个slab cache可以为一种对象分配内存；每个slab cache包含系统中 <strong>所有CPU</strong> 的 <strong>所有内存节点</strong> 的属于该对象的slab信息，保存在 <strong>struct kmem_cache</strong> 的 <strong>node</strong> 变量和 <strong>cpu_slab</strong> 变量；前者以节点为单位统计slab的信息，后者以CPU为单位统计slab的信息。</p>
@@ -800,7 +1177,7 @@ EXPORT_SYMBOL(kmem_cache_create);
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>

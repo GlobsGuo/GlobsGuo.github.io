@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-12T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="6610">
+<meta itemprop="wordCount" content="6707">
 
 
 
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-12 </span>
         
-          <span class="more-meta"> 6610 words </span>
+          <span class="more-meta"> 6707 words </span>
           <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -223,14 +223,22 @@
 
 <p>总线层的公共数据域已经移动到公共的数据结构中，总线层和设备的驱动仍然可以访问这些域。
 建议其他的总线也想PCI总线一样：</p>
-
-<pre><code class="language-c">struct pci_dev {
-    ...
-    struct device dev;
-    ...
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">pci_dev</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="k">struct</span> <span class="n">device</span> <span class="n">dev</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p><strong>struct pci_dev</strong> 内的 <strong>struct device dev</strong> 是静态分配的，即在发现设备时分配。</p>
 
 <p>值得注意的是， <strong>struct device dev</strong> 不一定要在 <strong>pci_dev</strong> 结构前定义，这是为了让编程人员在总线驱动和global driver间切换时考虑清楚自己正在做的事情，防止两者之间不必要的错误的转换。</p>
@@ -248,32 +256,55 @@
 <p>平台设备通常作为自治项目出现，包括传统的端口设备、外设总线的host bridge以及SoC平台上集成的大部分控制器，他们的共同点是从CPU总线获取地址。</p>
 
 <p>平台设备需要设置名称，用于绑定驱动，还有一些资源列表，例如地址，中断：</p>
-
-<pre><code class="language-c">struct platform_device {
-    const char *name;
-    u32 id;
-    struct device dev;
-    u32 num_resources;
-    struct resources *resources;
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">platform_device</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+    <span class="n">u32</span> <span class="n">id</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">device</span> <span class="n">dev</span><span class="p">;</span>
+    <span class="n">u32</span> <span class="n">num_resources</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">resources</span> <span class="o">*</span><span class="n">resources</span><span class="p">;</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="2-2-platform-drivers">2.2. Platform drivers</h2>
 
 <p>平台设备的驱动和普通的驱动类似，需要提供probe，remove函数：</p>
-
-<pre><code class="language-c">struct platform_driver {
-    int (*probe)(struct platform_device *);
-    int (*remove)(struct platform_device *);
-    void (*shutdown)(struct platform_device *);
-    int (*suspend)(struct platform_device *, pm_message_t state);
-    int (*suspend_late)(struct platform_device *, pm_message_t state);
-    int (*resume_early)(struct platform_device *);
-    int (*resume)(struct platform_device *);
-    struct device_driver driver;
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">platform_driver</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">probe</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">remove</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">shutdown</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">suspend</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">,</span> <span class="n">pm_message_t</span> <span class="n">state</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">suspend_late</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">,</span> <span class="n">pm_message_t</span> <span class="n">state</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">resume_early</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">resume</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
+    <span class="k">struct</span> <span class="n">device_driver</span> <span class="n">driver</span><span class="p">;</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>平台驱动的注册函数为<code>int platform_driver_register(struct platform_driver *drv);</code>。</p>
 
 <p>对于不支持热插拔的设备，probe方法可以放在init section，减少驱动运行时消耗的内存：</p>
@@ -283,11 +314,16 @@
 <h2 id="2-3-device-enumeration">2.3. Device Enumeration</h2>
 
 <p>平台设备的注册函数为：</p>
-
-<pre><code class="language-c">int platform_device_register(struct platform_device *pdev);
-int platform_add_devices(struct platform_device **pdev, int ndev);
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">platform_device_register</span><span class="p">(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="n">pdev</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">platform_add_devices</span><span class="p">(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">**</span><span class="n">pdev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ndev</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>注册设备的首要原则是只注册真实存在的设备，但是有些情况下可能注册不存在的设备。例如内核可能和某些主板没有的外部的网络适配器一起工作。</p>
 
 <p>有些情况下boot firmware会将主板上的所有设备通过表格导出，如果没有这个表格，系统能够正确设置外设的唯一方法就是建立一个特定的内核镜像。</p>
@@ -350,13 +386,20 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
 <h2 id="3-1-declaration">3.1. Declaration</h2>
 
 <p>内核中的每种总线（PCI，USB等）都需要定义一个静态的对象，必须初始化name域，可以提供match回调函数：</p>
-
-<pre><code class="language-c">struct bus_type pci_bus_type = {
-    .name   = &quot;pci&quot;,
-    .match  = pci_bus_match,
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">bus_type</span> <span class="n">pci_bus_type</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">name</span>   <span class="o">=</span> <span class="s">&#34;pci&#34;</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">match</span>  <span class="o">=</span> <span class="n">pci_bus_match</span><span class="p">,</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>然后在头文件中导出，供驱动使用：
 <code>extern struct bus_type pci_bus_type;</code></p>
 
@@ -375,13 +418,20 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
 <h2 id="3-4-device-and-driver-lists">3.4. Device and Driver Lists</h2>
 
 <p>设备和驱动列表用来取代许多总线保留的本地列表（local list），列表的元素分别是 <strong>struct devices</strong> 和 <strong>struct device_driver</strong> ，总线驱动可以自由使用列表，LDM（Linux Device Model）提供了遍历两个列表的辅助函数：</p>
-
-<pre><code class="language-c">int bus_for_each_dev(struct bus_type *bus, struct device *start, void *data,
-        int (*fn)(struct device *, void *));
-int bus_for_each_drv(struct bus_type *bus, struct device_driver *start,
-        void *data, int (*fn)(struct device_driver *, void *));
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">bus_for_each_dev</span><span class="p">(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="n">bus</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">start</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+        <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">fn</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
+<span class="kt">int</span> <span class="nf">bus_for_each_drv</span><span class="p">(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="n">bus</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_driver</span> <span class="o">*</span><span class="n">start</span><span class="p">,</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">fn</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_driver</span> <span class="o">*</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="p">));</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>两个函数会遍历相应的列表，并且针对每个元素调用回调函数，所有的列表访问操作都通过总线的锁来同步，列表中每个对象的引用计数在调用函数前会增加，在取得下一个对象后会减少，调用回调函数时不会持有锁。</p>
 
 <h2 id="3-5-sysfs">3.5. sysfs</h2>
@@ -389,14 +439,22 @@ int bus_for_each_drv(struct bus_type *bus, struct device_driver *start,
 <p>每种总线类型在/sys/bus下都有一个目录，例如/sys/bus/pci，注册的驱动在/sys/bus/pci/drivers/下，总线下的每个设备在/sys/bus/pci/devices/下，是指向/sys/devices下设备的符号链接。</p>
 
 <h2 id="3-6-exporting-attributes">3.6. Exporting Attributes</h2>
-
-<pre><code class="language-c">struct bus_attribute {
-    struct attribtue attr;
-    ssize_t (*show)(struct bus_type *, char *buf);
-    ssize_t (*store)(struct bus_type *, const char *buf, size_t count);
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">bus_attribute</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">attribtue</span> <span class="n">attr</span><span class="p">;</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">);</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>总线驱动可以使用BUS_ATTR宏导出参数<code>static BUS_ATTR(debug, 0644, show_debug, store_debug);</code>。</p>
 
 <h1 id="4-the-basic-device-structure">4. The Basic Device Structure</h1>
@@ -413,26 +471,44 @@ int bus_for_each_drv(struct bus_type *bus, struct device_driver *start,
 </ul>
 
 <p>设备的引用计数下降到0时，会从核心删除。引用计数通过下列函数修改：</p>
-
-<pre><code class="language-c">struct device *get_device(struct device *dev);
-void put_device(struct device *dev);
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="nf">get_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">put_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>驱动程序通过系列函数访问设备的锁：</p>
-
-<pre><code class="language-c">void lock_device(struct device *dev);
-void unlock_device(struct device *dev);
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">lock_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">unlock_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="4-2-attributes">4.2. Attributes</h2>
-
-<pre><code class="language-c">struct device_attributes {
-    struct attribute attr;
-    ssize_t (*show)(struct device *dev, struct device_attribute *attr, char *buf);
-    ssize_t (*store)(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">device_attributes</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">attribute</span> <span class="n">attr</span><span class="p">;</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_attribute</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_attribute</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">);</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="5-devres-managed-device-resource">5. Devres-Managed Device Resource</h1>
 
 <h2 id="5-1-intro">5.1. Intro</h2>
@@ -474,26 +550,44 @@ void unlock_device(struct device *dev);
 <h2 id="6-2-programming-interface">6.2. Programming Interface</h2>
 
 <p>设备类的数据结构定义如下：</p>
-
-<pre><code class="language-c">struct device_class input_devclass {
-    .name           =   &quot;input&quot;,
-    .add_device    =    input_add_device,
-    .remove_device =    input_remove_device,
-};
-</code></pre>
-
-<pre><code class="language-c">typedef int (*devclass_add)(struct device *);
-typedef void (*devclass_remove)(struct device *);
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">device_class</span> <span class="n">input_devclass</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">name</span>           <span class="o">=</span>   <span class="s">&#34;input&#34;</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">add_device</span>    <span class="o">=</span>    <span class="n">input_add_device</span><span class="p">,</span>
+    <span class="p">.</span><span class="n">remove_device</span> <span class="o">=</span>    <span class="n">input_remove_device</span><span class="p">,</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="nf">int</span> <span class="p">(</span><span class="o">*</span><span class="n">devclass_add</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">devclass_remove</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>每种设备类的数据结构都应该通过头文件导出，以供驱动，扩展程序和接口使用。</p>
 
 <p>设备类和LDM核心的交互函数如下：</p>
-
-<pre><code class="language-c">int devclass_register(struct device_class *cls);
-void devclass_unregister(struct device_class *cls);
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">devclass_register</span><span class="p">(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="n">cls</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">devclass_unregister</span><span class="p">(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="n">cls</span><span class="p">);</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="6-3-devices">6.3. Devices</h2>
 
 <p>设备是绑定到驱动的，因此会被添加到驱动所属的设备类中。在驱动模型核心出现前，这个过程（将设备添加到所属的设备类中）通常发生在设备初始化后，驱动的 <em>probe</em> 函数中。现在一般发生在 <em>probe</em> 完成后。</p>
@@ -512,14 +606,22 @@ void devclass_unregister(struct device_class *cls);
 <p>/sys/class下每个设备类都有对应的文件夹，比如/sys/class/input。每个设备类包含的设备和驱动分别对应文件夹/sys/class/input/devices，/sys/class/input/drivers，都是符号链接。</p>
 
 <h2 id="6-6-exporting-attributes">6.6. Exporting Attributes</h2>
-
-<pre><code class="language-c">struct devclass_attribute {
-    struct attribute attr;
-    ssize_t (*show)(struct device_class *, char *buf, size_t count, loff_t off);
-    ssize_t (*store)(struct device_class *, const char *buf, size_t count, loff_t off);
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">devclass_attribute</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">attribute</span> <span class="n">attr</span><span class="p">;</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="n">off</span><span class="p">);</span>
+    <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="n">off</span><span class="p">);</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="6-7-interfaces">6.7. Interfaces</h2>
 
 <p>添加设备到设备类时，LDM核心会尝试将其添加到注册到设备类的所有接口中。</p>
@@ -584,25 +686,43 @@ void devclass_unregister(struct device_class *cls);
 <h2 id="8-3-declaration">8.3. Declaration</h2>
 
 <p>设备驱动的定义示例如下：</p>
-
-<pre><code class="language-c">static struct device_driver eepro100_driver = {
-       .name = &quot;eepro100&quot;,
-       .bus = &amp;pci_bus_type,
-       .probe = eepro100_probe,
-       .remove = eepro100_remove,
-       .suspend = eepro100_suspend,
-       .resume = eepro100_resume,
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="k">struct</span> <span class="n">device_driver</span> <span class="n">eepro100_driver</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#34;eepro100&#34;</span><span class="p">,</span>
+       <span class="p">.</span><span class="n">bus</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pci_bus_type</span><span class="p">,</span>
+       <span class="p">.</span><span class="n">probe</span> <span class="o">=</span> <span class="n">eepro100_probe</span><span class="p">,</span>
+       <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">eepro100_remove</span><span class="p">,</span>
+       <span class="p">.</span><span class="n">suspend</span> <span class="o">=</span> <span class="n">eepro100_suspend</span><span class="p">,</span>
+       <span class="p">.</span><span class="n">resume</span> <span class="o">=</span> <span class="n">eepro100_resume</span><span class="p">,</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>属于某种总线的驱动通常包含支持的设备的列表，而且比较设备ID是否匹配通常和总线类型相关。此外，总线的驱动需要包含一个 <strong>struct device_driver</strong> 成员，</p>
-
-<pre><code class="language-c">struct pci_driver {
-       const struct pci_device_id *id_table;
-       struct device_driver driver;
-};
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">pci_driver</span> <span class="p">{</span>
+       <span class="k">const</span> <span class="k">struct</span> <span class="n">pci_device_id</span> <span class="o">*</span><span class="n">id_table</span><span class="p">;</span>
+       <span class="k">struct</span> <span class="n">device_driver</span> <span class="n">driver</span><span class="p">;</span>
+<span class="p">};</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="8-4-registration">8.4. Registration</h2>
 
 <p><code>int driver_reigister(struct device_driver *drv);</code>
@@ -626,39 +746,70 @@ void devclass_unregister(struct device_class *cls);
 <p>尽管一些驱动程序假定自己意会在系统中被probed一次，仍然需要考虑绑定到设备的驱动会出现在多个实例中。这就意味着 <em>probe</em> 和所有的回调函数需要是可重入的。</p>
 
 <p>最普遍的实现方法就是使用state container设计模式，形式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">foo</span> <span class="p">{</span>
+    <span class="n">spinlock_t</span> <span class="n">lock</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">};</span>
 
-<pre><code class="language-c">struct foo {
-    spinlock_t lock;
-    ...
-};
-
-static int foo_probe(..)
-{
-    struct foo *foo;
-    foo = devm_kzalloc(dev, sizeof(*foo), GFP_KERNEL);
-    if (!foo)
-        return -ENOMEM;
-    spin_lock_init(&amp;foo-&gt;lock);
-    ...
-}
-</code></pre>
-
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">foo_probe</span><span class="p">(..)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">foo</span> <span class="o">*</span><span class="n">foo</span><span class="p">;</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">devm_kzalloc</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">foo</span><span class="p">),</span> <span class="n">GFP_KERNEL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">foo</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+    <span class="n">spin_lock_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">foo</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>每次调用 <em>probe</em> 函数，都会创建 <strong>struct foo</strong> 实例，这就是设备驱动实例的状态容器。我们可以将实例传递给需要访问状态和成员的函数。
 例如，如果驱动程序正在注册一个中断处理函数，可以将指向 <strong>struct foo</strong> 的指针按下列方式传递：</p>
-
-<pre><code class="language-c">static irqreturn_t foo_handler(int irq, void *arg)
-{
-    struct foo *foo = arg;
-    ...
-}
-static int foo_probe(...)
-{
-    struct foo *foo;
-    ...
-    ret = request_irq(irq, foo_handler, 0, &quot;foo&quot;, foo);
-}
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="n">irqreturn_t</span> <span class="nf">foo_handler</span><span class="p">(</span><span class="kt">int</span> <span class="n">irq</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">foo</span> <span class="o">*</span><span class="n">foo</span> <span class="o">=</span> <span class="n">arg</span><span class="p">;</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">foo_probe</span><span class="p">(...)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">foo</span> <span class="o">*</span><span class="n">foo</span><span class="p">;</span>
+    <span class="p">...</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">request_irq</span><span class="p">(</span><span class="n">irq</span><span class="p">,</span> <span class="n">foo_handler</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#34;foo&#34;</span><span class="p">,</span> <span class="n">foo</span><span class="p">);</span>
+<span class="p">}</span></code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="9-2-container-of">9.2. container_of()</h2>
 
 <p>container_of()可以通过结构体内的<strong>非指针成员</strong>获取包含该成员的结构体的指针。</p>
@@ -771,7 +922,7 @@ static int foo_probe(...)
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>

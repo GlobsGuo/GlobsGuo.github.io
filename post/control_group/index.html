@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-12T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="17737">
+<meta itemprop="wordCount" content="17772">
 
 
 
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-12 </span>
         
-          <span class="more-meta"> 17737 words </span>
+          <span class="more-meta"> 17772 words </span>
           <span class="more-meta"> 36 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -334,22 +334,38 @@
 </ol>
 
 <p>例如，下列命令会在CPU 2和3，内存节点1创建一个名为“Charlie”的cgroup，并在其中开始一个sh：</p>
-
-<pre><code class="language-bash">mount -t tmpfs cgroup_root /sys/fs/cgroup
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t tmpfs cgroup_root /sys/fs/cgroup
 mkdir /sys/fs/cgroup/cpuset
 mount -t cgroup cpuset -ocpuset /sys/fs/cgroup/cpuset
-cd /sys/fs/cgroup/cpuset
+<span class="nb">cd</span> /sys/fs/cgroup/cpuset
 mkdir Charlie
-cd Charlie
-/bin/echo 2-3 &gt; cpuset.cpus
-/bin/echo 1 &gt; cpuset.mems
-/bin/echo $$ &gt; tasks
+<span class="nb">cd</span> Charlie
+/bin/echo <span class="m">2</span>-3 &gt; cpuset.cpus
+/bin/echo <span class="m">1</span> &gt; cpuset.mems
+/bin/echo <span class="nv">$$</span> &gt; tasks
 sh
-# The subshell 'sh' is now running in cgroup Charlie
-# The next line should display '/Charlie'
-cat /proc/self/cgroup
-</code></pre>
-
+<span class="c1"># The subshell &#39;sh&#39; is now running in cgroup Charlie</span>
+<span class="c1"># The next line should display &#39;/Charlie&#39;</span>
+cat /proc/self/cgroup</code></pre></td></tr></table>
+</div>
+</div>
 <h1 id="2-memory-resource-controller">2. Memory Resource Controller</h1>
 
 <p>资料来自 <em>Documentation/cgroups/memory.txt</em> ，这篇文档把内存资源控制器称作内存控制器，不要和硬件中的内存控制器混淆。还有内存控制器的cgroup，称作 <strong>memory cgroup</strong> ，而不是源码中经常使用的 <strong>memcg</strong> 。</p>
@@ -455,13 +471,20 @@ cat /proc/self/cgroup
 <h3 id="2-2-5-锁">2.2.5. 锁</h3>
 
 <p><code>lock_page_cgroup()</code> / <code>unlock_page_cgroup()</code> 应该在 <code>mapping-&gt;tree_lock</code> 下调用，锁的调用次序如下：</p>
-
-<pre><code class="language-C">PG_locked.
-mm-&gt;page_table_lock
-    zone-&gt;lru_lock
-    lock_page_cgroup
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="n">PG_locked</span><span class="p">.</span>
+<span class="n">mm</span><span class="o">-&gt;</span><span class="n">page_table_lock</span>
+    <span class="n">zone</span><span class="o">-&gt;</span><span class="n">lru_lock</span>
+    <span class="n">lock_page_cgroup</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>per-zone-per-cgroup LRU通过 <code>zone-&gt;lru_lock</code> 保护，没有自己的锁。</p>
 
 <h3 id="2-2-6-kernel-memory-extension-config-memcg-kmem">2.2.6. Kernel Memory Extension(CONFIG_MEMCG_KMEM)</h3>
@@ -524,18 +547,29 @@ mm-&gt;page_table_lock
 </ol>
 
 <h3 id="2-3-2-准备cgroup">2.3.2. 准备cgroup</h3>
-
-<pre><code class="language-bash">mount -t tmpfs none /sys/fs/cgroup
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t tmpfs none /sys/fs/cgroup
 mkdir /sys/fs/cgroup/memory
-mount -t cgroup none /sys/fs/cgroup/memory -o memory
-</code></pre>
-
+mount -t cgroup none /sys/fs/cgroup/memory -o memory</code></pre></td></tr></table>
+</div>
+</div>
 <h3 id="2-3-3-创建新的组-将bash移入">2.3.3. 创建新的组，将bash移入</h3>
-
-<pre><code class="language-bash">mkdir /sys/fs/cgroup/memory/0
-echo $$ &gt; /sys/fs/cgroup/memory/0/tasks
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mkdir /sys/fs/cgroup/memory/0
+<span class="nb">echo</span> <span class="nv">$$</span> &gt; /sys/fs/cgroup/memory/0/tasks</code></pre></td></tr></table>
+</div>
+</div>
 <p>现在可以调整内存限制：<code>echo 4M &gt; /sys/fs/cgroup/memory/0/memory.limit_in_bytes</code>。</p>
 
 <p>说明：可以通过写入-1来取消限制；不能对根cgroup设置限制。</p>
@@ -655,16 +689,26 @@ echo $$ &gt; /sys/fs/cgroup/memory/0/tasks
 <p>每个memcg的 <strong>numa_stat</strong> 文件包含每个节点的“total”，“file”，“anon”，“unevictable”内存页数，以及子cgroup的hierarchical_&lt;counter&gt;信息。</p>
 
 <p><strong>memory.numa_stat</strong> 的输出格式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">total</span><span class="o">=</span>&lt;total pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">file</span><span class="o">=</span>&lt;total file pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">anon</span><span class="o">=</span>&lt;total anon pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">unevictable</span><span class="o">=</span>&lt;total anon pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+hierarchical_&lt;counter&gt;<span class="o">=</span>&lt;counter pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
 
-<pre><code class="language-bash">total=&lt;total pages&gt; N0=&lt;node 0 pages&gt; N1=&lt;node 1 pages&gt; ...
-file=&lt;total file pages&gt; N0=&lt;node 0 pages&gt; N1=&lt;node 1 pages&gt; ...
-anon=&lt;total anon pages&gt; N0=&lt;node 0 pages&gt; N1=&lt;node 1 pages&gt; ...
-unevictable=&lt;total anon pages&gt; N0=&lt;node 0 pages&gt; N1=&lt;node 1 pages&gt; ...
-hierarchical_&lt;counter&gt;=&lt;counter pages&gt; N0=&lt;node 0 pages&gt; N1=&lt;node 1 pages&gt; ...
-
-The &quot;total&quot; count is sum of file + anon + unevictable.
-</code></pre>
-
+The <span class="s2">&#34;total&#34;</span> count is sum of file + anon + unevictable.</code></pre></td></tr></table>
+</div>
+</div>
 <h2 id="2-6-hierarchy支持">2.6. hierarchy支持</h2>
 
 <p>内存控制器支持深度的hierarchy，和hierarchical account。在cgroup的文件系统内创建cgroup可以创建hierarchy结构。</p>
@@ -856,13 +900,20 @@ The &quot;total&quot; count is sum of file + anon + unevictable.
 <p>cpuset没有对应的系统调用可用，所有的操作都需要通过虚拟文件系统完成。挂载“cgroup”文件系统，以便查看和修改内核已知的cpuset。</p>
 
 <p>每个进程的 <em>/proc/&lt;pid&gt;/status</em> 文件都有4行新增信息，显示进程的 <strong>cpus_allowed</strong> 和 <strong>mems_allowed</strong> ：</p>
-
-<pre><code class="language-yaml">Cpus_allowed:   ffffffff,ffffffff,fffffff,ffffffff
-Cpus_allowed_list:  0-127
-Mems_allowed:   ffffffff,ffffffff
-Mems_allowed_list:  0-63
-</code></pre>
-
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml">Cpus_allowed<span class="p">:</span><span class="w">   </span>ffffffff<span class="p">,</span>ffffffff<span class="p">,</span>fffffff<span class="p">,</span>ffffffff<span class="w">
+</span><span class="w"></span>Cpus_allowed_list<span class="p">:</span><span class="w">  </span><span class="m">0-127</span><span class="w">
+</span><span class="w"></span>Mems_allowed<span class="p">:</span><span class="w">   </span>ffffffff<span class="p">,</span>ffffffff<span class="w">
+</span><span class="w"></span>Mems_allowed_list<span class="p">:</span><span class="w">  </span><span class="m">0-63</span></code></pre></td></tr></table>
+</div>
+</div>
 <p>cgroup文件系统下的每个目录代表一个cpuset，包含下列文件：</p>
 
 <ul>
@@ -1090,20 +1141,34 @@ cpuset内的内存页压力</li>
 </ol>
 
 <p>例如，下面的操作会创建一个名为“Charlie”的cpuset，包含CPU 2和3，内存节点1，并且启动一个shell：</p>
-
-<pre><code class="language-bash">mount -t cgroup -ocpuset cpuset /sys/fs/cgroup/cpuset
-cd /sys/fs/cgroup/cpuset
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t cgroup -ocpuset cpuset /sys/fs/cgroup/cpuset
+<span class="nb">cd</span> /sys/fs/cgroup/cpuset
 mkdir Charlie
-cd Charlie
-/bin/echo 2-3 &gt; cpuset.cpus
-/bin/echo 1 &gt; cpuset.mems
-/bin/echo $$ &gt; tasks
+<span class="nb">cd</span> Charlie
+/bin/echo <span class="m">2</span>-3 &gt; cpuset.cpus
+/bin/echo <span class="m">1</span> &gt; cpuset.mems
+/bin/echo <span class="nv">$$</span> &gt; tasks
 sh
-# sh 现在运行在cpuset Charlie中
-# 下一行会显示&quot;/Charlie&quot;
-cat /proc/self/cpuset
-</code></pre>
-
+<span class="c1"># sh 现在运行在cpuset Charlie中</span>
+<span class="c1"># 下一行会显示&#34;/Charlie&#34;</span>
+cat /proc/self/cpuset</code></pre></td></tr></table>
+</div>
+</div>
 <p>查询或者修改cpuset的方法如下：</p>
 
 <ul>
@@ -1224,7 +1289,7 @@ cat /proc/self/cpuset
       <i class="iconfont icon-up"></i>
     </div>
   </div>
-  <script src="/lib/highlight/highlight.pack.js?v=20171001"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
