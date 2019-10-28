@@ -50,7 +50,7 @@
 
 <meta itemprop="datePublished" content="2019-10-24T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2019-10-24T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="6655">
+<meta itemprop="wordCount" content="6661">
 
 
 
@@ -125,7 +125,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-24 </span>
         
-          <span class="more-meta"> 6655 words </span>
+          <span class="more-meta"> 6661 words </span>
           <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -186,12 +186,12 @@
     struct page *page;
 
     /*
-     添加复合页面元数据标志，即释放内存时需要的信息。
-     复合页面的一个应用是实现transhugepage，即透明的
-     hugepage。
-     复合页面用连续的多个页面组成一个hugepage，其中的
-     第一个页面称作head page，其余的页面成为tail page。
-     head page中保存着hugepage的元数据。 */
+     * 添加复合页面元数据标志，即释放内存时需要的信息。
+     * 复合页面的一个应用是实现transhugepage，即透明的
+     * hugepage。
+     * 复合页面用连续的多个页面组成一个hugepage，其中的
+     * 第一个页面称作head page，其余的页面成为tail page。
+     * head page中保存着hugepage的元数据。 */
     flags |= __GFP_COMP;
     page = alloc_kmem_pages(flags, order);
     ret = page ? page_address(page) : NULL;
