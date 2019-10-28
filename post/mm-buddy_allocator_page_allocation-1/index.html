@@ -191,7 +191,8 @@
      * hugepage。
      * 复合页面用连续的多个页面组成一个hugepage，其中的
      * 第一个页面称作head page，其余的页面成为tail page。
-     * head page中保存着hugepage的元数据。 */
+     * head page中保存着hugepage的元数据。 
+	 */
     flags |= __GFP_COMP;
     page = alloc_kmem_pages(flags, order);
     ret = page ? page_address(page) : NULL;
