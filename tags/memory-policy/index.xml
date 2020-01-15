@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>memory policy on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/memory-policy/</link>
+    <link>https://blog.globs.site/tags/memory-policy/</link>
     <description>Recent content in memory policy on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 12 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/memory-policy/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.globs.site/tags/memory-policy/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Linux Memory Policy</title>
-      <link>https://globsguo.github.io/post/memory_policy/</link>
+      <link>https://blog.globs.site/post/memory_policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/memory_policy/</guid>
+      <guid>https://blog.globs.site/post/memory_policy/</guid>
       <description>内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-</description>
     </item>
     

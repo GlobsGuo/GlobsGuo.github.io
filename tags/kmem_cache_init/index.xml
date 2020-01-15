@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>kmem_cache_init on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/kmem_cache_init/</link>
+    <link>https://blog.globs.site/tags/kmem_cache_init/</link>
     <description>Recent content in kmem_cache_init on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/kmem_cache_init/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.globs.site/tags/kmem_cache_init/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>mm-slab初始化</title>
-      <link>https://globsguo.github.io/post/mm-slab_initialization/</link>
+      <link>https://blog.globs.site/post/mm-slab_initialization/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/mm-slab_initialization/</guid>
+      <guid>https://blog.globs.site/post/mm-slab_initialization/</guid>
       <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分</description>
     </item>
     

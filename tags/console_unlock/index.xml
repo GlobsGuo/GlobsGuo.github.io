@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>console_unlock on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/console_unlock/</link>
+    <link>https://blog.globs.site/tags/console_unlock/</link>
     <description>Recent content in console_unlock on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Thu, 19 Sep 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/console_unlock/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.globs.site/tags/console_unlock/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>printk函数</title>
-      <link>https://globsguo.github.io/post/printk/</link>
+      <link>https://blog.globs.site/post/printk/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/printk/</guid>
+      <guid>https://blog.globs.site/post/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 /* console_sem用来</description>
     </item>
     

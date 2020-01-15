@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://globsguo.github.io/sitemap.xml
+Sitemap: https://blog.globs.site/sitemap.xml

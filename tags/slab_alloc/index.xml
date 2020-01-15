@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>slab_alloc on Globs&#39; Catchall</title>
-    <link>https://globsguo.github.io/tags/slab_alloc/</link>
+    <link>https://blog.globs.site/tags/slab_alloc/</link>
     <description>Recent content in slab_alloc on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://globsguo.github.io/tags/slab_alloc/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://blog.globs.site/tags/slab_alloc/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>mm-slab对象的分配</title>
-      <link>https://globsguo.github.io/post/mm-slab_objects_allocation/</link>
+      <link>https://blog.globs.site/post/mm-slab_objects_allocation/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/mm-slab_objects_allocation/</guid>
+      <guid>https://blog.globs.site/post/mm-slab_objects_allocation/</guid>
       <description>slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内</description>
     </item>
     
