@@ -2,314 +2,314 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Globs&#39; Catchall</title>
-    <link>https://blog.globs.site/tags/</link>
+    <link>https://globsguo.github.io/tags/</link>
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.globs.site/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>__alloc_pages_nodemask</title>
-      <link>https://blog.globs.site/tags/__alloc_pages_nodemask/</link>
+      <link>https://globsguo.github.io/tags/__alloc_pages_nodemask/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/__alloc_pages_nodemask/</guid>
+      <guid>https://globsguo.github.io/tags/__alloc_pages_nodemask/</guid>
       <description></description>
     </item>
     
     <item>
       <title>buddy-allocator</title>
-      <link>https://blog.globs.site/tags/buddy-allocator/</link>
+      <link>https://globsguo.github.io/tags/buddy-allocator/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/buddy-allocator/</guid>
+      <guid>https://globsguo.github.io/tags/buddy-allocator/</guid>
       <description></description>
     </item>
     
     <item>
       <title>expand</title>
-      <link>https://blog.globs.site/tags/expand/</link>
+      <link>https://globsguo.github.io/tags/expand/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/expand/</guid>
+      <guid>https://globsguo.github.io/tags/expand/</guid>
       <description></description>
     </item>
     
     <item>
       <title>get_page_from_freelist</title>
-      <link>https://blog.globs.site/tags/get_page_from_freelist/</link>
+      <link>https://globsguo.github.io/tags/get_page_from_freelist/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/get_page_from_freelist/</guid>
+      <guid>https://globsguo.github.io/tags/get_page_from_freelist/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kernel-sources</title>
-      <link>https://blog.globs.site/tags/kernel-sources/</link>
+      <link>https://globsguo.github.io/tags/kernel-sources/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kernel-sources/</guid>
+      <guid>https://globsguo.github.io/tags/kernel-sources/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kmalloc</title>
-      <link>https://blog.globs.site/tags/kmalloc/</link>
+      <link>https://globsguo.github.io/tags/kmalloc/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kmalloc/</guid>
+      <guid>https://globsguo.github.io/tags/kmalloc/</guid>
       <description></description>
     </item>
     
     <item>
       <title>memory</title>
-      <link>https://blog.globs.site/tags/memory/</link>
+      <link>https://globsguo.github.io/tags/memory/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/memory/</guid>
+      <guid>https://globsguo.github.io/tags/memory/</guid>
       <description></description>
     </item>
     
     <item>
       <title>NODE_DATA</title>
-      <link>https://blog.globs.site/tags/node_data/</link>
+      <link>https://globsguo.github.io/tags/node_data/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/node_data/</guid>
+      <guid>https://globsguo.github.io/tags/node_data/</guid>
       <description></description>
     </item>
     
     <item>
       <title>zlcache</title>
-      <link>https://blog.globs.site/tags/zlcache/</link>
+      <link>https://globsguo.github.io/tags/zlcache/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/zlcache/</guid>
+      <guid>https://globsguo.github.io/tags/zlcache/</guid>
       <description></description>
     </item>
     
     <item>
       <title>zonelist</title>
-      <link>https://blog.globs.site/tags/zonelist/</link>
+      <link>https://globsguo.github.io/tags/zonelist/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/zonelist/</guid>
+      <guid>https://globsguo.github.io/tags/zonelist/</guid>
       <description></description>
     </item>
     
     <item>
       <title>create_boot_cache</title>
-      <link>https://blog.globs.site/tags/create_boot_cache/</link>
+      <link>https://globsguo.github.io/tags/create_boot_cache/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/create_boot_cache/</guid>
+      <guid>https://globsguo.github.io/tags/create_boot_cache/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kfree</title>
-      <link>https://blog.globs.site/tags/kfree/</link>
+      <link>https://globsguo.github.io/tags/kfree/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kfree/</guid>
+      <guid>https://globsguo.github.io/tags/kfree/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kmalloc_caches</title>
-      <link>https://blog.globs.site/tags/kmalloc_caches/</link>
+      <link>https://globsguo.github.io/tags/kmalloc_caches/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kmalloc_caches/</guid>
+      <guid>https://globsguo.github.io/tags/kmalloc_caches/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kmem_cache</title>
-      <link>https://blog.globs.site/tags/kmem_cache/</link>
+      <link>https://globsguo.github.io/tags/kmem_cache/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kmem_cache/</guid>
+      <guid>https://globsguo.github.io/tags/kmem_cache/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kmem_cache_alloc</title>
-      <link>https://blog.globs.site/tags/kmem_cache_alloc/</link>
+      <link>https://globsguo.github.io/tags/kmem_cache_alloc/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kmem_cache_alloc/</guid>
+      <guid>https://globsguo.github.io/tags/kmem_cache_alloc/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kmem_cache_init</title>
-      <link>https://blog.globs.site/tags/kmem_cache_init/</link>
+      <link>https://globsguo.github.io/tags/kmem_cache_init/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kmem_cache_init/</guid>
+      <guid>https://globsguo.github.io/tags/kmem_cache_init/</guid>
       <description></description>
     </item>
     
     <item>
       <title>slab_alloc</title>
-      <link>https://blog.globs.site/tags/slab_alloc/</link>
+      <link>https://globsguo.github.io/tags/slab_alloc/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/slab_alloc/</guid>
+      <guid>https://globsguo.github.io/tags/slab_alloc/</guid>
       <description></description>
     </item>
     
     <item>
       <title>slab_free</title>
-      <link>https://blog.globs.site/tags/slab_free/</link>
+      <link>https://globsguo.github.io/tags/slab_free/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/slab_free/</guid>
+      <guid>https://globsguo.github.io/tags/slab_free/</guid>
       <description></description>
     </item>
     
     <item>
       <title>slub</title>
-      <link>https://blog.globs.site/tags/slub/</link>
+      <link>https://globsguo.github.io/tags/slub/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/slub/</guid>
+      <guid>https://globsguo.github.io/tags/slub/</guid>
       <description></description>
     </item>
     
     <item>
       <title>cgroup</title>
-      <link>https://blog.globs.site/tags/cgroup/</link>
+      <link>https://globsguo.github.io/tags/cgroup/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/cgroup/</guid>
+      <guid>https://globsguo.github.io/tags/cgroup/</guid>
       <description></description>
     </item>
     
     <item>
       <title>cmdline</title>
-      <link>https://blog.globs.site/tags/cmdline/</link>
+      <link>https://globsguo.github.io/tags/cmdline/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/cmdline/</guid>
+      <guid>https://globsguo.github.io/tags/cmdline/</guid>
       <description></description>
     </item>
     
     <item>
       <title>console</title>
-      <link>https://blog.globs.site/tags/console/</link>
+      <link>https://globsguo.github.io/tags/console/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/console/</guid>
+      <guid>https://globsguo.github.io/tags/console/</guid>
       <description></description>
     </item>
     
     <item>
       <title>cpuset</title>
-      <link>https://blog.globs.site/tags/cpuset/</link>
+      <link>https://globsguo.github.io/tags/cpuset/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/cpuset/</guid>
+      <guid>https://globsguo.github.io/tags/cpuset/</guid>
       <description></description>
     </item>
     
     <item>
       <title>devres</title>
-      <link>https://blog.globs.site/tags/devres/</link>
+      <link>https://globsguo.github.io/tags/devres/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/devres/</guid>
+      <guid>https://globsguo.github.io/tags/devres/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Documentation</title>
-      <link>https://blog.globs.site/tags/documentation/</link>
+      <link>https://globsguo.github.io/tags/documentation/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/documentation/</guid>
+      <guid>https://globsguo.github.io/tags/documentation/</guid>
       <description></description>
     </item>
     
     <item>
       <title>driver</title>
-      <link>https://blog.globs.site/tags/driver/</link>
+      <link>https://globsguo.github.io/tags/driver/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/driver/</guid>
+      <guid>https://globsguo.github.io/tags/driver/</guid>
       <description></description>
     </item>
     
     <item>
       <title>grub</title>
-      <link>https://blog.globs.site/tags/grub/</link>
+      <link>https://globsguo.github.io/tags/grub/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/grub/</guid>
+      <guid>https://globsguo.github.io/tags/grub/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kernel</title>
-      <link>https://blog.globs.site/tags/kernel/</link>
+      <link>https://globsguo.github.io/tags/kernel/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kernel/</guid>
+      <guid>https://globsguo.github.io/tags/kernel/</guid>
       <description></description>
     </item>
     
     <item>
       <title>kernel parameters</title>
-      <link>https://blog.globs.site/tags/kernel-parameters/</link>
+      <link>https://globsguo.github.io/tags/kernel-parameters/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/kernel-parameters/</guid>
+      <guid>https://globsguo.github.io/tags/kernel-parameters/</guid>
       <description></description>
     </item>
     
     <item>
       <title>memory policy</title>
-      <link>https://blog.globs.site/tags/memory-policy/</link>
+      <link>https://globsguo.github.io/tags/memory-policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/memory-policy/</guid>
+      <guid>https://globsguo.github.io/tags/memory-policy/</guid>
       <description></description>
     </item>
     
     <item>
       <title>platform bus</title>
-      <link>https://blog.globs.site/tags/platform-bus/</link>
+      <link>https://globsguo.github.io/tags/platform-bus/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/platform-bus/</guid>
+      <guid>https://globsguo.github.io/tags/platform-bus/</guid>
       <description></description>
     </item>
     
     <item>
       <title>console_unlock</title>
-      <link>https://blog.globs.site/tags/console_unlock/</link>
+      <link>https://globsguo.github.io/tags/console_unlock/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/console_unlock/</guid>
+      <guid>https://globsguo.github.io/tags/console_unlock/</guid>
       <description></description>
     </item>
     
     <item>
       <title>cont</title>
-      <link>https://blog.globs.site/tags/cont/</link>
+      <link>https://globsguo.github.io/tags/cont/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/cont/</guid>
+      <guid>https://globsguo.github.io/tags/cont/</guid>
       <description></description>
     </item>
     
     <item>
       <title>printk</title>
-      <link>https://blog.globs.site/tags/printk/</link>
+      <link>https://globsguo.github.io/tags/printk/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/tags/printk/</guid>
+      <guid>https://globsguo.github.io/tags/printk/</guid>
       <description></description>
     </item>
     
