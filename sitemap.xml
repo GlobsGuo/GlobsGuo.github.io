@@ -58,14 +58,14 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/mm-buddy_allocator_page_allocation-1/</loc>
+    <loc>https://blog.globs.site/post/mm/mm-buddy_allocator_page_allocation-1/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/mm-buddy_allocator_initialization/</loc>
+    <loc>https://blog.globs.site/post/mm/mm-buddy_allocator_initialization/</loc>
     <lastmod>2019-10-24T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -149,21 +149,21 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/mm-slab_initialization/</loc>
+    <loc>https://blog.globs.site/post/mm/mm-slab_initialization/</loc>
     <lastmod>2019-10-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/mm-slab_objects_allocation/</loc>
+    <loc>https://blog.globs.site/post/mm/mm-slab_objects_allocation/</loc>
     <lastmod>2019-10-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/mm-slab_objects_free/</loc>
+    <loc>https://blog.globs.site/post/mm/mm-slab_objects_free/</loc>
     <lastmod>2019-10-21T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -212,7 +212,7 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/control_group/</loc>
+    <loc>https://blog.globs.site/post/mm/control_group/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -247,7 +247,7 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/driver_model/</loc>
+    <loc>https://blog.globs.site/post/mm/driver_model/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -261,7 +261,7 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/grub_parameters/</loc>
+    <loc>https://blog.globs.site/post/mm/grub_parameters/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -282,7 +282,7 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/memory_policy/</loc>
+    <loc>https://blog.globs.site/post/mm/memory_policy/</loc>
     <lastmod>2019-10-12T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -324,7 +324,7 @@
   </url>
   
   <url>
-    <loc>https://blog.globs.site/post/printk/</loc>
+    <loc>https://blog.globs.site/post/mm/printk/</loc>
     <lastmod>2019-09-19T00:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

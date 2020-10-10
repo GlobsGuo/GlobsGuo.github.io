@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
 
 
 <link rel="canonical" href="https://blog.globs.site/" />
@@ -44,11 +44,9 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://blog.globs.site/" />
-
 <meta property="og:updated_time" content="2019-10-24T00:00:00+00:00" />
 <meta itemprop="name" content="Globs&#39; Catchall">
 <meta itemprop="description" content="">
-
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Globs&#39; Catchall"/>
 <meta name="twitter:description" content=""/>
@@ -114,7 +112,7 @@
           <section id="posts" class="posts">
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm-buddy_allocator_page_allocation-1/">mm-buddy_allocator分配页框(上)</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_page_allocation-1/">mm-buddy_allocator分配页框(上)</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-24 </span>
       
@@ -128,14 +126,14 @@
       slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内
     </div>
     <div class="read-more">
-      <a href="/post/mm-buddy_allocator_page_allocation-1/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-buddy_allocator_page_allocation-1/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm-buddy_allocator_initialization/">mm-buddy_allocator初始化</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_initialization/">mm-buddy_allocator初始化</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-24 </span>
       
@@ -149,19 +147,19 @@
       在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存
     </div>
     <div class="read-more">
-      <a href="/post/mm-buddy_allocator_initialization/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-buddy_allocator_initialization/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm-slab_initialization/">mm-slab初始化</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_initialization/">mm-slab初始化</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-21 </span>
       
-        <span class="more-meta"> 5013 words </span>
-        <span class="more-meta"> 11 mins read </span>
+        <span class="more-meta"> 5009 words </span>
+        <span class="more-meta"> 10 mins read </span>
     </div>
   </header>
   
@@ -170,14 +168,14 @@
       SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分
     </div>
     <div class="read-more">
-      <a href="/post/mm-slab_initialization/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-slab_initialization/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm-slab_objects_allocation/">mm-slab对象的分配</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_allocation/">mm-slab对象的分配</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-21 </span>
       
@@ -191,14 +189,14 @@
       slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内
     </div>
     <div class="read-more">
-      <a href="/post/mm-slab_objects_allocation/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-slab_objects_allocation/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm-slab_objects_free/">mm-slab对象的回收</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_free/">mm-slab对象的回收</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-21 </span>
       
@@ -212,14 +210,14 @@
       本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5
     </div>
     <div class="read-more">
-      <a href="/post/mm-slab_objects_free/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-slab_objects_free/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/control_group/">control group</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/control_group/">control group</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-12 </span>
       
@@ -233,18 +231,18 @@
       1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的
     </div>
     <div class="read-more">
-      <a href="/post/control_group/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/control_group/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/driver_model/">driver model</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/driver_model/">driver model</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-12 </span>
       
-        <span class="more-meta"> 6707 words </span>
+        <span class="more-meta"> 6706 words </span>
         <span class="more-meta"> 14 mins read </span>
     </div>
   </header>
@@ -254,18 +252,18 @@
       1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型
     </div>
     <div class="read-more">
-      <a href="/post/driver_model/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/driver_model/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/grub_parameters/">grub参数&#34;console=&#34;</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/grub_parameters/">grub参数&#34;console=&#34;</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-12 </span>
       
-        <span class="more-meta"> 6321 words </span>
+        <span class="more-meta"> 6318 words </span>
         <span class="more-meta"> 13 mins read </span>
     </div>
   </header>
@@ -275,18 +273,18 @@
       本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。 grub参数中
     </div>
     <div class="read-more">
-      <a href="/post/grub_parameters/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/grub_parameters/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/memory_policy/">Linux Memory Policy</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/memory_policy/">Linux Memory Policy</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-10-12 </span>
       
-        <span class="more-meta"> 5389 words </span>
+        <span class="more-meta"> 5382 words </span>
         <span class="more-meta"> 11 mins read </span>
     </div>
   </header>
@@ -296,14 +294,14 @@
       内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-
     </div>
     <div class="read-more">
-      <a href="/post/memory_policy/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/memory_policy/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/printk/">printk函数</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/printk/">printk函数</a></h1>
     <div class="post-meta">
       <span class="post-time"> 2019-09-19 </span>
       
@@ -317,7 +315,7 @@
       1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 /* console_sem用来
     </div>
     <div class="read-more">
-      <a href="/post/printk/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/printk/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>

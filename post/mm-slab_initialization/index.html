@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
 
 
 <link rel="canonical" href="https://blog.globs.site/post/mm-slab_initialization/" />
@@ -46,11 +46,9 @@
 <meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
 <meta itemprop="name" content="mm-slab初始化">
 <meta itemprop="description" content="SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分">
-
-
-<meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="5013">
+<meta itemprop="datePublished" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="wordCount" content="5009">
 
 
 
@@ -125,8 +123,8 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-21 </span>
         
-          <span class="more-meta"> 5013 words </span>
-          <span class="more-meta"> 11 mins read </span>
+          <span class="more-meta"> 5009 words </span>
+          <span class="more-meta"> 10 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -135,133 +133,114 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#1-struct-kmem-cache">1. struct kmem_cache</a></li>
-<li><a href="#2-create-boot-cache">2. create_boot_cache</a>
-<ul>
-<li><a href="#2-1-init-kmem-cache-nodes">2.1. init_kmem_cache_nodes</a>
-<ul>
-<li><a href="#2-1-1-early-kmem-cache-node-alloc">2.1.1. early_kmem_cache_node_alloc</a>
-<ul>
-<li><a href="#2-1-1-1-new-slab">2.1.1.1. new_slab</a></li>
-</ul></li>
-<li><a href="#2-1-2-kmem-cache-alloc-node">2.1.2. kmem_cache_alloc_node</a></li>
-</ul></li>
-<li><a href="#2-2-alloc-kmem-cache-cpus">2.2. alloc_kmem_cache_cpus</a></li>
-</ul></li>
-<li><a href="#3-kmalloc-caches">3. kmalloc_caches</a>
-<ul>
-<li><a href="#3-1-create-kmalloc-caches">3.1. create_kmalloc_caches</a></li>
-</ul></li>
-<li><a href="#4-其他slab-cache的初始化">4. 其他slab cache的初始化</a></li>
-<li><a href="#5-总结">5. 总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#21-init_kmem_cache_nodes">2.1. init_kmem_cache_nodes</a>
+      <ul>
+        <li><a href="#211-early_kmem_cache_node_alloc">2.1.1. early_kmem_cache_node_alloc</a></li>
+        <li><a href="#212-kmem_cache_alloc_node">2.1.2. kmem_cache_alloc_node</a></li>
+      </ul>
+    </li>
+    <li><a href="#22-alloc_kmem_cache_cpus">2.2. alloc_kmem_cache_cpus</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-create_kmalloc_caches">3.1. create_kmalloc_caches</a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<p>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。</p>
-
-<p>Linux内核支持三种分配器，分别为SLAB，SLOB，SLUB。x86架构下，默认采用SLUB分配器。<br />
+      <p>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。</p>
+<p>Linux内核支持三种分配器，分别为SLAB，SLOB，SLUB。x86架构下，默认采用SLUB分配器。<br>
 因此，本文解析内核代码时，默认采用SLUB下的代码定义；同时，虽然三种分配器名称不同，但是都起源于SLAB，因此本文依然用slab来指代小内存分配器，而不是用SLUB。</p>
-
 <p>由于slab涉及到的内容较多，初步分为三部分进行介绍：slab初始化，slab对象的分配，slab对象的回收。</p>
-
 <p>建议先看一下<a href="https://blog.csdn.net/RichardYSteven/article/details/71308350">资料</a>关于SLUB的介绍，对整个系统即各个组件之间的关系有个大体认识。</p>
-
 <p>slab cache的初始化通过函数 <code>kmem_cache_init</code> 函数完成，主要完成三个工作：创建 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 和 <strong>kmalloc_caches</strong> 三个slab cache。</p>
-
 <p><strong>kmem_cache_node</strong> 分配 <strong>struct kmem_cache_node</strong> 对象，因为 <strong>struct kmem_cache</strong> 对象包含 <strong>struct kmem_cache_node</strong> 的成员，因此先创建 <strong>kmem_cache_node</strong> 。</p>
-
 <p><strong>kmem_cache</strong> 分配 <strong>struct kmem_cache</strong> 对象，供创建其他的slab cache使用，例如 <strong>kmalloc_caches</strong> slab cache。</p>
-
 <p><strong>kmalloc_caches</strong> 是一个slab cache数组，包含分配各种大小的对象的slab cache，供 <code>kmalloc</code> 函数使用。</p>
-
-<h1 id="1-struct-kmem-cache">1. struct kmem_cache</h1>
-
+<h1 id="1-struct-kmem_cache">1. struct kmem_cache</h1>
 <p><strong>struct kmem_cache</strong> 是描述slab cache的结构体，定义在 <em>include/linux/slub_def.h</em> ，以 <strong>kmem_cache_node</strong> 分配器为例， 执行这些函数时，设置其成员变量的函数为：</p>
-
 <ul>
-<li><p><code>create_boot_cache</code>，<em>mm/slab_common.c</em></p>
-
+<li>
+<p><code>create_boot_cache</code>，<em>mm/slab_common.c</em></p>
 <ul>
-<li>const char *<strong>name</strong> = &ldquo;kmem_cache_node&rdquo;<br />
+<li>const char *<strong>name</strong> = &ldquo;kmem_cache_node&rdquo;<br>
 slab cache的名称，显示在 <em>/sys/kernel/slab/</em> 目录下</li>
-<li>int <strong>size</strong> = sizeof(struct kmem_cache_node) = 64<br />
+<li>int <strong>size</strong> = sizeof(struct kmem_cache_node) = 64<br>
 slab cache保存的对象的大小，包含元数据</li>
-<li>int <strong>object_size</strong> = 64<br />
+<li>int <strong>object_size</strong> = 64<br>
 slab cache保存的对象的大小，不包含包含元数据</li>
-<li>int <strong>align</strong> = 64<br /></li>
-<li>int <strong>refcount</strong> = -1<br />
+<li>int <strong>align</strong> = 64</li>
+<li>int <strong>refcount</strong> = -1<br>
 重用计数器，请求创建新的SLUB时，SLUB分配器重用已经创建的相似大小的SLUB，以减少SLUB种类的个数</li>
-</ul></li>
-
-<li><p><code>kmem_cache_open</code>，<em>mm/slub.c</em></p>
-
+</ul>
+</li>
+<li>
+<p><code>kmem_cache_open</code>，<em>mm/slub.c</em></p>
 <ul>
-<li>unsigned long <strong>flags</strong><br />
+<li>unsigned long <strong>flags</strong><br>
 标志位，指明slab cache的特点</li>
 <li>int <strong>reserved</strong> = 0</li>
-<li>unsigned long <strong>min_partial</strong> = 5<br />
+<li>unsigned long <strong>min_partial</strong> = 5<br>
 每个node的部分空slab缓冲区数量不能低于这个值</li>
-<li>unsigned long <strong>cpu_partial</strong> = 30<br />
+<li>unsigned long <strong>cpu_partial</strong> = 30<br>
 cpu的可用对象数量的最大值</li>
-<li>unsigned long <strong>remote_node_defrag_ratio</strong> = 1000<br />
+<li>unsigned long <strong>remote_node_defrag_ratio</strong> = 1000<br>
 用于NUMA系统，值越小，越倾向于在本节点分配对象</li>
-</ul></li>
-
-<li><p><code>calculate_sizes</code>，<em>mm/slub.c</em></p>
-
+</ul>
+</li>
+<li>
+<p><code>calculate_sizes</code>，<em>mm/slub.c</em></p>
 <ul>
-<li>int <strong>inuse</strong> = 64<br />
+<li>int <strong>inuse</strong> = 64<br>
 元数据的偏移量</li>
 <li>int <strong>size</strong> = 64</li>
-<li>gfp_t <strong>allocflags</strong> = 0<br />
+<li>gfp_t <strong>allocflags</strong> = 0<br>
 每一次分配时使用的标志</li>
-<li>struct kmem_cache_order_object <strong>oo</strong> = { 64 }<br />
+<li>struct kmem_cache_order_object <strong>oo</strong> = { 64 }<br>
 保存slab需要的页框数量的order值和object的数量，可以计算出需要多少页框，这个是默认值，初始化时根据经验设置</li>
-<li>struct kmem_cache_order_object <strong>min</strong> = { 64 }<br />
+<li>struct kmem_cache_order_object <strong>min</strong> = { 64 }<br>
 保存slab需要的页框数量的order值和object的数量，这个是最小值，如果尝试用oo分配失败，使用最小值进行分配</li>
-<li>struct kmem_cache_order_object <strong>max</strong> = { 64 }<br />
+<li>struct kmem_cache_order_object <strong>max</strong> = { 64 }<br>
 保存slab需要的页框数量的order值和object的数量，这个是最大值</li>
-</ul></li>
 </ul>
-
-<h1 id="2-create-boot-cache">2. create_boot_cache</h1>
-
+</li>
+</ul>
+<h1 id="2-create_boot_cache">2. create_boot_cache</h1>
 <p><code>kmem_cache_init</code> 主要调用 <code>create_boot_cache</code> 创建slab分配器，设置参数。涉及到的函数及调用关系如下：</p>
-
 <p><strong><code>kmem_cache_init</code></strong></p>
-
 <ul>
 <li>create_boot_cache(kmem_cache_node)
-
 <ul>
-<li>__kmem_cache_create</li>
+<li>__kmem_cache_create
+<ul>
 <li>kmem_cache_open
-
 <ul>
-<li>init_kmem_cache_nodes</li>
+<li>init_kmem_cache_nodes
+<ul>
 <li>early_kmem_cache_node_alloc / kmem_cache_alloc_node
-
 <ul>
 <li>init_kmem_cache_node</li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
 <li>alloc_kmem_cache_cpus</li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li>create_boot_cache(kmem_cache)</li>
 <li>create_kmalloc_caches &ndash; kmalloc_caches[]</li>
 </ul>
-
 <p>开启 <strong>CONFIG_SLUB</strong> 时， <code>create_boot_cache</code> 只有创建 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 和 <strong>kmalloc_caches</strong> 时会调用。</p>
-
 <p><code>create_boot_cache</code> 会设置传入cache的一些成员变量，然后调用 <code>__kmem_cache_create</code> 函数。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -292,18 +271,16 @@ cpu的可用对象数量的最大值</li>
                     <span class="n">name</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">err</span><span class="p">);</span>
 
     <span class="n">s</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>   <span class="cm">/* Exempt from merging for now */</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><code>__kmem_cache_crete</code> 主要通过 <code>kmem_cache_open</code> 实现，这个函数除了设置cache的一些参数以外，还会调用 <code>init_kmem_cache_nodes</code> 和 <code>alloc_kmem_cache_cpus</code> ;前者用于初始化kmem_cache中的 <strong>struct kmem_cache_node *node[MAX_NUMNODES]</strong> 成员,
+</div><p><code>__kmem_cache_crete</code> 主要通过 <code>kmem_cache_open</code> 实现，这个函数除了设置cache的一些参数以外，还会调用 <code>init_kmem_cache_nodes</code> 和 <code>alloc_kmem_cache_cpus</code> ;前者用于初始化kmem_cache中的 <strong>struct kmem_cache_node *node[MAX_NUMNODES]</strong> 成员,
 后者用于分配 <strong>struct kmem_cache</strong> 中的per-cpu成员变量 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 。</p>
-
-<h2 id="2-1-init-kmem-cache-nodes">2.1. init_kmem_cache_nodes</h2>
-
+<h2 id="21-init_kmem_cache_nodes">2.1. init_kmem_cache_nodes</h2>
 <p><code>init_kmem_cache_nodes</code> 函数根据当前slab系统的状态，为传入的 <strong>struct kmem_cache</strong> 对象分配 <strong>struct kmem_cache_node</strong> 类型的成员变量。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -364,19 +341,16 @@ cpu的可用对象数量的最大值</li>
         <span class="n">init_kmem_cache_node</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-1-1-early-kmem-cache-node-alloc">2.1.1. early_kmem_cache_node_alloc</h3>
-
+</div><h3 id="211-early_kmem_cache_node_alloc">2.1.1. early_kmem_cache_node_alloc</h3>
 <p>如果系统的slab系统还没有启动，即 <strong>slab_state = DOWN</strong> ，这发生在 <strong>kmalloc_caches</strong> 数组初始化之前——还没有调用 <code>create_kmalloc_caches</code> ，就通过 <code>early_kmem_cache_node_alloc</code> 分配并初始化 <strong>kmem_cache_node</strong> 。</p>
-
 <p>根据内核的代码，当且仅当创建 <strong>kmem_cache_node</strong> 和 <strong>kmem_cache_node</strong> 时，会执行 <code>early_kmem_cache_node_alloc</code> 函数。</p>
-
 <p>这个函数首先通过 <code>new_slab</code> 函数从指定的内存节点通过buddy allocator分配一个新的page给 <strong>kmem_cache_node</strong> 分配器，然后初始化struct page中和SLUB相关的信息，并且将page保存到 <strong>kmem_cache_node</strong> 的 <strong>node[]</strong> 域中。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -471,15 +445,14 @@ cpu的可用对象数量的最大值</li>
 </span><span class="cm">     */</span>
      <span class="cm">/* 将page添加到node的partial list中 */</span>
     <span class="n">__add_partial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">DEACTIVATE_TO_HEAD</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h4 id="2-1-1-1-new-slab">2.1.1.1. new_slab</h4>
-
+</div><h4 id="2111-new_slab">2.1.1.1. new_slab</h4>
 <p><code>early_kmem_cache_node_alloc</code> 首先调用 <code>new_slab</code> 为指定的内存节点分配用作slab的内存页，并且初始化其中的对象。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -592,15 +565,14 @@ cpu的可用对象数量的最大值</li>
     <span class="n">page</span><span class="o">-&gt;</span><span class="n">frozen</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 <span class="nl">out</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-1-2-kmem-cache-alloc-node">2.1.2. kmem_cache_alloc_node</h3>
-
+</div><h3 id="212-kmem_cache_alloc_node">2.1.2. kmem_cache_alloc_node</h3>
 <p><code>kmem_cache_alloc_node</code> 函数和 <code>slab_alloc</code> 一样，通过 <code>slab_alloc_node</code> 实现，之后在介绍 <code>slab_alloc</code> 函数时详细说明。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -621,17 +593,15 @@ cpu的可用对象数量的最大值</li>
 
     <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_alloc_node</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_alloc_node</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="2-2-alloc-kmem-cache-cpus">2.2. alloc_kmem_cache_cpus</h2>
-
+</div><h2 id="22-alloc_kmem_cache_cpus">2.2. alloc_kmem_cache_cpus</h2>
 <p><code>kmem_cache_open</code> 函数调用 <code>init_kmem_cache_nodes</code> 后，接着调用 <code>alloc_kmem_cache_cpus</code> ，初始化 <strong>struct kmem_cache</strong> 结构体中的per-cpu成员 <strong>cpu_slab</strong> 。</p>
-
 <p><strong>cpu_slab</strong> 类型为 <strong>struct kmem_cache_cpu</strong> ，包含每个CPU的slab信息：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -650,15 +620,14 @@ cpu的可用对象数量的最大值</li>
 <span class="cp">#ifdef CONFIG_SLUB_STATS
 </span><span class="cp"></span>    <span class="kt">unsigned</span> <span class="n">stat</span><span class="p">[</span><span class="n">NR_SLUB_STAT_ITEMS</span><span class="p">];</span>
 <span class="cp">#endif
-</span><span class="cp"></span><span class="p">};</span></code></pre></td></tr></table>
+</span><span class="cp"></span><span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>对于多CPU系统而言，每一个slab cache对象，都包含系统中所有CPU的同种类型的slab信息——对于某种对象的slab cache，系统中的每个CPU都有一个slab用来响应对应CPU的对象分配请求。</p>
-
+</div><p>对于多CPU系统而言，每一个slab cache对象，都包含系统中所有CPU的同种类型的slab信息——对于某种对象的slab cache，系统中的每个CPU都有一个slab用来响应对应CPU的对象分配请求。</p>
 <p>这些信息保存在 <strong>cpu_slab</strong> ，而 <strong>struct kmem_cache</strong> 包括所有CPU的slab信息。其中和 <strong>cpu_slab</strong> 相关的成员变量包括 <strong>cpu_partial</strong> ，即每个CPU需要保留的partial objects的数量。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -697,19 +666,16 @@ cpu的可用对象数量的最大值</li>
     <span class="n">init_kmem_cache_cpus</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
 
     <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>至此，slab系统的两个cache—— <strong>kmem_cache_node</strong> 和 <strong>kmem_cache</strong> 初始化完成，可以用来响应其他 <strong>struct kmem_cache_node</strong> 和 <strong>struct kmem_cache</strong> 对象的内存分配请求。</p>
-
-<h1 id="3-kmalloc-caches">3. kmalloc_caches</h1>
-
-<p>分配kmalloc slab cache的关键变量是 <strong>kmalloc_caches</strong> ，定义在*mm/slab_common.c*中， <strong>struct kmem_cache *kmalloc_caches[KMALLOC_SHIFT_HIGH + 1]</strong> ，在 <code>create_kmalloc_caches</code> 函数中初始化。</p>
-
+</div><p>至此，slab系统的两个cache—— <strong>kmem_cache_node</strong> 和 <strong>kmem_cache</strong> 初始化完成，可以用来响应其他 <strong>struct kmem_cache_node</strong> 和 <strong>struct kmem_cache</strong> 对象的内存分配请求。</p>
+<h1 id="3-kmalloc_caches">3. kmalloc_caches</h1>
+<p>分配kmalloc slab cache的关键变量是 <strong>kmalloc_caches</strong> ，定义在<em>mm/slab_common.c</em>中， *<em>struct kmem_cache <em>kmalloc_caches[KMALLOC_SHIFT_HIGH + 1]</em></em> ，在 <code>create_kmalloc_caches</code> 函数中初始化。</p>
 <p>这个函数中，x86架构下 <strong>KMALLOC_SHIFT_LOW</strong> =3， <strong>KMALLOC_SHIFT_HIGH</strong> =13， <strong>KMALLOC_MIN_SIZE</strong> =8，许多修复 <strong>size_index</strong> 数组的条件语句不满足，此处省略不述：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -820,17 +786,15 @@ cpu的可用对象数量的最大值</li>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="cp">#endif
-</span><span class="cp"></span><span class="p">}</span></code></pre></td></tr></table>
+</span><span class="cp"></span><span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>结合此函数中创建 <strong>kmalloc_caches</strong> 的过程，可以理解*mm/slab_common.c*中 <strong>static s8 size_index[24]</strong> 数组的内容。</p>
-
-<h2 id="3-1-create-kmalloc-caches">3.1. create_kmalloc_caches</h2>
-
+</div><p>结合此函数中创建 <strong>kmalloc_caches</strong> 的过程，可以理解<em>mm/slab_common.c</em>中 <strong>static s8 size_index[24]</strong> 数组的内容。</p>
+<h2 id="31-create_kmalloc_caches">3.1. create_kmalloc_caches</h2>
 <p><code>create_kmalloc_caches</code> 函数的主要工作通过 <code>create_kmalloc_cache</code> 实现，这个函数首先从 <strong>kmem_cache</strong> 中分配一个 <strong>struct kmem_cache</strong> 对象，然后调用 <code>create_boot_cache</code> 函数，设置创建的 <strong>kmem_cache</strong> 对象的参数，包括per-cpu成员变量；并且创建对应的sysfs目录，位于 <em>/sys/kernel/slab/&lt;kmem_cache name&gt;/</em> 。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -859,17 +823,15 @@ cpu的可用对象数量的最大值</li>
     <span class="n">list_add</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="o">-&gt;</span><span class="n">list</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">slab_caches</span><span class="p">);</span>
     <span class="n">s</span><span class="o">-&gt;</span><span class="n">refcount</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>可以看到，创建 <strong>kmalloc_caches</strong> 时，直接通过 <code>kmem_cache_zalloc</code> 从 <strong>kmem_cache</strong> slab cache中分配一个 <strong>struct kmem_cache</strong> 对象使用。</p>
-
+</div><p>可以看到，创建 <strong>kmalloc_caches</strong> 时，直接通过 <code>kmem_cache_zalloc</code> 从 <strong>kmem_cache</strong> slab cache中分配一个 <strong>struct kmem_cache</strong> 对象使用。</p>
 <h1 id="4-其他slab-cache的初始化">4. 其他slab cache的初始化</h1>
-
 <p>除了 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 、 <strong>kmalloc_caches</strong> 三个slab cache，内核中其他的slab cache的创建通过 <code>kmem_cache_create</code> 函数完成：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1054,17 +1016,13 @@ cpu的可用对象数量的最大值</li>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_create</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kmem_cache_create</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="5-总结">5. 总结</h1>
-
+</div><h1 id="5-总结">5. 总结</h1>
 <p>从代码看，每一个slab cache通过一个 <strong>struct kmem_cache</strong> 对象描述；每个slab cache包含多个slab，每个slab通常为一个page；每个slab cache可以为一种对象分配内存；每个slab cache包含系统中 <strong>所有CPU</strong> 的 <strong>所有内存节点</strong> 的属于该对象的slab信息，保存在 <strong>struct kmem_cache</strong> 的 <strong>node</strong> 变量和 <strong>cpu_slab</strong> 变量；前者以节点为单位统计slab的信息，后者以CPU为单位统计slab的信息。</p>
-
 <p>整个slab系统的建立过程从 <strong>kmem_cache_node</strong> 、 <strong>kmem_cache</strong> 、 <strong>kmalloc_caches</strong> 三个slab cache的初始化开始。这三个分配器通过 <code>create_boot_cache</code> 函数建立；其他的分配器通过函数 <code>kmem_cache_create</code> 函数创建。</p>
-
 <p>两个函数最终都会调用 <code>__kmem_cache_create</code> 来初始化新创建 <strong>struct kmem_cache</strong> 对象，区别在于获取 <strong>struct kmem_cache</strong> 对象的方式。</p>
-
 <p>slab最终通过伙伴系统获取内存页，介绍slab系统之后介绍伙伴系统。</p>
 
     </div>

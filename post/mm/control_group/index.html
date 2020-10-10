@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>control group - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://blog.globs.site/post/mm/control_group/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="control group" />
+<meta property="og:description" content="1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.globs.site/post/mm/control_group/" />
+<meta property="article:published_time" content="2019-10-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-12T00:00:00+00:00" />
+<meta itemprop="name" content="control group">
+<meta itemprop="description" content="1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的">
+<meta itemprop="datePublished" content="2019-10-12T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-12T00:00:00+00:00" />
+<meta itemprop="wordCount" content="17772">
+
+
+
+<meta itemprop="keywords" content="Documentation,memory,kernel,cpuset,cgroup," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="control group"/>
+<meta name="twitter:description" content="1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">control group</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-10-12 </span>
+        
+          <span class="more-meta"> 17772 words </span>
+          <span class="more-meta"> 36 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11-what-is-cgroup">1.1. What is cgroup</a></li>
+    <li><a href="#12-why-are-cgroups-needed">1.2. Why are cgroups needed</a></li>
+    <li><a href="#13-how-are-cgroups-implemented">1.3. How are cgroups implemented</a>
+      <ul>
+        <li><a href="#131-what-does-notify_on_release-do">1.3.1. What does notify_on_release do</a></li>
+        <li><a href="#132-what-does-clone_children-do">1.3.2. What does clone_children do</a></li>
+        <li><a href="#133-how-do-i-use-cgroups">1.3.3. How do I use cgroups</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#21-内存控制器的应用场景和特点">2.1. 内存控制器的应用场景和特点</a>
+      <ul>
+        <li><a href="#211-应用场景">2.1.1. 应用场景</a></li>
+        <li><a href="#212-特点">2.1.2. 特点</a></li>
+        <li><a href="#213-控制文件">2.1.3. 控制文件</a></li>
+      </ul>
+    </li>
+    <li><a href="#22-内存控制">2.2. 内存控制</a>
+      <ul>
+        <li><a href="#221-account">2.2.1. account</a></li>
+        <li><a href="#222-共享页面的account">2.2.2. 共享页面的account</a></li>
+        <li><a href="#223-swap-extensionconfig_memcg_swap">2.2.3. swap extension(CONFIG_MEMCG_SWAP)</a></li>
+        <li><a href="#224-回收reclaim">2.2.4. 回收(reclaim)</a></li>
+        <li><a href="#225-锁">2.2.5. 锁</a></li>
+        <li><a href="#226-kernel-memory-extensionconfig_memcg_kmem">2.2.6. Kernel Memory Extension(CONFIG_MEMCG_KMEM)</a></li>
+      </ul>
+    </li>
+    <li><a href="#23-用户接口">2.3. 用户接口</a>
+      <ul>
+        <li><a href="#231-内核配置">2.3.1. 内核配置</a></li>
+        <li><a href="#232-准备cgroup">2.3.2. 准备cgroup</a></li>
+        <li><a href="#233-创建新的组将bash移入">2.3.3. 创建新的组，将bash移入</a></li>
+      </ul>
+    </li>
+    <li><a href="#24-测试">2.4. 测试</a>
+      <ul>
+        <li><a href="#241-问题解决">2.4.1. 问题解决</a></li>
+        <li><a href="#242-任务迁移">2.4.2. 任务迁移</a></li>
+        <li><a href="#243-移除cgroup">2.4.3. 移除cgroup</a></li>
+      </ul>
+    </li>
+    <li><a href="#25-各种接口">2.5. 各种接口</a>
+      <ul>
+        <li><a href="#251-force_empty">2.5.1. force_empty</a></li>
+        <li><a href="#252-stat文件">2.5.2. stat文件</a></li>
+        <li><a href="#253-swappiness">2.5.3. swappiness</a></li>
+        <li><a href="#254-failcnt">2.5.4. failcnt</a></li>
+        <li><a href="#255-usage_in_bytes">2.5.5. usage_in_bytes</a></li>
+        <li><a href="#256-numa_stat">2.5.6. numa_stat</a></li>
+      </ul>
+    </li>
+    <li><a href="#26-hierarchy支持">2.6. hierarchy支持</a>
+      <ul>
+        <li><a href="#261-开启hierarchical-account和回收">2.6.1. 开启hierarchical account和回收</a></li>
+      </ul>
+    </li>
+    <li><a href="#27-软限制">2.7. 软限制</a>
+      <ul>
+        <li><a href="#271-接口">2.7.1. 接口</a></li>
+      </ul>
+    </li>
+    <li><a href="#28-任务迁移时移动charge">2.8. 任务迁移时移动charge</a>
+      <ul>
+        <li><a href="#281-接口">2.8.1. 接口</a></li>
+        <li><a href="#282-可以移动的charge类型">2.8.2. 可以移动的charge类型</a></li>
+      </ul>
+    </li>
+    <li><a href="#29-内存阈值">2.9. 内存阈值</a></li>
+    <li><a href="#210-oom控制">2.10. OOM控制</a></li>
+    <li><a href="#211-内存压力memory-pressure">2.11. 内存压力(memory pressure)</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-什么是cpuset">3.1. 什么是cpuset</a></li>
+    <li><a href="#32-为什么需要cpuset">3.2. 为什么需要cpuset</a></li>
+    <li><a href="#33-cpuset是如何实现的">3.3. cpuset是如何实现的</a></li>
+    <li><a href="#34-什么是独占的cpuset">3.4. 什么是独占的cpuset</a></li>
+    <li><a href="#35-什么是内存压力">3.5. 什么是内存压力</a></li>
+    <li><a href="#36-什么是内存spread">3.6. 什么是内存spread</a></li>
+    <li><a href="#37-什么是sched_load_balance">3.7. 什么是sched_load_balance</a>
+      <ul>
+        <li><a href="#371-sched_load_balance的实现细节">3.7.1. sched_load_balance的实现细节</a></li>
+      </ul>
+    </li>
+    <li><a href="#38-什么是sched_relax_domain_level">3.8. 什么是sched_relax_domain_level</a></li>
+    <li><a href="#39-如何使用cpuset">3.9. 如何使用cpuset</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-control-group">1. Control Group</h1>
+<h2 id="11-what-is-cgroup">1.1. What is cgroup</h2>
+<p>cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。</p>
+<p>一个cgroup将一个或多个子系统的进程和一组参数关联起来。</p>
+<p>一个子系统是使用cgroup提供的进程分组工具，采取特定的方式处理进程组的模块。子系统是典型的资源控制器——调度资源，应用per-cgroup限制；但也可能是作用于一组进程的任何对象，比如一个虚拟化子系统。</p>
+<p>一个层次结构是一组树形的cgroup，也是一组子系统，系统中的每一个进程都属于层次结构中的一个cgroup。层次结构中的每一个cgroup都有附属于自己的特定的状态。每一个层次结构都有和其相关联的cgroup虚拟文件系统。</p>
+<p>任何情况下可能有多个活跃的层次结构，每一个层次机构都是系统中所有进程的分区。</p>
+<p>用户层代码可以通过cgroup的虚拟文件系统的名称创建或者销毁cgroup，查看任务分配到的cgroup，列出分配到cgroup的任务PID。这些创建和分配操作只会影响和cgroup相关的层次结构。</p>
+<p>cgroup本身只是用来简单的任务追踪，使用cgroup的子系统向cgroup提供新的参数，例如account/limit cgroup内的进程可以访问的资源，例如， <strong>cpuset</strong> 可以将CPU和内存节点关联到每个cgroup内的进程。</p>
+<h2 id="12-why-are-cgroups-needed">1.2. Why are cgroups needed</h2>
+<p>Linux内核中有很多提供进程聚集的工作，主要用于资源追踪，这些工作包括cpusets，CKRM/ResGroups，UserBeanCounters，virtual server namespaces。这些工作都有一个基本的需求——group/partition进程，将新创建(fork)的进程保存在与父进程相同的group中。</p>
+<p>内核的cgroup补丁提供了实现这些group所需的最基本的内核机制，对系统的fast path影响最小，向某些子系统如cpuset提供了hook。</p>
+<p>多hierarchy的支持允许不同的子系统的cgroup内的进程采用不同的划分方式——并列的层次结构允许每一个hierarchy都是进程的一个划分方式，不需要处理将多个无关的子系统置于同一个cgroup树形结构时复杂的进程组合。</p>
+<p>一种极端是每一个资源控制器或者子系统可以有单独的hierarchy；另一种极端是所有的子系统都处于相同的hierarchy。</p>
+<h2 id="13-how-are-cgroups-implemented">1.3. How are cgroups implemented</h2>
+<p>控制组扩展了内核的下列方面：</p>
+<ul>
+<li>系统中的每个进程都有 <strong>css_set</strong> 的引用计数指针。</li>
+<li><strong>css_set</strong> 包含一组 <strong>cgroup_subsys_state</strong> 对象的引用计数指针，系统中注册的每一个cgroup子系统都有一个。进程内没有指向所属cgroup的直接链接，但是可以通过 <strong>cgroup_subsys_state</strong> 对象内的指针获取。这是因为performance-critical代码通常会频繁访问子系统的状态信息，而访问进程所属的cgroup并不常见(比如在cgroup之间移动进程)。每一个task_struct的cg_list域是使用 <strong>css_set</strong> 的链表。</li>
+<li>用户空间可以在挂载后访问和操作cgroup hierarchy文件系统</li>
+<li>可以列出属于cgroup的所有进程(PID)</li>
+</ul>
+<p>cgroup的实现需要内核其余部分的一些简单hook，都不在关键路径：</p>
+<ul>
+<li>在 <em>init/main.c</em> ，在启动阶段初始化根cgroup和 <strong>css_set</strong></li>
+<li>在 <code>fork</code> 和 <code>exit</code> 函数，将进程和其 <strong>css_set</strong> attach或者detach</li>
+</ul>
+<p>除此之外，还需要挂载类型为cgroup的文件系统，启用内核支持的cgroup。挂载操作默认会挂载包含所有已注册的子系统的 hierarchy。</p>
+<p>如果存在和请求的子系统相同的active hierarchy，这个hierarchy就会被新的挂载操作重用。如果没有匹配的hierarchy存在，并且请求的子系统在已有的hierarchy中处于使用状态，挂载操作会失败，返回 <strong>-EBUSY</strong> 。否则，新的hierarchy就会被激活，关联到请求的子系统。</p>
+<p>不能将一个新的子系统绑定到一个活跃的cgroup hierarchy，或者从一个活跃的cgroup hierarchy中解绑一个子系统，这会带来很多错误恢复的问题。</p>
+<p>cgroup文件系统被umount时，如果顶层的cgroup下还有任何子cgroup，这个hierarchy还会保持活跃状态，即使已经被umount。如果没有子cgroup，hierarchy就会失效。</p>
+<p>cgroup没有相关的系统调用——所有的查询和修改操作都通过cgroup文件系统完成。</p>
+<p><em>/proc</em> 下的每个进程都有一个名为‘cgroup’的文件，对于每一个活跃的hierarchy，保存着子系统到根cgroup文件系统的相对路径。</p>
+<p>每一个cgroup都有cgroup文件系统下的一个目录表示，包含以下文件：</p>
+<ul>
+<li>tasks：属于该cgroup的进程列表，没有排序，向文件写入一个线程ID可以将线程移入该cgroup</li>
+<li>cgroup.procs：cgroup内核的线程组ID，没有排序，可能存在重复的TGID，向文件写入一个线程组ID可以将所有线程一如到该cgroup</li>
+<li>notify_on_release标志：退出时执行release agent？</li>
+<li>release_agent：释放通知使用的路径(这个文件只存在于顶层cgroup)</li>
+</ul>
+<p>其他的子系统例如cpuset可以向每个cgroup目录添加额外的文件。</p>
+<p>新的cgroup通过mkdir或者其他的命令创建，其属性值通过写入对应的文件设置。</p>
+<p>嵌套的cgroup的命名层次结构允许将一个大系统分割为嵌套的、动态可变的soft-partition。</p>
+<p>通过fork创建的cgroup内的每个进程的子进程都会处于相同的cgroup内，这样可以将相关的任务组织在一起。如果cgroup文件系统目录的权限允许的话，一个任务可以重新关联到另一个cgroup。</p>
+<p>当一个任务从一个cgroup移动到另一个cgroup，会有新的 <strong>css_set</strong> 指针——如果已经有 <strong>css_set</strong> 存在，这个group就会被重用，否则分配一个新的 <strong>css_set</strong> 。 <strong>css_set</strong> 通过哈希表定位。</p>
+<p>为了允许从cgroup内访问构成其的 <strong>css_set</strong> ，一组 <strong>cg_cgroup_link</strong> 对象组成了一个格状结构；每个cgroup的 <strong>cgrp_link_list</strong> 域和 <strong>css_set</strong> 都链接到一个 <strong>cg_group_link</strong> 链表。</p>
+<p>因此，一个cgroup内的任务可以通过遍历引用该cgroup的 <strong>css_set</strong> ，并且遍历 <strong>css_set</strong> 内的 <strong>cg_link_list</strong> 访问。</p>
+<h3 id="131-what-does-notify_on_release-do">1.3.1. What does notify_on_release do</h3>
+<p>如果启用 <strong>notify_on_release</strong> 标志，即为1，cgroup内的最后一个任务结束时，内部的最后一个子cgroup就会被移除，之后内核运行hierarchy根目录下的 <strong>release_agent</strong> 包含的命令，并提供cgroup相对于cgroup文件系统挂载点的路径名。这样可以自动移除废弃的cgroup。</p>
+<p>系统启动时，根cgroup的 <strong>notify_on_release</strong> 默认值为0；其他的cgroup的默认值继承自父cgroup的 <strong>notify_on_release</strong> ， <strong>release_agent</strong> 的默认值为空。</p>
+<h3 id="132-what-does-clone_children-do">1.3.2. What does clone_children do</h3>
+<p>这个标志影响cpuset控制器，如果 <strong>clone_children</strong> 为1，新的cpuset cgroup会在初始化阶段复制父cgroup的配置。</p>
+<h3 id="133-how-do-i-use-cgroups">1.3.3. How do I use cgroups</h3>
+<p>要开始一个包含在cgroup的新任务，使用“cpuset” cgroup子系统，步骤如下：</p>
+<ol>
+<li><code>mount -t tmpfs cgroup_root /sys/fs/cgroup</code></li>
+<li><code>mkdir /sys/fs/cgroup/cpuset</code></li>
+<li><code>mount -t cgroup -ocpuset cpuset /sys/fs/cgroup/cpuset</code></li>
+<li>在 <em>/sys/fs/cgroup</em> 虚拟文件系统中通过mkdir和echo创建新的cgroup</li>
+<li>启动一个将要成为新任务的父进程的任务</li>
+<li>向 <em>/sys/fs/cgroup/cpuset/tasks</em> 写入任务的PID</li>
+<li>从父进程fork，exec或者clone出新任务</li>
+</ol>
+<p>例如，下列命令会在CPU 2和3，内存节点1创建一个名为“Charlie”的cgroup，并在其中开始一个sh：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t tmpfs cgroup_root /sys/fs/cgroup
+mkdir /sys/fs/cgroup/cpuset
+mount -t cgroup cpuset -ocpuset /sys/fs/cgroup/cpuset
+<span class="nb">cd</span> /sys/fs/cgroup/cpuset
+mkdir Charlie
+<span class="nb">cd</span> Charlie
+/bin/echo 2-3 &gt; cpuset.cpus
+/bin/echo <span class="m">1</span> &gt; cpuset.mems
+/bin/echo <span class="nv">$$</span> &gt; tasks
+sh
+<span class="c1"># The subshell &#39;sh&#39; is now running in cgroup Charlie</span>
+<span class="c1"># The next line should display &#39;/Charlie&#39;</span>
+cat /proc/self/cgroup
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="2-memory-resource-controller">2. Memory Resource Controller</h1>
+<p>资料来自 <em>Documentation/cgroups/memory.txt</em> ，这篇文档把内存资源控制器称作内存控制器，不要和硬件中的内存控制器混淆。还有内存控制器的cgroup，称作 <strong>memory cgroup</strong> ，而不是源码中经常使用的 <strong>memcg</strong> 。</p>
+<h2 id="21-内存控制器的应用场景和特点">2.1. 内存控制器的应用场景和特点</h2>
+<h3 id="211-应用场景">2.1.1. 应用场景</h3>
+<p>内存控制器将一组应用的内存行为和系统的其他部分隔离开，可以用来：</p>
+<ol>
+<li>隔离一个或者一组应用：memory-hungry应用可以被隔离，限制使用总量有限的内存空间</li>
+<li>以有限的内存空间创建一个 <strong>cgroup</strong> ，可以作为grub参数 <strong>mem=xxx</strong> 的替代选项</li>
+<li>虚拟化解决方案可以控制要分配给虚拟机实例的内存总量</li>
+<li>CD/DVD烧写器可以通过系统剩余部分使用的内存的总量来保证在烧写过程中不会由于内存不足而失败</li>
+<li>还有其他的应用场景</li>
+</ol>
+<h3 id="212-特点">2.1.2. 特点</h3>
+<ul>
+<li>统计匿名页、文件高速缓存、交换高速缓存的使用情况，并进行限制</li>
+<li>内存页被独占的链接到per-memcg LRU，没有全局的LRU</li>
+<li>可选功能：统计内存+交换区的使用情况并进行限制</li>
+<li>分级的统计</li>
+<li>软限制</li>
+<li>在移动一个进程时移动(or recharge)统计信息是可选的</li>
+<li>使用情况阈值通知</li>
+<li>内存压力通知</li>
+<li>oom-killer disable knob and oom-notifier</li>
+<li>root cgroup没有限制控制(has no limit controls)</li>
+</ul>
+<h3 id="213-控制文件">2.1.3. 控制文件</h3>
+<p>在ubuntu-18.04中 <em>/sys/fs/cgroup/memory</em> 下，提供了一组控制文件，可以设置cgroup的相关参数。</p>
+<h2 id="22-内存控制">2.2. 内存控制</h2>
+<p>内存控制器的核心是 <strong>res_counter</strong> ，记录了当前的内存使用情况，限制关联到控制器的进程组。每一个cgroup都有一个相关联的内存控制器数据结构—— <strong>mem_cgroup</strong> 。</p>
+<p><strong>mem_cgroup</strong> 和常见的内存数据结构之间的关系如下：</p>
+<ol>
+<li>每一个cgroup都有自己的统计信息(account)</li>
+<li>每一个 <strong>mm_struct</strong> 都知道自己所属的cgroup</li>
+<li>每一个page都包含指向 <strong>page_cgroup</strong> (在 <em>boot/memory-hotplug</em> 分配)的指针，后者知道自己所属的cgroup</li>
+</ol>
+<h3 id="221-account">2.2.1. account</h3>
+<p>account的流程如下：调用 <code>mem_cgroup_charge_common()</code> 函数建立所需的数据结构，并检查其管理的cgroup是否超出限制。如果超出，进行回收操作。如果一切正常，更新<strong>page_cgroup</strong> —— <strong>page_cgroup</strong> has its own LRU on cgroup。</p>
+<p>所有mapped anon pages(RSS)和cache pages(Page Cache)都会被account。从来不会被回收以及不会出现在LRU上的页面不会被记录，只记录通过普通的VM管理的页面。</p>
+<p>RSS页在完全unmap后不再account，PageCache页在从radix-tree移除后不再account。RSS页即使被完全unmap，还会作为SwapCache存留在系统中，直到被释放。这些SwapCache也会被account，一个swap-in的页直到被映射后才会account。</p>
+<p>说明：内核会进行swapin-readahead，一次性读取多个swaps——也就是说，swap-in的页可能包含触发缺页异常的进程以外的进程所需的页面。因此，我们避免记录swap-in I/O。</p>
+<p>执行页面migration操作时，保留account信息。</p>
+<p>说明：我们只记录pages-on-LRU，因为我们的目的是控制已用页面的总数，从VM的角度看，不会管理not-on-LRU页面。</p>
+<h3 id="222-共享页面的account">2.2.2. 共享页面的account</h3>
+<p>共享页面由第一次touch该页面的cgroup进行account，原因是频繁使用共享页面的cgroup最终会get charged for it(一旦uncharged from the cgroup that brought it in——发生在内存不足时)。</p>
+<p>将一个进程移动到另一个cgroup时，如果选择了 <strong>move_charge_at_immigrate</strong> ，属于进程的页面可能会recharge到新的cgroup。</p>
+<p>特殊情况：如果设置了 <strong>CONFIG_MEMCG_SWAP</strong> ，执行swapoff，强制把shmem(tmpfs)的swapped-out页面换入到内存中，这些页面的charges由swapoff的调用者进行account，而不是shmem的使用者。</p>
+<h3 id="223-swap-extensionconfig_memcg_swap">2.2.3. swap extension(CONFIG_MEMCG_SWAP)</h3>
+<p>交换区扩展支持记录交换区的swap，如果可能的话，换进的页面会charge到原来的页分配器。</p>
+<p>account交换区时，会增加以下文件：</p>
+<ul>
+<li>memory.memsw.usage_in_bytes</li>
+<li>memory.memsw.limit_in_bytes</li>
+</ul>
+<p><strong>memsw</strong> 表示内存+交换区，其使用量受到<strong>memsw.limit_in_bytes</strong> 的限制。</p>
+<p><strong>为什么使用“内存+交换区”，而不是交换区？</strong></p>
+<p>全局LRU(kswapd)可能将任意的页面换出，换出意味着将account从内存移到交换区，“内存+交换区”的组合不会有任何变化；也就是说，当我们想要在不影响全局LRU的情况下限制交换区的使用，从OS的角度来看，使用内存+交换区的限制比只使用交换区更好。</p>
+<p><strong>如果cgroup达到了 <code>memory.memsw.limit_in_bytes</code> 的限制，会发生什么？</strong></p>
+<p>如果一个cgroup达到了limit_in_bytes，再进行换出操作没有任何意义；cgroup不会执行换出操作，file caches are dropped。但是正如之前所说，全局的LRU仍然会将其内存换出，不能通过cgroup禁止这种情况的发生。</p>
+<h3 id="224-回收reclaim">2.2.4. 回收(reclaim)</h3>
+<p>每个cgroup都维护一个per-cgroup LRU，和全局的LRU结构相同；当cgroup超出自己的限制时，首先从cgroup回收内存，为cgroup访问的新页释放内存空间。如果回收失败，调用OOM函数选择cgroup内一个占用内存最大的任务，杀死。</p>
+<p>cgroup的回收函数和全局的回收函数采用相同的算法，只是操作的对象来自per-cgruop LRU列表。</p>
+<p>说明：根cgroup不会有回收操作，因为根cgroup没有任何限制。</p>
+<p>说明2：如果 <strong>panic_on_oom</strong> 设置为2，整个系统就会panic。</p>
+<h3 id="225-锁">2.2.5. 锁</h3>
+<p><code>lock_page_cgroup()</code> / <code>unlock_page_cgroup()</code> 应该在 <code>mapping-&gt;tree_lock</code> 下调用，锁的调用次序如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="n">PG_locked</span><span class="p">.</span>
+<span class="n">mm</span><span class="o">-&gt;</span><span class="n">page_table_lock</span>
+    <span class="n">zone</span><span class="o">-&gt;</span><span class="n">lru_lock</span>
+    <span class="n">lock_page_cgroup</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>per-zone-per-cgroup LRU通过 <code>zone-&gt;lru_lock</code> 保护，没有自己的锁。</p>
+<h3 id="226-kernel-memory-extensionconfig_memcg_kmem">2.2.6. Kernel Memory Extension(CONFIG_MEMCG_KMEM)</h3>
+<p>内核控制器可以通过这个扩展项限制系统使用的内核内存的大小，内核内存和用户内存有根本的差异——内核内存无法被换出——消耗大量的内核内存可以DoS系统。</p>
+<p>在限制一个group之前，内核内存不会被account，这保证了现有的setup可以继续正常工作。如果cgroup包含子cgroup，或者已经有了进程，就无法设置限制。这种情况下设置限制会返回 <strong>-EBUSY</strong> 。设置 <code>use_hierarchy == 1</code> 的情况下account一个group，其子cgroup会被自动account，无视限制值。</p>
+<p>一旦设置了group的限制值，就会一直account这个group，知道被移除。内存的限制通过向 <strong>memroy.kmem.limit_in_bytes</strong> 中写入-1移除。这样的话，kmem就会被account，但是没有限制。</p>
+<p>根cgroup的内核内存限制并不是必须的，根cgroup的使用情况可能不会account。使用的内存都会累计到 <strong>memory.kmem.usage_in_bytes</strong> ，或者保存在有意义的计数器。</p>
+<p>主kmem计数器也包含在主计数器，因此用户计数器也可以看到kmem charge。</p>
+<p>目前内核内存没有软限制，未来的工作是达到限制时触发slab回收操作。</p>
+<h4 id="2261-目前account的内核内存资源">2.2.6.1. 目前account的内核内存资源</h4>
+<p><strong>stack pages</strong> ：每个进程都会使用栈页面，当使用的内核内存过多时，这个信息用来阻止创建新的进程。</p>
+<p><strong>slab pages</strong> ：记录通过SLAB和SLUB分配的页，每一次访问cache时，memcg都会创建一个 *<em>kmem_cache</em> *的副本。创建过程是lazy的，所以在创建cache的时候可能会略过一些对象。一个slab页内的所有对象都属于相同的memcg，只有在cache分配页时将一个进程迁移到另一个memcg的情况例外。</p>
+<p><strong>sockets memory pressure</strong> ：一些套接字协议有内存压力阈值，内存控制允许每个cgroup控制自己的阈值。</p>
+<p><strong>tcp memory pressure</strong> ：tcp协议的套接字内存压力。</p>
+<h4 id="2262-常见的使用情况">2.2.6.2. 常见的使用情况</h4>
+<p>由于“kmem“计数器包含在主用户计数器，不可能在完全不影响用户内存的情况下限制内核内存。用”U“代表用户内存限制，”K“代表内核内存限制，有三种组合方式：</p>
+<ul>
+<li>U != 0, K = unlimited
+<ul>
+<li>account kmem之前已有的标准memcg限制机制，忽略内核内存。</li>
+</ul>
+</li>
+<li>U != 0, K &lt; U
+<ul>
+<li>内核内存是用户内存的一部分，常用于per-cgroup的内存使用过量的情况。不推荐过量使用内核内存——可能会耗尽不可回收内存。</li>
+<li>这种情况下，管理员可以设置K值，保证所有组的和不会大于内存的总量，可以根据自身QoS的情况设置U值。</li>
+</ul>
+</li>
+<li>U != 0, K &gt;= U
+<ul>
+<li>kmem charges也会包含在用户计数器，两种内存都会触发cgroup的内存回收操作。这种方式向管理员提供了统一的内存视图，方便只想追踪内核内存用量的使用者。</li>
+</ul>
+</li>
+</ul>
+<h2 id="23-用户接口">2.3. 用户接口</h2>
+<h3 id="231-内核配置">2.3.1. 内核配置</h3>
+<ol>
+<li>打开 <strong>CONFIG_CGROUPS</strong></li>
+<li>打开 <strong>CONFIG_RESOURCE_COUNTERS</strong></li>
+<li>打开 <strong>CONFIG_MEMCG</strong></li>
+<li>打开 <strong>CONFIG_MEMCG_SWAP</strong> (使用交换区扩展)</li>
+<li>打开 <strong>CONFIG_MEMCG_KMEM</strong> (使用kmem扩展)</li>
+</ol>
+<h3 id="232-准备cgroup">2.3.2. 准备cgroup</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t tmpfs none /sys/fs/cgroup
+mkdir /sys/fs/cgroup/memory
+mount -t cgroup none /sys/fs/cgroup/memory -o memory
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="233-创建新的组将bash移入">2.3.3. 创建新的组，将bash移入</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mkdir /sys/fs/cgroup/memory/0
+<span class="nb">echo</span> <span class="nv">$$</span> &gt; /sys/fs/cgroup/memory/0/tasks
+</code></pre></td></tr></table>
+</div>
+</div><p>现在可以调整内存限制：<code>echo 4M &gt; /sys/fs/cgroup/memory/0/memory.limit_in_bytes</code>。</p>
+<p>说明：可以通过写入-1来取消限制；不能对根cgroup设置限制。</p>
+<p>成功写入文件并不能保证成功将内存限制为写入文件的值，原因可能有很多：比如对齐到页，或者系统中可用的内存总量。用户在写入之后需要重新读取，以确认写入的值被内核提交。</p>
+<p><strong>memory.failcnt</strong> 包含超出cgroup限制的次数；<strong>memory.stat</strong> 文件提供了account信息，当前包含cache，RSS，活动的页/非活动的页。</p>
+<h2 id="24-测试">2.4. 测试</h2>
+<p>性能测试很重要，要确定内存控制器的开销，在tmpfs上进行测试。</p>
+<p>缺页的可预测性也很重要，并行的缺页测试中，多进程的测试可能好于多线程的测试，后者可能受到共享对象/状态的影响。</p>
+<h3 id="241-问题解决">2.4.1. 问题解决</h3>
+<p>有的时候cgroup下的应用可能会被OMM终止，原因可能为：</p>
+<ol>
+<li>cgroup的限制值太小</li>
+<li>用户在使用匿名页，并且关闭了交换区，或者交换区太小</li>
+</ol>
+<p>sync后的 <code>echo 1 &gt; /proc/sys/vm/drop_caches</code> 操作可以清除cgroup内的页缓存。</p>
+<h3 id="242-任务迁移">2.4.2. 任务迁移</h3>
+<p>一个任务从一个cgroup迁移到另一个cgroup时，默认不会移动其charge。原cgroup保留自己分配的页，直到页面被释放或者回收。</p>
+<p>可以在迁移任务的同时移除charge。</p>
+<h3 id="243-移除cgroup">2.4.3. 移除cgroup</h3>
+<p>可以通过rmdir删除cgroup，但是根据上述内容，即使一个cgroup的所有任务都被移出，仍然可能有charge。</p>
+<p>将stats移动到根(user_hierarchy == 0)或者父group(user_hierarchy == 1)，除了uncharge from child，charge不变。</p>
+<p>移除cgroup时记录在交换信息的charge记录不被更新，记录的信息会被丢弃，使用交换区的cgroup会被charge，成为新的所有者。</p>
+<h2 id="25-各种接口">2.5. 各种接口</h2>
+<h3 id="251-force_empty">2.5.1. force_empty</h3>
+<p><strong>memory.for_empty</strong> 接口用来清零cgroup的内存使用情况，写入任何值都会导致cgroup被回收，回收尽可能多的页。</p>
+<p>典型的使用情况是在调用 <code>rmdir()</code> 之前调用，因为 <code>rmdir()</code> 会将所有的页面移动到父group，一些不再使用的页高速缓存也会被移动到父group。</p>
+<p>设置 <strong>memory.kmem.limit_in_bytes</strong> 时，属于内核页的charge依然可见。这种情况下， <strong>memory.kmem.usage_in_bytes == memory.usage_in_bytes</strong> 。</p>
+<h3 id="252-stat文件">2.5.2. stat文件</h3>
+<p><strong>memory.stat</strong> 文件包含以下统计数据：</p>
+<ul>
+<li>
+<p>per-memory cgroup local status</p>
+<ul>
+<li><strong>cache</strong> ：page cache memory的字节数</li>
+<li><strong>rss</strong> ：匿名的和交换区的高速缓存内存的字节数(包含透明的大页面)</li>
+<li><strong>rss_huge</strong> ：匿名的透明大页面的字节数</li>
+<li><strong>mapped_file</strong> ：已映射的文件的字节数(包含<em>tmpfs/shmem</em>)</li>
+<li><strong>pgpgin</strong> ：内存cgroup的charge事件数——每次内存页作为RSS或者页高速缓存被account到cgroup时就会产生charge事件</li>
+<li><strong>pgpgout</strong> ：内存cgroup的uncharge事件数——每次内存页从cgroup uncharge时就会产生uncharge事件</li>
+<li><strong>swap</strong> ：交换区的字节数</li>
+<li><strong>writeback</strong> ：要同步到磁盘的file/anon高速缓存队列的字节数</li>
+<li><strong>inactive_anon</strong> ：非活跃LRU列表中匿名的和交换区的高速缓存内存字节数</li>
+<li><strong>active_anon</strong> ：活跃LRU列表中匿名的和交换区的高速缓存内存字节数</li>
+<li><strong>inactive_file</strong> ：非活跃LRU列表中file-backed内存的字节数</li>
+<li><strong>active_file</strong> ：活跃LRU列表中file-backed内存的字节数</li>
+<li><strong>unevictable</strong> ：无法被回收的内存字节数</li>
+</ul>
+</li>
+<li>
+<p>hierarchy相关的status</p>
+<ul>
+<li><strong>hierarchical_memory_limit</strong> ：和内存cgroup所在的hierarchy相关的内存限制字节数</li>
+<li><strong>hierarchical_memsw_limit</strong> ：和内存cgroup所在的hierarchy相关的内存+交换区限制字节数</li>
+<li><strong>total_&lt;counter&gt;</strong> ：&lt;counter&gt;的hierarchy版本号，不包含自身的值，例如total_cache</li>
+</ul>
+</li>
+<li>
+<p>依赖于 <strong>CONFIG_DEBUG_VM</strong> 的统计数据</p>
+<ul>
+<li><strong>recent_rotated_anon</strong></li>
+<li><strong>recent_rotated_file</strong></li>
+<li><strong>recent_scanned_anon</strong></li>
+<li><strong>recent_scanned_file</strong></li>
+</ul>
+<p>说明：<strong>recent_rotated</strong> 表示最近的LRU rotation频率； <strong>recent_scanned</strong> 表示LRU的扫描次数。</p>
+</li>
+</ul>
+<p>只有匿名的和交换区的高速缓存内存是“rss“数据的一部分，不要和真正的”resident set size“或者cgroup使用的物理内存的总数搞混。</p>
+<p>“rss+file_mapped“是cgroup的resident set size。</p>
+<h3 id="253-swappiness">2.5.3. swappiness</h3>
+<p>overrides /proc/sys/vm/swappiness for the particular group。根cgroup对应全局的swappiness设置。</p>
+<p>和全局的回收操作不同，limit reclaim 保证swappiness为0时，即使有交换区存储，也不会执行任何交换操作，这可能会导致没有页面可以回收时的memcg OOM killer。</p>
+<h3 id="254-failcnt">2.5.4. failcnt</h3>
+<p>一个内存cgroup包括 <strong>memory.failcnt</strong> 和 <strong>memory.memsw.failcnt</strong> 文件，这个失败次数指的是一个使用计数器达到限制的次数。如果一个内存cgroup达到了限制，失败次数就会增加，cgroup的内存就会被回收。</p>
+<p>向其写入0可以重设失败次数。</p>
+<h3 id="255-usage_in_bytes">2.5.5. usage_in_bytes</h3>
+<p>为了效率更高，内存cgroup和其他的内核组件一样，使用一些优化措施避免不必要的cacheline false sharing。 <strong>usage_in_bytes</strong> 会收到影响，不会显示内存使用情况的准确值，只是一个fuzz值。要获得准确值，需要使用 <strong>memory.stat</strong> 的RSS+CACHE(+SWAP)。</p>
+<h3 id="256-numa_stat">2.5.6. numa_stat</h3>
+<p>和 <strong>numa_maps</strong> 相似，但是基于per-memcg。鉴于内存页可以从任意物理节点分配， <strong>numa_stat</strong> 可以用来查看memcg内部的numa locality信息。比如将此信息和CPU的分配策略进行组合，评估应用的性能。</p>
+<p>每个memcg的 <strong>numa_stat</strong> 文件包含每个节点的“total”，“file”，“anon”，“unevictable”内存页数，以及子cgroup的hierarchical_&lt;counter&gt;信息。</p>
+<p><strong>memory.numa_stat</strong> 的输出格式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">total</span><span class="o">=</span>&lt;total pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">file</span><span class="o">=</span>&lt;total file pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">anon</span><span class="o">=</span>&lt;total anon pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+<span class="nv">unevictable</span><span class="o">=</span>&lt;total anon pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+hierarchical_&lt;counter&gt;<span class="o">=</span>&lt;counter pages&gt; <span class="nv">N0</span><span class="o">=</span>&lt;node <span class="m">0</span> pages&gt; <span class="nv">N1</span><span class="o">=</span>&lt;node <span class="m">1</span> pages&gt; ...
+
+The <span class="s2">&#34;total&#34;</span> count is sum of file + anon + unevictable.
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="26-hierarchy支持">2.6. hierarchy支持</h2>
+<p>内存控制器支持深度的hierarchy，和hierarchical account。在cgroup的文件系统内创建cgroup可以创建hierarchy结构。</p>
+<p>hierarchy中打开 <strong>memory.use_hierarchy</strong> 的每个节点都会被祖先节点account，如果一个祖先超出了限制，回收算法从祖先和孩子的任务中回收内存。</p>
+<h3 id="261-开启hierarchical-account和回收">2.6.1. 开启hierarchical account和回收</h3>
+<p>内存cgroup默认关闭hierarchy特性，向根cgroup的 <strong>memory.use_hierarchy</strong> 写入1可以开启。</p>
+<p>说明：如果cgroup下已经有别的cgroup，或者父cgroup开启了hierarchy，打开/关闭操作可能会失败。</p>
+<h2 id="27-软限制">2.7. 软限制</h2>
+<p>软限制允许cgroup在下列情况中使用尽可能多的内存：</p>
+<ol>
+<li>不存在内存竞争</li>
+<li>cgroup没有超出硬限制</li>
+</ol>
+<p>系统检测到内存竞争或者内存不足时，cgroup会被限制到软限制之内。如果每一个cgroup的软限制都很高，会被尽可能多的压缩，保证其他的cgroup不会被某个cgroup饿死。</p>
+<p>但是，软限制只是一个best-effort特性——没有保障，只是在内存紧缺时尽量完成。当前的基于软限制的内存回收通过 <strong>balance_pgdat</strong> 调用。</p>
+<h3 id="271-接口">2.7.1. 接口</h3>
+<p>软限制可以这样设置：<code>echo 256M &gt; memory.soft_limit_in_bytes</code> 。</p>
+<p>说明：软限制需要很长的时间才能生效——为了平衡各个cgroup，需要内存回收操作；推荐设置软限制小于硬限制，否则硬限制会先生效。</p>
+<h2 id="28-任务迁移时移动charge">2.8. 任务迁移时移动charge</h2>
+<p>用户可以在任务迁移时移动charge，也就是从旧的cgroup uncharge内存页，并且charge到新的cgroup。需要开启 <strong>CONFIG_MMU</strong> 。</p>
+<h3 id="281-接口">2.8.1. 接口</h3>
+<p>这个特性默认关闭，写 <strong>memory.move_charge_at_immigrate</strong> 文件可以开启：<code>echo (some positive value) &gt; memory.move_charge_at_immegrate</code> ，写入0可以关闭。</p>
+<p>说明： <strong>move_charge_at_immigrate</strong> 的每一位代表要移动的charge的类型；charge只有在移动mm-&gt;owner时才会移动，也就是改变一组线程的leader；如果目标cgroup没有足够的空间，执行内存回收操作，如果不能回收足够的空间，任务迁移就会失败。</p>
+<h3 id="282-可以移动的charge类型">2.8.2. 可以移动的charge类型</h3>
+<p>只有charge到进程当前的内存cgroup的内存页或者交换区的account才可以被移动。 <strong>move_charge_at_immigrate</strong> 的不同bit代表的charge类型为：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">bit</th>
+<th style="text-align:left">type of charge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">目标进程使用的匿名页(及其交换区)的charge，交换区charge需要开启交换区扩展</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">目标进程映射的文件页(普通文件、tmpfs文件、tmpfs文件的交换区)的charge。和匿名页的情况不同，即使进程没有执行缺页操作，其映射的文件页和交换区也会被移动；也就是说，这些文件页可能不是进程的RSS，而是其他映射相同文件的进程的RSS。内存页的映射基数会被忽略——即使 <code>page_mapcount(page) &gt; 1</code> 页面也会被移动</td>
+</tr>
+</tbody>
+</table>
+<h2 id="29-内存阈值">2.9. 内存阈值</h2>
+<p>内存cgroup通过cgroup通知API实现内存阈值，支持多个内存和内存+交换区阈值，超过阈值时收到通知。</p>
+<p>要注册一个阈值，应用必须：</p>
+<ul>
+<li>使用 <code>eventfd</code> 创建eventfd</li>
+<li>打开 <strong>memory.usage_in_bytes</strong> 或者 <strong>memory.memsw.usage_in_bytes</strong></li>
+<li>向 <strong>cgroup.event_control</strong> 写入“&lt;event_fd&gt; &lt;fd of memory.usage_in_bytes&gt; &lt;threshold&gt;”</li>
+</ul>
+<p>应用会在内存用量超出阈值时通过eventfd收到通知，可以用于根和非根cgroup。</p>
+<h2 id="210-oom控制">2.10. OOM控制</h2>
+<p><strong>memory.oom_control</strong> 用于OOM通知和其他控制。</p>
+<p>内存cgroup通过cgroup通知API实现OOM通知器，可以注册多个OOM通知器。</p>
+<p>要注册一个通知器，一个应用必须：</p>
+<ul>
+<li>使用 <code>eventfd</code> 创建eventfd</li>
+<li>打开 <strong>memory.oom_control</strong> 文件</li>
+<li>向 <strong>cgroup.event_control</strong> 写入“&lt;event_fd&gt; &lt;fd of memory.oom_control&gt;”</li>
+</ul>
+<p>OOM发生时应用会通过eventfd收到通知，但是不能用于根cgroup。</p>
+<p>向 <strong>memory.oom_control</strong> 文件写入1可以关闭OOM-killer：<code>echo 1 &gt; memory.oom_control</code> 。</p>
+<p>关闭OOM-killer后，cgroup内的进程请求accountable内存时会在OOM-waitqueue保持hang/sleep状态。</p>
+<p>要运行这些进程，需要解除内存cgroup的OOM状态：增大限制值或者减少使用量。</p>
+<p>要减少使用量：</p>
+<ul>
+<li>杀死一些进程</li>
+<li>将一些进程移动到其他cgroup，并执行account迁移操作</li>
+<li>删除一些文件(在tmpfs上的文件)</li>
+</ul>
+<h2 id="211-内存压力memory-pressure">2.11. 内存压力(memory pressure)</h2>
+<p>压力等级通知可以用于监测内存分配的开销；应用程序可以基于压力实现管理内存的不同策略。压力的等级定义如下：</p>
+<ul>
+<li>
+<p>“low” level表示系统正在为新的分配操作回收内存。监测这个回收操作对于维持cache等级可能很有用。压力等级通知可以帮助程序(通常为Activity Manager)分析vmstat，提前执行操作(比如永久的关闭一些不重要的服务)</p>
+</li>
+<li>
+<p>“medium” level表示系统处于中等内存压力，可能正在执行swap，paging out active file caches。应用程序可以基于这种事件对 <em>vmstat/zoneinfo/memcg</em> 或者内存使用情况的统计数据进行更深入的分析，并释放一些重构难度小或者可以从硬盘重新读取的资源。</p>
+</li>
+<li>
+<p>“critical” level表示系统处于崩溃的边缘，正要OOM，就要触发内部的OOM killer。应用程序应该执行一些有用的操作，建议立即采取措施。</p>
+</li>
+</ul>
+<p>上述三种事件are propagated upward until the event is handled——这些事件不会pass-through。例如，有三个cgroup A-&gt;B-&gt;C，都注册了事件监听器。假如group C存在一些压力，只有C会收到通知，group A和B不会收到通知。这样做是为了避免冗余的信息，尤其是系统中的内存不足时。</p>
+<p><strong>memory.pressure_level</strong> 文件只用于创建一个eventfd，要注册一个通知，应用程序必须：</p>
+<ul>
+<li>通过 <code>eventfd</code> 创建一个eventfd</li>
+<li>打开 <strong>memory.pressure_level</strong></li>
+<li>向 <strong>cgroup.event_control</strong> 写入“&lt;event_fd&gt; &lt;fd of memory.pressure_level&gt; &lt;level&gt;”</li>
+</ul>
+<p>系统的内存压力处于给定的level时应用就会收到通知； <strong>memory.pressure_level</strong> 的读写操作没有实现。</p>
+<h1 id="3-cpuset">3. cpuset</h1>
+<h2 id="31-什么是cpuset">3.1. 什么是cpuset</h2>
+<p>cpuset提供了一种将一组CPU和内存节点分配给一些进程的机制，内存节点指的是包含内存的可用节点。</p>
+<p>cpuset将进程可以使用的CPU和内存资源限制到当前的cpuset内，在虚拟文件系统中形成一个层次结构。</p>
+<p>cpuset使用通用的cgroup子系统。</p>
+<p>进程的cpuset会过滤通过 <code>sched_setaffinity</code> 系统调用包含的CPU，以及通过 <code>mbind</code> 和 <code>set_mempolicy</code> 系统调用设置的内存节点，排除所有没有包含在cpuset内的CPU和内存节点。调度器将进程放在没有包含在 <strong>cpus_allowed</strong> 内的CPU上运行；内核的页面分配器也不会从没有包含在 <strong>mems_allowed</strong> 内的节点中分配内存。</p>
+<p>用户层代码可以通过cgroup的虚拟文件系统设置cpuset的相关参数和信息。</p>
+<h2 id="32-为什么需要cpuset">3.2. 为什么需要cpuset</h2>
+<p>大型系统将处理器和内存放到合适的位置，以便减少内存的访问时间和竞争，这种情况下，利用cpuset控制进程运行的CPU和内存节点，可以显著提升性能。比如：</p>
+<ul>
+<li>Web服务器同时运行同一网络应用的多个实例</li>
+<li>服务器运行多个应用(例如，一个Web服务器，一个数据库)</li>
+<li>十分注重性能的运行大型HPC应用的NUMA系统</li>
+</ul>
+<h2 id="33-cpuset是如何实现的">3.3. cpuset是如何实现的</h2>
+<p>Linux内核已经有机制分别指明进程可以运行的CPU( <code>sched_setaffinity</code> )、可以分配内存的节点( <code>mbind</code> ， <code>set_mempolicy</code> )。</p>
+<p>cpuset将两种机制扩展为：</p>
+<ul>
+<li>cpuset包含一些允许的CPU或者内存节点，内核可知</li>
+<li>系统中的每个进程都属于某个cpuset，通过进程结构体内的cgroup指针可以获取</li>
+<li>调用 <code>sched_setaffinity</code> 时的CPU会被进程的cpuset过滤</li>
+<li>调用 <code>mbind</code> 和 <code>set_mempolicy</code> 时的内存节点会被进程的cpuset过滤</li>
+<li>根cpuset包含系统所有的CPU和内存节点</li>
+<li>可以定义任何一个cpuset的CPU和内存节点的子集为子cpuset</li>
+<li>cpuset的层次结构可以挂载到 <em>/dev/cpuset</em> ，以便从用户空间操作</li>
+<li>cpuset可以标记为exclusive，保证其他的cpuset(除了直接祖先和后辈)不会包含重复的CPU和内存节点</li>
+<li>可以列出属于任意cpuset的所有进程PID</li>
+</ul>
+<p>cpuset的实现需要在系统的其他部分添加钩子，都不在关键路径中：</p>
+<ul>
+<li><em>init/main.c</em> 中系统启动阶段初始化根cpuset</li>
+<li><code>fork</code> 和 <code>exit</code> 函数中，从cpuset中添加或者删除进程</li>
+<li><code>sched_setaffinity</code> 中，根据cpuset选择可用的CPU</li>
+<li><em>sched.c</em> 中的 <code>migrate_live_tasks</code> ，尽可能的将迁移的进程运行在cpuset中的CPU上</li>
+<li><code>mbind</code> 和 <code>set_mempolicy</code> 系统调用，根据cpuset选择可用的内存节点</li>
+<li><em>page_alloc.c</em> 中，将内存限制到可用的节点</li>
+<li><em>vmscan.c</em> 中，限制页面恢复到当前的cpuset</li>
+</ul>
+<p>cpuset没有对应的系统调用可用，所有的操作都需要通过虚拟文件系统完成。挂载“cgroup”文件系统，以便查看和修改内核已知的cpuset。</p>
+<p>每个进程的 <em>/proc/&lt;pid&gt;/status</em> 文件都有4行新增信息，显示进程的 <strong>cpus_allowed</strong> 和 <strong>mems_allowed</strong> ：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">Cpus_allowed</span><span class="p">:</span><span class="w">   </span><span class="l">ffffffff,ffffffff,fffffff,ffffffff</span><span class="w">
+</span><span class="w"></span><span class="nt">Cpus_allowed_list</span><span class="p">:</span><span class="w">  </span><span class="m">0-127</span><span class="w">
+</span><span class="w"></span><span class="nt">Mems_allowed</span><span class="p">:</span><span class="w">   </span><span class="l">ffffffff,ffffffff</span><span class="w">
+</span><span class="w"></span><span class="nt">Mems_allowed_list</span><span class="p">:</span><span class="w">  </span><span class="m">0-63</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>cgroup文件系统下的每个目录代表一个cpuset，包含下列文件：</p>
+<ul>
+<li>cpuset.cpus<br>
+cpuset中的CPUs</li>
+<li>cpuset.mems<br>
+cpuset中的内存节点</li>
+<li>cpuset.memory_migrate flag<br>
+如果设置，将页面移动到cpuset内的内存节点</li>
+<li>cpuset.cpu_exclusive flag<br>
+CPU的位置是否独占</li>
+<li>cpuset.mem_exclusive flag<br>
+内存的位置是否独占</li>
+<li>cpuset.mem_hardwall flag<br>
+内存分配是否hardwalled</li>
+<li>cpuset.memroy_pressure<br>
+cpuset内的内存页压力</li>
+<li>cpuset.memory_spread_page flag<br>
+如果设置，在可用的节点上平均分配页面缓存</li>
+<li>cpuset.memory_spread_slab flag<br>
+如果设置，在可用的节点上平均分配slab缓存</li>
+<li>cpuset.sched_load_balance flag<br>
+如果设置，在cpuset内的CPUs进行负载均衡</li>
+<li>cpuset.sched_relax_domain_level<br>
+迁移进程时的查找范围</li>
+</ul>
+<p>只有根cpuset有下列属性：</p>
+<ul>
+<li>cpuset.memory_pressure_enabled flag<br>
+是否计算内存压力</li>
+</ul>
+<p>mkdir可以创建新的cpuset，向对应的文件写入数据可以修改对应的标志和参数。</p>
+<p><code>fork</code> 操作时，子进程会继承父进程的cpuset，进程可以重新添加到其他的cpuset，只要cpuset的文件目录有所需的权限。</p>
+<p>所有的cpuset都遵循以下原则：</p>
+<ul>
+<li>进程的CPU和内存节点必须是父进程的子集</li>
+<li>只有父进程标记为独占时，子进程才能标记成独占</li>
+<li>如果CPU或者内存为独占，可能和其他的兄弟都不重叠</li>
+</ul>
+<p>根cpuset的CPUs和内存文件是只读的，CPU文件通过CPU热插拔通知器自动追踪 <strong>cpu_online_mask</strong> 的值，内存文件通过 <code>cpuset_track_online_nodes</code> 钩子自动追踪 <strong>node_states[N_memory]</strong> 的值。</p>
+<h2 id="34-什么是独占的cpuset">3.4. 什么是独占的cpuset</h2>
+<p>如果一个cpuset是CPU或者内存独占的，除了直系祖先或者后代，其他的cpuset不能共享其中的CPUs或者内存节点。</p>
+<p>设置 <strong>cpuset.mem_exclusive</strong> 或者 <strong>cpuset.mem_hardwall</strong> 的cpuset是hardwalled——限制内核分配页面、缓冲区以及其他通常情况下由内核在多个用户间共享的数据。所有的cpuset，无论是否hardwalled，限制用户空间的内存分配。系统从而能够在隔离每个任务的用户分配操作到各自的cpuset的同时，在多个独立的任务之间共享公共的内核数据，例如文件系统页面。</p>
+<p>要实现这个目标，创建一个大的 <strong>mem_exclusive</strong> cpuset，保存所有的任务；为每个独立的任务创建非内存独占的子cpuset，只有一小部分内核内存，例如中断处理函数发送的请求，可以从 <strong>mem_exclusive</strong> cpuset外部获取。</p>
+<h2 id="35-什么是内存压力">3.5. 什么是内存压力</h2>
+<p>per-cpuset的 <strong>memory_pressure</strong> 提供了cpuset内的进程尝试释放节点已用的内存以便响应额外的内存请求比率的简单度量。批管理器可以借此监测cpuset内的任务，确定任务造成的内存压力。</p>
+<p><strong>为什么是per-cpuset，running average？</strong></p>
+<p>大型系统中有很多进程，per-cpuset可以显著减少扫描的负担，而且无需获取cpuset内的所有进程的内存压力，再取平均值。</p>
+<p>保存一个简单的per-cpuset数字过滤器，并且在进入同步的(直接的)页面回收代码时，由cpuset内的进程更新。</p>
+<p>一个per-cpuset文件包含cpuset内的进程执行的直接页面回收操作的比率，单位是每秒尝试回收的次数，乘以1000。</p>
+<h2 id="36-什么是内存spread">3.6. 什么是内存spread</h2>
+<p>cpuset内有两个布尔型的标志文件，控制内核为文件系统缓冲区和相关内容的位置—— <strong>cpuset.memory_spread_page</strong> 和 <strong>cpuset.memory_spread_slab</strong> 。</p>
+<p>如果设置了per-cpuset的布尔标志文件 <strong>cpuset.memory_spread_page</strong> ，内核会将文件系统的缓冲区(page cache)平摊到发生缺页的进程可以使用的所有节点，而不是将这些页面放在进程正在运行的节点。</p>
+<p>如果设置了 <strong>cpuset.memory_spread_slab</strong> ，内核将某系文件系统slab cache，比如inode和dentry，平摊到发生缺页的进程可以使用的所有节点，而不是首先放到进程正在运行的节点。</p>
+<p>这两个标志不影响进程的匿名数据段和栈段内存页。<br>
+两个标志符默认关闭，内存页从进程的本地节点分配。</p>
+<p>创建新的cpuset时继承父cpuset的内存spread设置。</p>
+<p>受内存spread影响的page或者slab cache会忽略进程的NUMA内存策略。使用 <code>mbind</code> 或者 <code>set_mempolicy</code> 设置NUMA内存策略时如果收到进程的内存spread影响，不会有任何提示信息。如果关闭了内存spread，当前的NUMA内存策略中的页面分配限制会再次生效。</p>
+<p><strong>cpuset.memory_spread_page</strong> 和 <strong>cpuset.memory_spread_slab</strong> 默认都是0，即关闭。如果写入1，对应的标志就会打开。</p>
+<p>实现过程十分很简单。</p>
+<p>设置 <strong>cpuset.memory_spread_page</strong> 就会打开cpuset内每个进程的 <strong>PF_SPREAD_PAGE</strong> 标志，后续添加到cpuset内的进程也会设置该标志。页高速缓存的页面分配操作会执行一个内联检查，如果设置了 <strong>PF_SPREAD_PAGE</strong> 标志，就会调用 <code>cpuset_mem_spread_node</code> 函数，返回首选的内存节点。</p>
+<p>类似的，设置 <strong>cpuset.memory_spread_slab</strong> 打开 <strong>PF_SPREAD_SLAB</strong> 标志，被标记的slab cache从 <code>cpuset_mem_spread_node</code> 函数返回的节点中分配内存。</p>
+<p><code>cpuset_mem_spread_node</code> 函数也很简单，函数使用一个per-task的转子 <strong>cpuset_mem_spread_rotor</strong> 选择当前进程的 <strong>mems_allowed</strong> 中包含的下一个节点。</p>
+<p>这种内存位置策略也被称为round-robin或者interleave。</p>
+<p>这种策略能够显著提升某些任务的性能——这些任务需要将线程本地的数据放到相应的节点，但是需要将数据平摊到cpuset内的所有节点，以便能够访问访问大量的文件系统数据。没有这种策略，对于有一个线程读取数据集的任务，cpuset内节点之间的内存分配会变得十分不均匀。</p>
+<h2 id="37-什么是sched_load_balance">3.7. 什么是sched_load_balance</h2>
+<p>内核的调度器( <em>kernel/sched/core.c</em> )自动进行负载均衡——如果一个CPU未能充分利用，运行在那个CPU上的内核代码会寻找其他的过载CPU的任务，将这些任务迁移到自己的CPU，迁移的操作受cpuset和sched_setaffinity的限制。</p>
+<p>负载均衡的算法开销及其对于关键的内核共享的数据结构(例如进程列表)的影响略大于进行负载均衡的CPU的数量的线性关系。因此，调度器支持将系统内的CPU分为多个调度域。每个调度域包含系统中的部分CPU；调度域之间没有交叉；一些CPU可能不属于任意调度域，也不会进行负载均衡。</p>
+<p>简单来说，均衡两个较小的调度域的开销小于均衡两个较大的调度域。</p>
+<p>默认情况下，有一个调度域包含所有的CPU，除了通过内核启动参数“isocpus=”指明的CPU。</p>
+<p>默认的所有CPU之间的负载均衡并不适用下列两种情形：</p>
+<ol>
+<li>大型系统中，多个CPU之间执行负载均衡开销很大，如果系统通过cpuset将独立的任务放到不同的CPU集合，完全的负载均衡没有必要。</li>
+<li>支持部分CPU的实时运行的系统需要最小化这些CPU的系统开销，包括避免不必要的负载均衡。</li>
+</ol>
+<p>开启(默认情况)per-cpuset标志 <strong>cpuset.sched_load_balance</strong> 后，需要设置cpuset内的每个CPU需要允许 <strong>cpuset.cpus</strong> 包含的在单独的调度域中，保证负载均衡能够将任务从任意CPU移动到cpuset内的其他CPUs。</p>
+<p>关闭 <strong>cpuset.sched_load_balance</strong> 后，调度器会避免在cpuset内的CPU之间执行负载均衡，除了某些交叉的cpuset开启了 <strong>sched_load_balance</strong> ，需要进行负载均衡的情况。</p>
+<p>例如，顶层的cpuset开启了 <strong>cpuset.sched_load_balance</strong> ，调度器就会有一个调度域，包含所有的CPU，无论其他cpuset内的 <strong>cpuset.sched_load_balance</strong> 是否设置，都会进行完全的负载均衡。</p>
+<p>因此在上述情况中，应该关闭顶层的cpuset标志 <strong>cpuset.sched_load_balance</strong> ，其他的较小的、子cpuset应该开启这个标志。</p>
+<p>这种情况下，通常不会把任何不固定的进程放到顶层的cpuset——这些进程可能被限制到CPU的子集，取决于后代cpuset对此flag的设置。即使进程能够使用其他CPU，内核调度器可能不会将进程均衡到其他的空闲CPU。</p>
+<p>当然，可以将固定到特定CPU的进程留在关闭 <strong>cpuset.sched_load_balance</strong> 的cpuset内——这些进程不会移动到其他位置。</p>
+<p>cpuset和调度域之间有一个矛盾的地方：cpuset有层次结构，可以嵌套；调度域是平整的，不会交叉，每个CPU对多属于一个调度域。</p>
+<p>调度域需要保持平整，因为有重叠CPU的负载均衡有不稳定的后果，可能无法解释。因此，如果两个交叉的cpuset都打开了 <strong>cpuset.sched_load_balance</strong> 标志，就会形成一个单独的调度域，是两个集合的超集。我们不会将一个进程移动到cpuset以外的CPU，但是内核的调度器可能会浪费时间计算这个可能性。</p>
+<p>如果两个cpuset有部分交叉的 <strong>cpuset.cpus</strong> ，但是只有一个cpuset设置了 <strong>cpuset.sched_load_balance</strong> 标志，另一个cpuset的进程只会进行部分负载均衡，只在交叉的CPUs。</p>
+<h3 id="371-sched_load_balance的实现细节">3.7.1. sched_load_balance的实现细节</h3>
+<p>per-cpuset标志 <strong>cpuset.sched_load_balance</strong> 默认开启，内核会在cpuset内的所有CPU之间执行负载均衡操作(保证cpuset内的所有CPU位于相同的调度域中)。</p>
+<p>如果两个交叉的cpuset都开启了 <strong>cpuset.sched_load_balance</strong> ，必须属于相同的调度域。</p>
+<p>如果顶层的cpuset开启了 <strong>cpuset.sched_load_balance</strong> ，意味着有一个调度域覆盖了整个系统，无论其他的cpuset如何设置。</p>
+<p>cpuset代码创建了一个新的分区，传递给调度器创建调度域的代码，以便在下列情况出现时重新建立调度域，</p>
+<ul>
+<li>包含CPU的cpuset的 <strong>cpuset.sched_load_balance</strong> 发生了变化</li>
+<li>开启 <strong>cpuset.sched_load_balance</strong> 时，cpuset增加或者删除CPU</li>
+<li>开启 <strong>cpuset.sched_load_balance</strong> 时，包含CPU的cpuset的 <strong>cpuset.sched_relax_domain_level</strong> 发生了变化</li>
+<li>开启 <strong>cpuset.sched_load_balance</strong> 时，包含CPU的cpuset被移除</li>
+<li>一个CPU上线/脱机</li>
+</ul>
+<p>调度器会记录当前的活跃调度域，cpuset代码调用 <code>partition_sched_domains</code> 更新调度域时，这个函数会对比新的分区和当前的分区，更新调度域，移除旧的，增加新的。</p>
+<h2 id="38-什么是sched_relax_domain_level">3.8. 什么是sched_relax_domain_level</h2>
+<p>在调度域中，调度器有两种方式迁移进程：周期性的在tick时进行负载均衡；发生调度事件时。</p>
+<p>唤醒进程时，调度器会试着将进程移动到空闲CPU。例如，CPU X上的进程A唤醒了同一CPU上的进程B，如果CPU Y是X的兄弟，并且正在执行idle，调度器就会把进程B迁移到Y。</p>
+<p>如果一个CPU用完了runqueue，就会尝试从其他的较忙的CPU拉取一些进程，在进入idle之前帮助其他CPU。</p>
+<p>寻找可以移动的进程和空闲CPU需要一些时间，调度器可能不会每次都遍历调度域内所有的CPU。在某些架构下，调度事件触发的查找操作只会发生在和CPU相同的socket或者node；tick时发生的负载均衡会寻找所有的socket或者node。</p>
+<p>例如，假设CPU Z和CPU X相距很远，即使CPU Z空闲，CPU X和兄弟都很忙，调度器也不会从X唤醒进程B，迁移到Z上，因为超出了查找的范围。<br>
+结果就是，CPU X上的进程B需要等待进程A，或者下一次tick时进行的负载均衡。对于一些特殊的应用，1个tick可能过长。</p>
+<p><strong>cpuset.sched_relax_domain_level</strong> 文件可以配置查找的范围，文件值为整数，对应的效果如下：</p>
+<ul>
+<li><strong>-1</strong> ：使用默认的值或者其他的cpuset指明的值</li>
+<li><strong>0</strong> ： 不要寻找</li>
+<li><strong>1</strong> ：寻找兄弟(同一个core的超线程)</li>
+<li><strong>2</strong> ：package内的core</li>
+<li><strong>3</strong> ：node内的CPU(non-NUMA系统的全部CPU)</li>
+<li><strong>4</strong> ：一些节点(NUMA系统)</li>
+<li><strong>5</strong> ：全部节点(NUMA系统)</li>
+</ul>
+<p>系统的默认值依赖于体系结构，可以通过“relax_domain_level=”启动参数修改。</p>
+<p>这个文件是per-cpuset，只会影响cpuset所属的调度域。如果 <strong>cpuset.sched_load_balance</strong> 关闭， <strong>cpuset.sched_relax_domain_level</strong> 不会有任何效果——因为没有调度域。</p>
+<p>如果多个cpuset交叉，形成了一个单独的调度域，使用这些 <strong>cpuset.sched_relax_domain_level</strong> 中的最大值。</p>
+<p>修改这个文件的影响有好有坏，具体情况视情形而定，不确定的时候不要修改。</p>
+<p>如果：</p>
+<ul>
+<li>每个CPU之间进行迁移带来的开销很小</li>
+<li>寻找开销很小，或者可以通过管理cpuset使寻找开销足够小</li>
+<li>即使牺牲cache命中率也要降低访存延迟</li>
+</ul>
+<p>增加 <strong>cpuset.sched_relax_domain_level</strong> 的值可能有用。</p>
+<h2 id="39-如何使用cpuset">3.9. 如何使用cpuset</h2>
+<p>为了最小化cpuset对于内核关键代码的影响，例如调度器；以及内核不支持由另一个线程直接修改当前进程的内存定位，进程更改自己的cpuset包含的CPU或者内存节点的位置时，或者更改进程所属的cpuset时的开销很小。</p>
+<p>如果cpuset修改了自己的内存节点，下一次内核为属于cpuset的所有进程分配页面时，会注意到cpuset的改变，更新自己的per-task内存位置，以便留在新的cpuset中包含的内存位置。如果进程使用内存策略 <strong>MPOL_BIND</strong> ，绑定到的节点和新的cpuset重叠，进程会继续使用包含在新cpuset内的节点。<br>
+如果进程使用了 <strong>MPOL_BIND</strong> ，内存策略内的节点都没有包含在cpuset，进程会被视为绑定到cpuset指明的节点。如果进程从一个cpuset移动到另一个，内核会在下一次分配内存页时调整进程的内存位置。</p>
+<p>如果cpuset更改了 <strong>cpuset.cpus</strong> ，cpuset内的所有进程会立即更改允许的CPU位置。如果一个进程的PID写到了另一个cpuset的 <strong>cpuset.tasks</strong> 文件，其允许的CPU位置也会立即改变。如果这个进程通过 <code>sched_setaffinity</code> 绑定到了cpuset的子集，进程可以运行在新cpuset的所有CPU，替换前一个 <code>sched_setaffinity</code> 的运行结果。</p>
+<p>总结起来，改变cpuset的内存位置，下一次内存分配时由内核进行更新；CPU位置会立即更新。</p>
+<p>通常，页面分配后，会停留在分配它的节点，即使cpuset的 <strong>cpuset.mems</strong> 后续发生变化。如果cpuset的标志文件 <strong>cpuset.memory_migrate</strong> 为真，添加新的进程到cpuset时，由前一个cpuset分配给该进程的所有内存页都会被迁移到新的cpuset中。迁移过程会尽量保留这些页面的相对位置。例如，如果页面位于之前cpuset的第二个有效节点，页面会被迁移到新cpuset的第二个节点。</p>
+<p>如果 <strong>cpuset.memory_migrate</strong> 设置为真，如果 <strong>cpuset.mems</strong> 文件改变，分配在之前节点的页面会被迁移到新的节点。不属于之前cpuset的page，或者之前 <strong>cpuset.mems</strong> 内的节点的页面，不会被移动。</p>
+<p>上述情况有一个例外，如果使用热插拔功能移除cpuset内的所有的CPU，cpuset内的所有进程都会被移动到最近的非空祖先。如果cpuset绑定到了另一个限制进程绑定cgroup子系统，移动进程时可能失败。这种失败的情况下，进程会留在原来的cpuset，内核会自动更新 <strong>cpus_allowed</strong> 为所有在线的CPU。<br>
+如果内存的热插拔功能可用，有类似的机制。一句话，和饿死一个没有CPU或者内存的进程相比，内核更倾向于违背cpuset的限制。</p>
+<p>上述情况还有第二个例外， <strong>GFP_ATOMIC</strong> 请求是必须立刻被响应的内核内部的分配。如果 <strong>GFP_ATOMIC</strong> 分配失败，内核会丢弃一些请求，在一些特殊的情况下甚至panic。如果当前进程的cpuset无法满足请求，放宽cpuset，寻找其他内存。违反cpuset是比压迫内核更好的选择。</p>
+<p>要在一个cpuset内开始新的任务，采取以下步骤：</p>
+<ol>
+<li><code>mkdir /sys/fs/cgroup/cpuset</code></li>
+<li><code>mount -t cgroup -ocpuset cpuset /sys/fs/cgroup/cpuset</code></li>
+<li>在 <em>/sys/fs/cgroup/cpuset</em> 虚拟文件系统目录下创建新的目录来创建新的cpuset</li>
+<li>开始一个进程，作为新任务的“founding father”</li>
+<li>向 <em>/sys/fs/cgroup/cpuset</em> 的进程文件写入PID，将进程添加到新的cpuset</li>
+<li>从“founding father“进程fork，exec或者clone新任务进程</li>
+</ol>
+<p>例如，下面的操作会创建一个名为“Charlie”的cpuset，包含CPU 2和3，内存节点1，并且启动一个shell：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash">mount -t cgroup -ocpuset cpuset /sys/fs/cgroup/cpuset
+<span class="nb">cd</span> /sys/fs/cgroup/cpuset
+mkdir Charlie
+<span class="nb">cd</span> Charlie
+/bin/echo 2-3 &gt; cpuset.cpus
+/bin/echo <span class="m">1</span> &gt; cpuset.mems
+/bin/echo <span class="nv">$$</span> &gt; tasks
+sh
+<span class="c1"># sh 现在运行在cpuset Charlie中</span>
+<span class="c1"># 下一行会显示&#34;/Charlie&#34;</span>
+cat /proc/self/cpuset
+</code></pre></td></tr></table>
+</div>
+</div><p>查询或者修改cpuset的方法如下：</p>
+<ul>
+<li>直接通过cpuset的文件系统，使用cd，mkdir，echo，cat，rmdir等命令，或者使用功能相同的C代码</li>
+<li>通过C语言库 <strong>libcpuset</strong></li>
+<li>通过C语言库 <strong>libcgroup</strong></li>
+<li>通过python应用 <strong>cset</strong></li>
+</ul>
+<p>命令 <strong>numactrl</strong> 可以实现 <code>mbind</code> 和 <code>set_mempolicy</code> 系统调用。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-10-12
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/documentation/">Documentation</a>
+          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kernel/">kernel</a>
+          <a href="/tags/cpuset/">cpuset</a>
+          <a href="/tags/cgroup/">cgroup</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mm/mm-slab_objects_free/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">mm-slab对象的回收</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm/driver_model/">
+            <span class="next-text nav-default">driver model</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://blog.globs.site/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

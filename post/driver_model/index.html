@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
 
 
 <link rel="canonical" href="https://blog.globs.site/post/driver_model/" />
@@ -46,11 +46,9 @@
 <meta property="article:modified_time" content="2019-10-12T00:00:00+00:00" />
 <meta itemprop="name" content="driver model">
 <meta itemprop="description" content="1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型">
-
-
-<meta itemprop="datePublished" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-10-12T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="6707">
+<meta itemprop="datePublished" content="2019-10-12T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-12T00:00:00+00:00" />
+<meta itemprop="wordCount" content="6706">
 
 
 
@@ -125,7 +123,7 @@
       <div class="post-meta">
         <span class="post-time"> 2019-10-12 </span>
         
-          <span class="more-meta"> 6707 words </span>
+          <span class="more-meta"> 6706 words </span>
           <span class="more-meta"> 14 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
@@ -135,97 +133,88 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#1-the-linux-kernel-device-model">1. The Linux Kernel Device Model</a>
-<ul>
-<li><a href="#1-1-overview">1.1. Overview</a></li>
-<li><a href="#1-2-downstream-access">1.2. Downstream Access</a></li>
-</ul></li>
-<li><a href="#2-platform-devices-and-drivers">2. Platform Devices and Drivers</a>
-<ul>
-<li><a href="#2-1-platform-devices">2.1. Platform devices</a></li>
-<li><a href="#2-2-platform-drivers">2.2. Platform drivers</a></li>
-<li><a href="#2-3-device-enumeration">2.3. Device Enumeration</a></li>
-<li><a href="#2-4-legacy-drivers-device-probing">2.4. Legacy Drivers：Device Probing</a></li>
-<li><a href="#2-5-device-naming-and-driver-binding">2.5. Device Naming and Driver Binding</a></li>
-<li><a href="#2-6-early-platform-devices-and-drivers">2.6. Early Platform Devices and Drivers</a></li>
-</ul></li>
-<li><a href="#3-bus-type">3. Bus Type</a>
-<ul>
-<li><a href="#3-1-declaration">3.1. Declaration</a></li>
-<li><a href="#3-2-registration">3.2. Registration</a></li>
-<li><a href="#3-3-callbacks">3.3. Callbacks</a></li>
-<li><a href="#3-4-device-and-driver-lists">3.4. Device and Driver Lists</a></li>
-<li><a href="#3-5-sysfs">3.5. sysfs</a></li>
-<li><a href="#3-6-exporting-attributes">3.6. Exporting Attributes</a></li>
-</ul></li>
-<li><a href="#4-the-basic-device-structure">4. The Basic Device Structure</a>
-<ul>
-<li><a href="#4-1-programming-interface">4.1. Programming Interface</a></li>
-<li><a href="#4-2-attributes">4.2. Attributes</a></li>
-</ul></li>
-<li><a href="#5-devres-managed-device-resource">5. Devres-Managed Device Resource</a>
-<ul>
-<li><a href="#5-1-intro">5.1. Intro</a></li>
-<li><a href="#5-2-devres">5.2. Devres</a></li>
-<li><a href="#5-3-devres-group">5.3. Devres group</a></li>
-<li><a href="#5-4-details">5.4. Details</a></li>
-<li><a href="#5-5-overhead">5.5. Overhead</a></li>
-</ul></li>
-<li><a href="#6-device-classes">6. Device Classes</a>
-<ul>
-<li><a href="#6-1-introduction">6.1. Introduction</a></li>
-<li><a href="#6-2-programming-interface">6.2. Programming Interface</a></li>
-<li><a href="#6-3-devices">6.3. Devices</a></li>
-<li><a href="#6-4-device-drivers">6.4. Device Drivers</a></li>
-<li><a href="#6-5-sysfs">6.5. sysfs</a></li>
-<li><a href="#6-6-exporting-attributes">6.6. Exporting Attributes</a></li>
-<li><a href="#6-7-interfaces">6.7. Interfaces</a></li>
-</ul></li>
-<li><a href="#7-driver-binding">7. Driver Binding</a>
-<ul>
-<li><a href="#7-1-bus">7.1. Bus</a></li>
-<li><a href="#7-2-device-register">7.2. device_register</a></li>
-<li><a href="#7-3-device-class">7.3. Device Class</a></li>
-<li><a href="#7-4-driver">7.4. Driver</a></li>
-<li><a href="#7-5-sysfs">7.5. sysfs</a></li>
-<li><a href="#7-6-driver-register">7.6. driver_register</a></li>
-<li><a href="#7-7-removal">7.7. Removal</a></li>
-</ul></li>
-<li><a href="#8-device-drivers">8. Device Drivers</a>
-<ul>
-<li><a href="#8-1-allocation">8.1. Allocation</a></li>
-<li><a href="#8-2-initialization">8.2. Initialization</a></li>
-<li><a href="#8-3-declaration">8.3. Declaration</a></li>
-<li><a href="#8-4-registration">8.4. Registration</a></li>
-<li><a href="#8-5-access">8.5. Access</a></li>
-</ul></li>
-<li><a href="#9-device-driver-design-patterns">9. Device Driver Design Patterns</a>
-<ul>
-<li><a href="#9-1-state-container">9.1. State Container</a></li>
-<li><a href="#9-2-container-of">9.2. container_of()</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#11-overview">1.1. Overview</a></li>
+    <li><a href="#12-downstream-access">1.2. Downstream Access</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21-platform-devices">2.1. Platform devices</a></li>
+    <li><a href="#22-platform-drivers">2.2. Platform drivers</a></li>
+    <li><a href="#23-device-enumeration">2.3. Device Enumeration</a></li>
+    <li><a href="#24-legacy-driversdevice-probing">2.4. Legacy Drivers：Device Probing</a></li>
+    <li><a href="#25-device-naming-and-driver-binding">2.5. Device Naming and Driver Binding</a></li>
+    <li><a href="#26-early-platform-devices-and-drivers">2.6. Early Platform Devices and Drivers</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-declaration">3.1. Declaration</a></li>
+    <li><a href="#32-registration">3.2. Registration</a></li>
+    <li><a href="#33-callbacks">3.3. Callbacks</a></li>
+    <li><a href="#34-device-and-driver-lists">3.4. Device and Driver Lists</a></li>
+    <li><a href="#35-sysfs">3.5. sysfs</a></li>
+    <li><a href="#36-exporting-attributes">3.6. Exporting Attributes</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#41-programming-interface">4.1. Programming Interface</a></li>
+    <li><a href="#42-attributes">4.2. Attributes</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#51-intro">5.1. Intro</a></li>
+    <li><a href="#52-devres">5.2. Devres</a></li>
+    <li><a href="#53-devres-group">5.3. Devres group</a></li>
+    <li><a href="#54-details">5.4. Details</a></li>
+    <li><a href="#55-overhead">5.5. Overhead</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#61-introduction">6.1. Introduction</a></li>
+    <li><a href="#62-programming-interface">6.2. Programming Interface</a></li>
+    <li><a href="#63-devices">6.3. Devices</a></li>
+    <li><a href="#64-device-drivers">6.4. Device Drivers</a></li>
+    <li><a href="#65-sysfs">6.5. sysfs</a></li>
+    <li><a href="#66-exporting-attributes">6.6. Exporting Attributes</a></li>
+    <li><a href="#67-interfaces">6.7. Interfaces</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#71-bus">7.1. Bus</a></li>
+    <li><a href="#72-device_register">7.2. device_register</a></li>
+    <li><a href="#73-device-class">7.3. Device Class</a></li>
+    <li><a href="#74-driver">7.4. Driver</a></li>
+    <li><a href="#75-sysfs">7.5. sysfs</a></li>
+    <li><a href="#76-driver_register">7.6. driver_register</a></li>
+    <li><a href="#77-removal">7.7. Removal</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#81-allocation">8.1. Allocation</a></li>
+    <li><a href="#82-initialization">8.2. Initialization</a></li>
+    <li><a href="#83-declaration">8.3. Declaration</a></li>
+    <li><a href="#84-registration">8.4. Registration</a></li>
+    <li><a href="#85-access">8.5. Access</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#91-state-container">9.1. State Container</a></li>
+    <li><a href="#92-container_of">9.2. container_of()</a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<h1 id="1-the-linux-kernel-device-model">1. The Linux Kernel Device Model</h1>
-
-<h2 id="1-1-overview">1.1. Overview</h2>
-
+      <h1 id="1-the-linux-kernel-device-model">1. The Linux Kernel Device Model</h1>
+<h2 id="11-overview">1.1. Overview</h2>
 <p>传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型包括一组所有总线共有的参数，一组共有的回调函数。
 设备和桥的公共接口反映了现代操作系统的目标：实现设备的PnP、电源管理、热插拔等无缝连接，微软和因特尔提出的ACPI，x86下几乎所有的设备都可以在这个框架下工作。</p>
-
-<h2 id="1-2-downstream-access">1.2. Downstream Access</h2>
-
+<h2 id="12-downstream-access">1.2. Downstream Access</h2>
 <p>总线层的公共数据域已经移动到公共的数据结构中，总线层和设备的驱动仍然可以访问这些域。
 建议其他的总线也想PCI总线一样：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -236,29 +225,21 @@
     <span class="p">...</span>
     <span class="k">struct</span> <span class="n">device</span> <span class="n">dev</span><span class="p">;</span>
     <span class="p">...</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><strong>struct pci_dev</strong> 内的 <strong>struct device dev</strong> 是静态分配的，即在发现设备时分配。</p>
-
+</div><p><strong>struct pci_dev</strong> 内的 <strong>struct device dev</strong> 是静态分配的，即在发现设备时分配。</p>
 <p>值得注意的是， <strong>struct device dev</strong> 不一定要在 <strong>pci_dev</strong> 结构前定义，这是为了让编程人员在总线驱动和global driver间切换时考虑清楚自己正在做的事情，防止两者之间不必要的错误的转换。</p>
-
 <p>PCI总线层可以自由的访问 <strong>struct device</strong> 的域， <strong>struct pci_dev</strong> 和 <strong>struct device</strong> 对于其都是可知的。已经转化为当前驱动模型的PCI设备驱动不能修改 <strong>struct device</strong> 域。</p>
-
 <p>上述抽象是为了减少过渡时期的痛苦。</p>
-
 <h1 id="2-platform-devices-and-drivers">2. Platform Devices and Drivers</h1>
-
 <p>linux/platform_device.h中有platform总线的定义：platform_device，platform_driver，这个伪总线用最小的结构来连接总线上的所有设备，就像SoC处理器上用来集成外设。</p>
-
-<h2 id="2-1-platform-devices">2.1. Platform devices</h2>
-
+<h2 id="21-platform-devices">2.1. Platform devices</h2>
 <p>平台设备通常作为自治项目出现，包括传统的端口设备、外设总线的host bridge以及SoC平台上集成的大部分控制器，他们的共同点是从CPU总线获取地址。</p>
-
 <p>平台设备需要设置名称，用于绑定驱动，还有一些资源列表，例如地址，中断：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -273,15 +254,14 @@
     <span class="k">struct</span> <span class="n">device</span> <span class="n">dev</span><span class="p">;</span>
     <span class="n">u32</span> <span class="n">num_resources</span><span class="p">;</span>
     <span class="k">struct</span> <span class="n">resources</span> <span class="o">*</span><span class="n">resources</span><span class="p">;</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="2-2-platform-drivers">2.2. Platform drivers</h2>
-
+</div><h2 id="22-platform-drivers">2.2. Platform drivers</h2>
 <p>平台设备的驱动和普通的驱动类似，需要提供probe，remove函数：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -302,93 +282,78 @@
     <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">resume_early</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
     <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">resume</span><span class="p">)(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="p">);</span>
     <span class="k">struct</span> <span class="n">device_driver</span> <span class="n">driver</span><span class="p">;</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>平台驱动的注册函数为<code>int platform_driver_register(struct platform_driver *drv);</code>。</p>
-
+</div><p>平台驱动的注册函数为<code>int platform_driver_register(struct platform_driver *drv);</code>。</p>
 <p>对于不支持热插拔的设备，probe方法可以放在init section，减少驱动运行时消耗的内存：</p>
-
 <p><code>int platform_driver_probe(struct platform_driver *drv, int (*probe)(struct platform_device *));</code></p>
-
-<h2 id="2-3-device-enumeration">2.3. Device Enumeration</h2>
-
+<h2 id="23-device-enumeration">2.3. Device Enumeration</h2>
 <p>平台设备的注册函数为：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">platform_device_register</span><span class="p">(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">*</span><span class="n">pdev</span><span class="p">);</span>
-<span class="kt">int</span> <span class="nf">platform_add_devices</span><span class="p">(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">**</span><span class="n">pdev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ndev</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="kt">int</span> <span class="nf">platform_add_devices</span><span class="p">(</span><span class="k">struct</span> <span class="n">platform_device</span> <span class="o">**</span><span class="n">pdev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ndev</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>注册设备的首要原则是只注册真实存在的设备，但是有些情况下可能注册不存在的设备。例如内核可能和某些主板没有的外部的网络适配器一起工作。</p>
-
+</div><p>注册设备的首要原则是只注册真实存在的设备，但是有些情况下可能注册不存在的设备。例如内核可能和某些主板没有的外部的网络适配器一起工作。</p>
 <p>有些情况下boot firmware会将主板上的所有设备通过表格导出，如果没有这个表格，系统能够正确设置外设的唯一方法就是建立一个特定的内核镜像。</p>
-
 <p>很多情况下平台设备的内存和IRQ资源不足以让设备的驱动工作，主板的配置代码还需要通过设备的 <strong>platform_data</strong> 域提供额外的信息。</p>
-
-<h2 id="2-4-legacy-drivers-device-probing">2.4. Legacy Drivers：Device Probing</h2>
-
+<h2 id="24-legacy-driversdevice-probing">2.4. Legacy Drivers：Device Probing</h2>
 <p>由于一些驱动是non-driver role，没有完全转化为驱动模型，这些驱动会注册自己的平台设备，这些驱动不能热插拔或者冷插拔，因为这些机制要求设备的创建过程在驱动外的系统组件中完成。</p>
-
 <p>这种驱动的存在是为了支持较老的系统设计，较新的系统大多已抛弃这种设计，支持总线级的动态配置（PCI，USB），或者由启动硬件（x86的PNPACPI）提供的设备表。</p>
-
 <p>Linux仍然提供了API来支持这种传统的驱动<code>struct platform_device *platform_device_alloc(const char *name, int id);</code>，<code>struct platform_device *platform_device_register_simple(const char *name, int id, struct resource *res, unsigned int nres);</code>。</p>
-
-<h2 id="2-5-device-naming-and-driver-binding">2.5. Device Naming and Driver Binding</h2>
-
+<h2 id="25-device-naming-and-driver-binding">2.5. Device Naming and Driver Binding</h2>
 <p>设备名是<strong>platform_device.dev.bus_id</strong>，由两部分组成：</p>
-
 <ul>
 <li><strong>platform_device.name</strong>，也用于匹配驱动</li>
 <li><strong>platform_device.id</strong>，device instance number，-1表示只有一个设备</li>
 </ul>
-
-<p>因此，name/id-&ldquo;serial&rdquo;/0代表bus_id“serial.0”，使用的platform_driver名为“serial”；&rdquo;my_rtc&rdquo;/-1代表bus_id&rdquo;my_rtc&rdquo;，使用的platform_driver为“my_rtc”。</p>
-
+<p>因此，name/id-&ldquo;serial&rdquo;/0代表bus_id“serial.0”，使用的platform_driver名为“serial”；&ldquo;my_rtc&rdquo;/-1代表bus_id&quot;my_rtc&quot;，使用的platform_driver为“my_rtc”。</p>
 <p>驱动核心自动进行驱动的绑定，发现匹配的设备和驱动后调用驱动的 <em>probe</em> 函数；如果 <em>probe</em> 成功，驱动和设备正常绑定。匹配的方式有三种：</p>
-
 <ul>
 <li>设备注册时，会检查总线的驱动是否匹配，平台设备需要在系统启动阶段的早期完成注册</li>
 <li>通过 <em>platform_driver_register</em> 注册驱动时，总线上的所有未绑定的设备都会进行匹配检测，驱动的注册通常在系统启动阶段较晚时进行，或者在模块加载时</li>
 <li>使用 <em>platform_driver_probe</em> 注册驱动和使用 <em>platform_driver_register</em> 类似，只是另一个设备注册时不会再调用驱动的 <em>probe</em> 函数</li>
 </ul>
-
-<h2 id="2-6-early-platform-devices-and-drivers">2.6. Early Platform Devices and Drivers</h2>
-
+<h2 id="26-early-platform-devices-and-drivers">2.6. Early Platform Devices and Drivers</h2>
 <p>early平台接口在系统启动阶段向平台设备驱动提供平台数据，这些接口在 <em>early_param</em> 的基础上实现。例如， <em>earlyprintk</em> 通过6步分类early串行控制台：</p>
-
 <ol>
-<li><p>注册early平台设备数据
-结构（arch）相关的代码使用 <em>early_platform_add_devices</em> 注册平台设备数据，对于early串行控制台，这个平台设备数据应该是串口的硬件配置，此时注册的设备之后还会和early平台驱动进行匹配。</p></li>
-
-<li><p>转化内核命令行
-结构相关的代码使用 <em>parse_early_param</em> 转化内核的命令行，执行所有匹配的 <em>early_param</em> 回调函数。用户指定的early平台设备会在此时注册，对于early串行控制台，用户可以通过内核命令行指明端口，“earlyprintk=serial1.0”，earlyprintk是class string，serial是平台驱动名，0是平台设备id。</p></li>
-
-<li><p>安装属于某一类的early平台驱动
-结构相关的代码可以选择通过 <em>early_platform_driver_register_all</em> 函数强制注册属于某一类的所有early平台驱动，但是步骤2中的用户指明的设备有更高的优先级。在串行驱动中，除非用户在内核命令行中指明了端口，early串行驱动的代码会被关闭，因此这个步骤会被掉过。</p></li>
-
-<li><p>early平台驱动的注册
-使用 <em>early_platform_init</em> 的compiled-in平台驱动会在步骤2或3中自动注册，串行驱动使用<code>early_platform_init(&quot;earlyprintk&quot;, &amp;platform_driver)</code>。</p></li>
-
-<li><p>属于某一类的early平台驱动的probing
-结构相关的代码调用 <em>early_platform_driver_probe</em> 匹配属于某一类的已经注册early平台设备和平台驱动，已经匹配的驱动会get probed()，这一步可以在early boot的任何时刻进行，对于串行驱动，越早进行越好。</p></li>
-
-<li><p>early平台驱动 <em>probe</em> 内部
-early boot时驱动代码需要特别注意，尤其是分配内存和注册中断时。 <em>probe</em> 函数内可以使用 <em>is_early_platform_device</em> 判断函数调用发生在early平台设备还是普通的平台设备。early串行驱动使用 <em>register_console</em> 。</p></li>
+<li>
+<p>注册early平台设备数据
+结构（arch）相关的代码使用 <em>early_platform_add_devices</em> 注册平台设备数据，对于early串行控制台，这个平台设备数据应该是串口的硬件配置，此时注册的设备之后还会和early平台驱动进行匹配。</p>
+</li>
+<li>
+<p>转化内核命令行
+结构相关的代码使用 <em>parse_early_param</em> 转化内核的命令行，执行所有匹配的 <em>early_param</em> 回调函数。用户指定的early平台设备会在此时注册，对于early串行控制台，用户可以通过内核命令行指明端口，“earlyprintk=serial1.0”，earlyprintk是class string，serial是平台驱动名，0是平台设备id。</p>
+</li>
+<li>
+<p>安装属于某一类的early平台驱动
+结构相关的代码可以选择通过 <em>early_platform_driver_register_all</em> 函数强制注册属于某一类的所有early平台驱动，但是步骤2中的用户指明的设备有更高的优先级。在串行驱动中，除非用户在内核命令行中指明了端口，early串行驱动的代码会被关闭，因此这个步骤会被掉过。</p>
+</li>
+<li>
+<p>early平台驱动的注册
+使用 <em>early_platform_init</em> 的compiled-in平台驱动会在步骤2或3中自动注册，串行驱动使用<code>early_platform_init(&quot;earlyprintk&quot;, &amp;platform_driver)</code>。</p>
+</li>
+<li>
+<p>属于某一类的early平台驱动的probing
+结构相关的代码调用 <em>early_platform_driver_probe</em> 匹配属于某一类的已经注册early平台设备和平台驱动，已经匹配的驱动会get probed()，这一步可以在early boot的任何时刻进行，对于串行驱动，越早进行越好。</p>
+</li>
+<li>
+<p>early平台驱动 <em>probe</em> 内部
+early boot时驱动代码需要特别注意，尤其是分配内存和注册中断时。 <em>probe</em> 函数内可以使用 <em>is_early_platform_device</em> 判断函数调用发生在early平台设备还是普通的平台设备。early串行驱动使用 <em>register_console</em> 。</p>
+</li>
 </ol>
-
 <h1 id="3-bus-type">3. Bus Type</h1>
-
-<h2 id="3-1-declaration">3.1. Declaration</h2>
-
+<h2 id="31-declaration">3.1. Declaration</h2>
 <p>内核中的每种总线（PCI，USB等）都需要定义一个静态的对象，必须初始化name域，可以提供match回调函数：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -397,30 +362,24 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">bus_type</span> <span class="n">pci_bus_type</span> <span class="o">=</span> <span class="p">{</span>
     <span class="p">.</span><span class="n">name</span>   <span class="o">=</span> <span class="s">&#34;pci&#34;</span><span class="p">,</span>
     <span class="p">.</span><span class="n">match</span>  <span class="o">=</span> <span class="n">pci_bus_match</span><span class="p">,</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>然后在头文件中导出，供驱动使用：
+</div><p>然后在头文件中导出，供驱动使用：
 <code>extern struct bus_type pci_bus_type;</code></p>
-
-<h2 id="3-2-registration">3.2. Registration</h2>
-
+<h2 id="32-registration">3.2. Registration</h2>
 <p>初始化总线驱动时，调用bus_register函数，bus_register会初始化总线对象（struct bus_type）的其余的域，然后将其添加到总线类型的全局列表中。一旦总线注册完成，对象内的所有域都可以使用。</p>
-
-<h2 id="3-3-callbacks">3.3. Callbacks</h2>
-
+<h2 id="33-callbacks">3.3. Callbacks</h2>
 <ul>
 <li>match()：将驱动添加到设备
 总线的驱动数据结构一般包含支持的设备的ID的列表，总线可以通过 <em>match</em> 函数判断特定的驱动是否支持特定的设备。
 驱动注册到总线时，会遍历总线的设备列表，针对每个没有驱动的设备调用 <em>match</em> 函数。</li>
 </ul>
-
-<h2 id="3-4-device-and-driver-lists">3.4. Device and Driver Lists</h2>
-
+<h2 id="34-device-and-driver-lists">3.4. Device and Driver Lists</h2>
 <p>设备和驱动列表用来取代许多总线保留的本地列表（local list），列表的元素分别是 <strong>struct devices</strong> 和 <strong>struct device_driver</strong> ，总线驱动可以自由使用列表，LDM（Linux Device Model）提供了遍历两个列表的辅助函数：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -429,19 +388,16 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">bus_for_each_dev</span><span class="p">(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="n">bus</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">start</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
         <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">fn</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
 <span class="kt">int</span> <span class="nf">bus_for_each_drv</span><span class="p">(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="n">bus</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_driver</span> <span class="o">*</span><span class="n">start</span><span class="p">,</span>
-        <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">fn</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_driver</span> <span class="o">*</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="p">));</span></code></pre></td></tr></table>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">fn</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_driver</span> <span class="o">*</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="p">));</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>两个函数会遍历相应的列表，并且针对每个元素调用回调函数，所有的列表访问操作都通过总线的锁来同步，列表中每个对象的引用计数在调用函数前会增加，在取得下一个对象后会减少，调用回调函数时不会持有锁。</p>
-
-<h2 id="3-5-sysfs">3.5. sysfs</h2>
-
+</div><p>两个函数会遍历相应的列表，并且针对每个元素调用回调函数，所有的列表访问操作都通过总线的锁来同步，列表中每个对象的引用计数在调用函数前会增加，在取得下一个对象后会减少，调用回调函数时不会持有锁。</p>
+<h2 id="35-sysfs">3.5. sysfs</h2>
 <p>每种总线类型在/sys/bus下都有一个目录，例如/sys/bus/pci，注册的驱动在/sys/bus/pci/drivers/下，总线下的每个设备在/sys/bus/pci/devices/下，是指向/sys/devices下设备的符号链接。</p>
-
-<h2 id="3-6-exporting-attributes">3.6. Exporting Attributes</h2>
+<h2 id="36-exporting-attributes">3.6. Exporting Attributes</h2>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -452,50 +408,45 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
     <span class="k">struct</span> <span class="n">attribtue</span> <span class="n">attr</span><span class="p">;</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">bus_type</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">);</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>总线驱动可以使用BUS_ATTR宏导出参数<code>static BUS_ATTR(debug, 0644, show_debug, store_debug);</code>。</p>
-
+</div><p>总线驱动可以使用BUS_ATTR宏导出参数<code>static BUS_ATTR(debug, 0644, show_debug, store_debug);</code>。</p>
 <h1 id="4-the-basic-device-structure">4. The Basic Device Structure</h1>
-
-<h2 id="4-1-programming-interface">4.1. Programming Interface</h2>
-
+<h2 id="41-programming-interface">4.1. Programming Interface</h2>
 <p>发现设备的总线驱动通过<code>int device_register(struct device *dev);</code>将设备注册到LDM核心。总线需要初始化以下域：</p>
-
 <ul>
 <li>parent</li>
 <li>name</li>
 <li>bus_id</li>
 <li>bus</li>
 </ul>
-
 <p>设备的引用计数下降到0时，会从核心删除。引用计数通过下列函数修改：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="nf">get_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
-<span class="kt">void</span> <span class="nf">put_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="kt">void</span> <span class="nf">put_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>驱动程序通过系列函数访问设备的锁：</p>
+</div><p>驱动程序通过系列函数访问设备的锁：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">lock_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
-<span class="kt">void</span> <span class="nf">unlock_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="kt">void</span> <span class="nf">unlock_device</span><span class="p">(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="4-2-attributes">4.2. Attributes</h2>
+</div><h2 id="42-attributes">4.2. Attributes</h2>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -506,53 +457,33 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
     <span class="k">struct</span> <span class="n">attribute</span> <span class="n">attr</span><span class="p">;</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_attribute</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">device_attribute</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">);</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="5-devres-managed-device-resource">5. Devres-Managed Device Resource</h1>
-
-<h2 id="5-1-intro">5.1. Intro</h2>
-
+</div><h1 id="5-devres-managed-device-resource">5. Devres-Managed Device Resource</h1>
+<h2 id="51-intro">5.1. Intro</h2>
 <p>试图使用iomap转化libata时提出了devres的概念：每一个iomapped的地址都要保存下来，在移除驱动时进行unmap。像许多设备驱动一样，libata的底层驱动在-&gt;remove和-&gt;probe的失败路径有很多漏洞；而且底层的设备驱动没有受到像核心代码那样足够多的关注，这些漏洞又在初始化或者移除设备时才会产生，导致许多底层驱动在添加驱动时会泄露资源。</p>
-
-<h2 id="5-2-devres">5.2. Devres</h2>
-
+<h2 id="52-devres">5.2. Devres</h2>
 <p>devres是和 <strong>struct device</strong> 相关联的任意大小的内存区域的链表，每个devres项都有一个 <em>release</em> 函数。devres有多种释放方式，但是都在移除驱动时执行释放操作。释放时会调用相关的 <em>release</em> 函数，然后释放相应的devres项。</p>
-
 <p>驱动程序经常使用的devres分配函数都有托管的（managed）接口，比如一致的DMA内存通过 <em>dma_alloc_coherent</em> 获取，对应的托管接口为 <em>dmam_alloc_coherent</em> ，两个函数功能一致，只是托管接口分配的DMA会在移除驱动时自动释放。</p>
-
 <p>使用 <em>dmam_alloc_coherent</em> 分配的内存区域一定会被释放，无论初始化过程是否会失败，或者设备被移除。如果大多数驱动都是用托管的资源分配函数，驱动的初始化和退出函数就能大大简化。</p>
-
-<h2 id="5-3-devres-group">5.3. Devres group</h2>
-
+<h2 id="53-devres-group">5.3. Devres group</h2>
 <p>devres可以通过devres group组合起来，释放一个组时，所有包含在内的devres项都会被释放。</p>
-
-<p>每个组通过<strong>void \ *id</strong> 标识，可以通过 <em>devres_open_group</em> 显式指明，也可以传入NULL自动创建。两种方式 <em>devres_open_group</em> 都会返回组的ID，可以传递给其他devres函数。如果传递的参数为NULL，会选择最近打开的组进行操作。</p>
-
-<h2 id="5-4-details">5.4. Details</h2>
-
+<p>每个组通过*<em>void \ <em>id</em></em> 标识，可以通过 <em>devres_open_group</em> 显式指明，也可以传入NULL自动创建。两种方式 <em>devres_open_group</em> 都会返回组的ID，可以传递给其他devres函数。如果传递的参数为NULL，会选择最近打开的组进行操作。</p>
+<h2 id="54-details">5.4. Details</h2>
 <p>devres项没有引用计数，分配时开启生命周期，释放时结束。devres核心保证所有的基本devres操作都是原子的，并且支持single-instance devres 类型（atomic lookup-and-add-if-not-found）。除此之外，调用者需要负责同步对分配的devres数据的并发访问。</p>
-
 <p>lib/devres.c中的 <em>pcim_iomap_table</em> 是单例devres类型的一个实例。</p>
-
 <p>如果正确提供了gfp掩码，所有的devres接口都可以在没有进程上下文的环境中调用。</p>
-
-<h2 id="5-5-overhead">5.5. Overhead</h2>
-
+<h2 id="55-overhead">5.5. Overhead</h2>
 <p>使用devres分配资源的同时会创建一些管理信息，关闭调试选项时，这些信息在32bit系统占用16byte，64bit系统占用24byte。每个devres组占用8个指针。</p>
-
 <h1 id="6-device-classes">6. Device Classes</h1>
-
-<h2 id="6-1-introduction">6.1. Introduction</h2>
-
+<h2 id="61-introduction">6.1. Introduction</h2>
 <p>每个设备类定义了一种类型的设备，像音频设备，网络设备。每个设备类定义了一组语义和支持的编程接口，设备驱动是特定总线上的特定设备的编程接口的实现。</p>
-
-<h2 id="6-2-programming-interface">6.2. Programming Interface</h2>
-
+<h2 id="62-programming-interface">6.2. Programming Interface</h2>
 <p>设备类的数据结构定义如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -563,52 +494,44 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
     <span class="p">.</span><span class="n">name</span>           <span class="o">=</span>   <span class="s">&#34;input&#34;</span><span class="p">,</span>
     <span class="p">.</span><span class="n">add_device</span>    <span class="o">=</span>    <span class="n">input_add_device</span><span class="p">,</span>
     <span class="p">.</span><span class="n">remove_device</span> <span class="o">=</span>    <span class="n">input_remove_device</span><span class="p">,</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
 </div><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="nf">int</span> <span class="p">(</span><span class="o">*</span><span class="n">devclass_add</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">);</span>
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">devclass_remove</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">devclass_remove</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device</span> <span class="o">*</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>每种设备类的数据结构都应该通过头文件导出，以供驱动，扩展程序和接口使用。</p>
-
+</div><p>每种设备类的数据结构都应该通过头文件导出，以供驱动，扩展程序和接口使用。</p>
 <p>设备类和LDM核心的交互函数如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">devclass_register</span><span class="p">(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="n">cls</span><span class="p">);</span>
-<span class="kt">void</span> <span class="nf">devclass_unregister</span><span class="p">(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="n">cls</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="kt">void</span> <span class="nf">devclass_unregister</span><span class="p">(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="n">cls</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="6-3-devices">6.3. Devices</h2>
-
+</div><h2 id="63-devices">6.3. Devices</h2>
 <p>设备是绑定到驱动的，因此会被添加到驱动所属的设备类中。在驱动模型核心出现前，这个过程（将设备添加到所属的设备类中）通常发生在设备初始化后，驱动的 <em>probe</em> 函数中。现在一般发生在 <em>probe</em> 完成后。</p>
-
 <p>类会枚举添加的设备，每次添加操作都会增加类的devnum，并分配给设备。devnum只增不减，因此设备从系统中删除后再次添加会得到不同的枚举值。</p>
-
-<p>设备类可以给设备创建class-specific数据结构，保存在设备的class_data指针中。<br />
+<p>设备类可以给设备创建class-specific数据结构，保存在设备的class_data指针中。<br>
 设备类没有设备列表，每个驱动包含支持的设备的列表；设备类包含特定类型的驱动的列表，可以遍历设备类的驱动列表以获取指定类的所有设备。</p>
-
-<h2 id="6-4-device-drivers">6.4. Device Drivers</h2>
-
+<h2 id="64-device-drivers">6.4. Device Drivers</h2>
 <p>设备驱动注册到核心时会添加到设备类中，设备通过设置 <strong>struct device_driver</strong> 的 <strong>devclass</strong> 域指明所属的设备类。</p>
-
-<h2 id="6-5-sysfs">6.5. sysfs</h2>
-
+<h2 id="65-sysfs">6.5. sysfs</h2>
 <p>/sys/class下每个设备类都有对应的文件夹，比如/sys/class/input。每个设备类包含的设备和驱动分别对应文件夹/sys/class/input/devices，/sys/class/input/drivers，都是符号链接。</p>
-
-<h2 id="6-6-exporting-attributes">6.6. Exporting Attributes</h2>
+<h2 id="66-exporting-attributes">6.6. Exporting Attributes</h2>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -619,76 +542,45 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
     <span class="k">struct</span> <span class="n">attribute</span> <span class="n">attr</span><span class="p">;</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">show</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="n">off</span><span class="p">);</span>
     <span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">store</span><span class="p">)(</span><span class="k">struct</span> <span class="n">device_class</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">count</span><span class="p">,</span> <span class="n">loff_t</span> <span class="n">off</span><span class="p">);</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="6-7-interfaces">6.7. Interfaces</h2>
-
+</div><h2 id="67-interfaces">6.7. Interfaces</h2>
 <p>添加设备到设备类时，LDM核心会尝试将其添加到注册到设备类的所有接口中。</p>
-
 <h1 id="7-driver-binding">7. Driver Binding</h1>
-
 <p>驱动的绑定指的是将设备关联到能够控制其的驱动的过程，每种总线有特定的设备和驱动对应的数据结构，因此绑定过程通常由总线驱动完成。</p>
-
-<h2 id="7-1-bus">7.1. Bus</h2>
-
+<h2 id="71-bus">7.1. Bus</h2>
 <p>总线的数据结构通常包含系统中属于该总线的所有设备的列表，针对设备调用 <em>device_register</em> 函数时，会将设备插入到列表的尾部。</p>
-
 <p>总线的数据结构还包含一个属于该总线类型的所有驱动的列表，针对驱动调用 <em>driver_register</em> 函数会将驱动插入到列表的尾部。</p>
-
 <p>这是两个会触发驱动绑定的事件。</p>
-
-<h2 id="7-2-device-register">7.2. device_register</h2>
-
+<h2 id="72-device_register">7.2. device_register</h2>
 <p>添加新设备时，会遍历总线的驱动列表，寻找支持新设备的驱动——设备的ID必须和驱动支持的设备ID匹配，总线的驱动负责提供一个回调函数，比较设备和驱动的ID，如果匹配返回1，否则返回0。</p>
-
 <p><code>int match(struct device *dev, struct device_driver *drv);</code>
 如果匹配成功，设备的驱动域就指向驱动，然后调用驱动的 <em>probe</em> 函数，以便驱动确认能够支持硬件设备。</p>
-
-<h2 id="7-3-device-class">7.3. Device Class</h2>
-
+<h2 id="73-device-class">7.3. Device Class</h2>
 <p>成功执行 <em>probe</em> 函数后，设备注册到所属的类（class）中，设备驱动只属于某一类，所属的类保存在驱动的devclass域。类的 <em>register_dev</em> 回调函数会调用 <em>devclass_add_device</em> 来枚举类中的设备，是实际将其注册到类中的函数。</p>
-
-<h2 id="7-4-driver">7.4. Driver</h2>
-
+<h2 id="74-driver">7.4. Driver</h2>
 <p>将驱动添加到设备时，会将设备插入到驱动的设备列表。</p>
-
-<h2 id="7-5-sysfs">7.5. sysfs</h2>
-
+<h2 id="75-sysfs">7.5. sysfs</h2>
 <p>bus的 <strong>devices</strong> 目录包含指向设备物理层次目录的符号链接。</p>
-
 <p>driver的 <strong>devices</strong> 目录包含指向设备物理层次目录的符号链接。</p>
-
 <p>class包含目录，设备目录包含指向sysfs树设备的物理位置的符号链接。</p>
-
 <p>上述即/sys/bus/XXX/devices和/sys/class/XXX/都指向/sys/devices。</p>
-
-<h2 id="7-6-driver-register">7.6. driver_register</h2>
-
+<h2 id="76-driver_register">7.6. driver_register</h2>
 <p>和添加新驱动的过程基本一致：遍历总线的设备列表以匹配设备，已经有驱动的设备会被跳过，所有的的设备都会遍历，以绑定尽可能多的设备。</p>
-
-<h2 id="7-7-removal">7.7. Removal</h2>
-
+<h2 id="77-removal">7.7. Removal</h2>
 <p>设备移除时，引用计数最终会变为0，调用驱动的 <em>remove</em> 回调函数，然后从驱动的设备列表中删除，减少驱动的引用计数，删除所有的符号链接。</p>
-
 <p>驱动移除时，遍历支持的设备列表，针对每个设备调用驱动的 <em>remove</em> 回调函数，从列表中删除设备，移除所有的符号链接。</p>
-
 <h1 id="8-device-drivers">8. Device Drivers</h1>
-
-<h2 id="8-1-allocation">8.1. Allocation</h2>
-
+<h2 id="81-allocation">8.1. Allocation</h2>
 <p>设备驱动是静态分配的数据结构，一个驱动可能支持多个设备，作为一个整体用一个 <strong>struct device_driver</strong> 代表。</p>
-
-<h2 id="8-2-initialization">8.2. Initialization</h2>
-
+<h2 id="82-initialization">8.2. Initialization</h2>
 <p>驱动至少需要初始化name和bus域，虽然是可选的，驱动还需要初始化devclass域，以及尽可能多的回调函数。</p>
-
-<h2 id="8-3-declaration">8.3. Declaration</h2>
-
+<h2 id="83-declaration">8.3. Declaration</h2>
 <p>设备驱动的定义示例如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -705,13 +597,13 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
        <span class="p">.</span><span class="n">remove</span> <span class="o">=</span> <span class="n">eepro100_remove</span><span class="p">,</span>
        <span class="p">.</span><span class="n">suspend</span> <span class="o">=</span> <span class="n">eepro100_suspend</span><span class="p">,</span>
        <span class="p">.</span><span class="n">resume</span> <span class="o">=</span> <span class="n">eepro100_resume</span><span class="p">,</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>属于某种总线的驱动通常包含支持的设备的列表，而且比较设备ID是否匹配通常和总线类型相关。此外，总线的驱动需要包含一个 <strong>struct device_driver</strong> 成员，</p>
+</div><p>属于某种总线的驱动通常包含支持的设备的列表，而且比较设备ID是否匹配通常和总线类型相关。此外，总线的驱动需要包含一个 <strong>struct device_driver</strong> 成员，</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -720,35 +612,25 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">pci_driver</span> <span class="p">{</span>
        <span class="k">const</span> <span class="k">struct</span> <span class="n">pci_device_id</span> <span class="o">*</span><span class="n">id_table</span><span class="p">;</span>
        <span class="k">struct</span> <span class="n">device_driver</span> <span class="n">driver</span><span class="p">;</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="8-4-registration">8.4. Registration</h2>
-
+</div><h2 id="84-registration">8.4. Registration</h2>
 <p><code>int driver_reigister(struct device_driver *drv);</code>
 驱动启动时注册数据结构，没有bus-specific域的驱动，使用 <em>driver_register</em> 函数，将自己的 <strong>struct device_driver</strong> 对象作为参数传递。</p>
-
 <p>大部分驱动都有bus-specific结构，需要注册到总线，比如 <em>pci_driver_register</em> 。</p>
-
 <p>驱动程序尽可能早的注册驱动很重要，注册过程会初始化 <strong>struct device_driver</strong> 中的许多域，包括引用计数和锁。这些域会被设备模型的核心和总线驱动经常使用。</p>
-
-<h2 id="8-5-access">8.5. Access</h2>
-
+<h2 id="85-access">8.5. Access</h2>
 <p>对象注册后，可以通过辅助函数访问对象的公共域：
 <code>int driver_for_each_dev(struct device_driver *drv, void *data, int (*callback)(struct device *dev, void *data));</code></p>
-
 <p>设备域是绑定到驱动的所有设备列表，LDM核心提供的辅助函数会在访问每个节点时锁住驱动，正确的修改引用计数。</p>
-
 <h1 id="9-device-driver-design-patterns">9. Device Driver Design Patterns</h1>
-
-<h2 id="9-1-state-container">9.1. State Container</h2>
-
+<h2 id="91-state-container">9.1. State Container</h2>
 <p>尽管一些驱动程序假定自己意会在系统中被probed一次，仍然需要考虑绑定到设备的驱动会出现在多个实例中。这就意味着 <em>probe</em> 和所有的回调函数需要是可重入的。</p>
-
 <p>最普遍的实现方法就是使用state container设计模式，形式如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -777,14 +659,14 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
         <span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
     <span class="n">spin_lock_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">foo</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
     <span class="p">...</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>每次调用 <em>probe</em> 函数，都会创建 <strong>struct foo</strong> 实例，这就是设备驱动实例的状态容器。我们可以将实例传递给需要访问状态和成员的函数。
+</div><p>每次调用 <em>probe</em> 函数，都会创建 <strong>struct foo</strong> 实例，这就是设备驱动实例的状态容器。我们可以将实例传递给需要访问状态和成员的函数。
 例如，如果驱动程序正在注册一个中断处理函数，可以将指向 <strong>struct foo</strong> 的指针按下列方式传递：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -807,11 +689,10 @@ early boot时驱动代码需要特别注意，尤其是分配内存和注册中�
     <span class="k">struct</span> <span class="n">foo</span> <span class="o">*</span><span class="n">foo</span><span class="p">;</span>
     <span class="p">...</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">request_irq</span><span class="p">(</span><span class="n">irq</span><span class="p">,</span> <span class="n">foo_handler</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#34;foo&#34;</span><span class="p">,</span> <span class="n">foo</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="9-2-container-of">9.2. container_of()</h2>
-
+</div><h2 id="92-container_of">9.2. container_of()</h2>
 <p>container_of()可以通过结构体内的<strong>非指针成员</strong>获取包含该成员的结构体的指针。</p>
 
     </div>

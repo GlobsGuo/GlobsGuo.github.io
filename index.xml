@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Globs&#39; Catchall</title>
@@ -6,98 +6,94 @@
     <description>Recent content on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://blog.globs.site/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 24 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.globs.site/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>mm-buddy_allocator分配页框(上)</title>
-      <link>https://blog.globs.site/post/mm-buddy_allocator_page_allocation-1/</link>
+      <link>https://blog.globs.site/post/mm/mm-buddy_allocator_page_allocation-1/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/mm-buddy_allocator_page_allocation-1/</guid>
+      <guid>https://blog.globs.site/post/mm/mm-buddy_allocator_page_allocation-1/</guid>
       <description>slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内</description>
     </item>
     
     <item>
       <title>mm-buddy_allocator初始化</title>
-      <link>https://blog.globs.site/post/mm-buddy_allocator_initialization/</link>
+      <link>https://blog.globs.site/post/mm/mm-buddy_allocator_initialization/</link>
       <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/mm-buddy_allocator_initialization/</guid>
+      <guid>https://blog.globs.site/post/mm/mm-buddy_allocator_initialization/</guid>
       <description>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存</description>
     </item>
     
     <item>
       <title>mm-slab初始化</title>
-      <link>https://blog.globs.site/post/mm-slab_initialization/</link>
+      <link>https://blog.globs.site/post/mm/mm-slab_initialization/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/mm-slab_initialization/</guid>
+      <guid>https://blog.globs.site/post/mm/mm-slab_initialization/</guid>
       <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分</description>
     </item>
     
     <item>
       <title>mm-slab对象的分配</title>
-      <link>https://blog.globs.site/post/mm-slab_objects_allocation/</link>
+      <link>https://blog.globs.site/post/mm/mm-slab_objects_allocation/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/mm-slab_objects_allocation/</guid>
+      <guid>https://blog.globs.site/post/mm/mm-slab_objects_allocation/</guid>
       <description>slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内</description>
     </item>
     
     <item>
       <title>mm-slab对象的回收</title>
-      <link>https://blog.globs.site/post/mm-slab_objects_free/</link>
+      <link>https://blog.globs.site/post/mm/mm-slab_objects_free/</link>
       <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/mm-slab_objects_free/</guid>
+      <guid>https://blog.globs.site/post/mm/mm-slab_objects_free/</guid>
       <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5</description>
     </item>
     
     <item>
       <title>control group</title>
-      <link>https://blog.globs.site/post/control_group/</link>
+      <link>https://blog.globs.site/post/mm/control_group/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/control_group/</guid>
+      <guid>https://blog.globs.site/post/mm/control_group/</guid>
       <description>1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的</description>
     </item>
     
     <item>
       <title>driver model</title>
-      <link>https://blog.globs.site/post/driver_model/</link>
+      <link>https://blog.globs.site/post/mm/driver_model/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/driver_model/</guid>
+      <guid>https://blog.globs.site/post/mm/driver_model/</guid>
       <description>1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型</description>
     </item>
     
     <item>
       <title>grub参数&#34;console=&#34;</title>
-      <link>https://blog.globs.site/post/grub_parameters/</link>
+      <link>https://blog.globs.site/post/mm/grub_parameters/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/grub_parameters/</guid>
+      <guid>https://blog.globs.site/post/mm/grub_parameters/</guid>
       <description>本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。 grub参数中</description>
     </item>
     
     <item>
       <title>Linux Memory Policy</title>
-      <link>https://blog.globs.site/post/memory_policy/</link>
+      <link>https://blog.globs.site/post/mm/memory_policy/</link>
       <pubDate>Sat, 12 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/memory_policy/</guid>
+      <guid>https://blog.globs.site/post/mm/memory_policy/</guid>
       <description>内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-</description>
     </item>
     
     <item>
       <title>printk函数</title>
-      <link>https://blog.globs.site/post/printk/</link>
+      <link>https://blog.globs.site/post/mm/printk/</link>
       <pubDate>Thu, 19 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://blog.globs.site/post/printk/</guid>
+      <guid>https://blog.globs.site/post/mm/printk/</guid>
       <description>1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 /* console_sem用来</description>
     </item>
     

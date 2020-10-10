@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
 
 
 <link rel="canonical" href="https://blog.globs.site/post/mm-buddy_allocator_initialization/" />
@@ -46,10 +46,8 @@
 <meta property="article:modified_time" content="2019-10-24T00:00:00+00:00" />
 <meta itemprop="name" content="mm-buddy_allocator初始化">
 <meta itemprop="description" content="在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存">
-
-
-<meta itemprop="datePublished" content="2019-10-24T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-10-24T00:00:00&#43;00:00" />
+<meta itemprop="datePublished" content="2019-10-24T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-24T00:00:00+00:00" />
 <meta itemprop="wordCount" content="9190">
 
 
@@ -135,87 +133,55 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#1-内存节点">1. 内存节点</a>
-<ul>
-<li><a href="#1-1-stuct-pglist-data-node-data">1.1. stuct pglist_data *node_data[]</a></li>
-<li><a href="#1-2-node-data-的初始化">1.2. <strong>node_data</strong> 的初始化</a>
-<ul>
-<li><a href="#1-2-1-setup-node-data">1.2.1. setup_node_data</a></li>
-<li><a href="#1-2-2-free-area-init-node">1.2.2. free_area_init_node</a></li>
-</ul></li>
-<li><a href="#1-3-zonelist的初始化">1.3. zonelist的初始化</a>
-<ul>
-<li><a href="#1-3-1-build-zonelists">1.3.1. build_zonelists</a>
-<ul>
-<li><a href="#1-3-1-1-build-zonelists-in-node-order">1.3.1.1. build_zonelists_in_node_order</a></li>
-<li><a href="#1-3-1-2-build-zonelists-in-zone-order">1.3.1.2. build_zonelists_in_zone_order</a></li>
-<li><a href="#1-3-1-3-示例说明">1.3.1.3. 示例说明</a></li>
-</ul></li>
-<li><a href="#1-3-2-build-zonelist-cache">1.3.2. build_zonelist_cache</a>
-<ul>
-<li><a href="#1-3-2-1-zlcache的说明">1.3.2.1. zlcache的说明</a></li>
-<li><a href="#1-3-2-2-zlcache的初始化">1.3.2.2. zlcache的初始化</a></li>
-</ul></li>
-<li><a href="#1-3-3-zonelist的额外说明">1.3.3. zonelist的额外说明</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#2-内存区域">2. 内存区域</a>
-<ul>
-<li><a href="#2-1-struct-zone">2.1. struct zone</a>
-<ul>
-<li><a href="#2-1-1-struct-zone的成员变量">2.1.1. struct zone的成员变量</a>
-<ul>
-<li><a href="#2-1-1-1-watermark">2.1.1.1. watermark</a>
-<ul>
-<li><a href="#2-1-1-1-1-wmark-low">2.1.1.1.1. WMARK_LOW</a></li>
-<li><a href="#2-1-1-1-2-wmark-min">2.1.1.1.2. WMARK_MIN</a></li>
-<li><a href="#2-1-1-1-3-wmark-high">2.1.1.1.3. WMARK_HIGH</a></li>
-</ul></li>
-<li><a href="#2-1-1-2-lowmem-reserve">2.1.1.2. lowmem_reserve</a></li>
-<li><a href="#2-1-1-3-xx-pages">2.1.1.3. xx_pages</a>
-<ul>
-<li><a href="#2-1-1-3-1-spanned-pages">2.1.1.3.1. spanned_pages</a></li>
-<li><a href="#2-1-1-3-2-present-pages">2.1.1.3.2. present_pages</a></li>
-<li><a href="#2-1-1-3-3-managed-pages">2.1.1.3.3. managed_pages</a></li>
-</ul></li>
-<li><a href="#2-1-1-4-wait-table-xx">2.1.1.4. wait_table_xx</a></li>
-</ul></li>
-<li><a href="#2-1-2-内存区域的初始化">2.1.2. 内存区域的初始化</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#3-zone-pcp-init">3. zone_pcp_init</a>
-<ul>
-<li><a href="#3-1-boot-pageset">3.1. boot_pageset</a></li>
-<li><a href="#3-2-rmqueue-bulk">3.2. rmqueue_bulk</a></li>
-</ul></li>
-<li><a href="#4-free-area的初始化">4. free_area的初始化</a>
-<ul>
-<li><a href="#4-1-init-currently-empty-zone">4.1. init_currently_empty_zone</a></li>
-<li><a href="#4-2-memmap-init-zone">4.2. memmap_init_zone</a></li>
-<li><a href="#4-3-free-all-bootmem">4.3. free_all_bootmem</a></li>
-</ul></li>
-<li><a href="#5-总结">5. 总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#11-stuct-pglist_data-node_data">1.1. stuct pglist_data *node_data[]</a></li>
+    <li><a href="#12-node_data-的初始化">1.2. <strong>node_data</strong> 的初始化</a>
+      <ul>
+        <li><a href="#121-setup_node_data">1.2.1. setup_node_data</a></li>
+        <li><a href="#122-free_area_init_node">1.2.2. free_area_init_node</a></li>
+      </ul>
+    </li>
+    <li><a href="#13-zonelist的初始化">1.3. zonelist的初始化</a>
+      <ul>
+        <li><a href="#131-build_zonelists">1.3.1. build_zonelists</a></li>
+        <li><a href="#132-build_zonelist_cache">1.3.2. build_zonelist_cache</a></li>
+        <li><a href="#133-zonelist的额外说明">1.3.3. zonelist的额外说明</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#21-struct-zone">2.1. struct zone</a>
+      <ul>
+        <li><a href="#211-struct-zone的成员变量">2.1.1. struct zone的成员变量</a></li>
+        <li><a href="#212-内存区域的初始化">2.1.2. 内存区域的初始化</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li><a href="#31-boot_pageset">3.1. boot_pageset</a></li>
+    <li><a href="#32-rmqueue_bulk">3.2. rmqueue_bulk</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#41-init_currently_empty_zone">4.1. init_currently_empty_zone</a></li>
+    <li><a href="#42-memmap_init_zone">4.2. memmap_init_zone</a></li>
+    <li><a href="#43-free_all_bootmem">4.3. free_all_bootmem</a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<p>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。<br />
+      <p>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。<br>
 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存信息。</p>
-
 <h1 id="1-内存节点">1. 内存节点</h1>
-
 <p>内存节点是内核管理物理内存的最上层抽象。对于NUMA系统，至少包含一个节点0。每个节点都有一个 <strong>struct pglist_data</strong> 对象指针，包含该节点的所有物理内存信息。</p>
-
-<h2 id="1-1-stuct-pglist-data-node-data">1.1. stuct pglist_data *node_data[]</h2>
-
+<h2 id="11-stuct-pglist_data-node_data">1.1. stuct pglist_data *node_data[]</h2>
 <p>x86架构下，变量 <strong>struct pglist_data *node_data[]</strong> 保存系统中的所有节点信息，定义在 <em>arch/x86/mm/numa.c</em> 中。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-c" data-lang="c"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -255,6 +221,7 @@
 </span><span class="lnt">38
 </span><span class="lnt">39
 </span><span class="lnt">40
+</span><span class="lnt">41
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">pglist_data</span> <span class="p">{</span>
@@ -296,42 +263,50 @@
     <span class="cm">/* Number of pages migrated during the rate limiting time interval */</span>
     <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">numabalancing_migrate_nr_pages</span><span class="p">;</span>
 <span class="cp">#endif
-</span><span class="cp"></span><span class="p">}</span> <span class="n">pg_data_t</span><span class="p">;</span></code></pre></td></tr></table>
-</div>
-</div>
-<h2 id="1-2-node-data-的初始化">1.2. <strong>node_data</strong> 的初始化</h2>
+</span><span class="cp"></span><span class="p">}</span> <span class="n">pg_data_t</span><span class="p">;</span>
 
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="12-node_data-的初始化">1.2. <strong>node_data</strong> 的初始化</h2>
 <p><em>arch/x86/include/asm/mmzone_64.h</em> 中定义了访问 <strong>node_data</strong> 变量的宏 <code>#define NODE_DATA(nid) (node_data[nid])</code> ，内核中的代码大多使用这个宏访问 <strong>node_data</strong> 变量。</p>
-
-<h3 id="1-2-1-setup-node-data">1.2.1. setup_node_data</h3>
-
+<h3 id="121-setup_node_data">1.2.1. setup_node_data</h3>
 <p>函数 <code>setup_node_data</code> 负责分配 <strong>node_data</strong> 变量，进行一些成员的简单初始化，函数的调用路径如下：</p>
-
 <ul>
 <li><code>start_kernel</code> ,  <em>init/main.c</em>
-
 <ul>
-<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em>
+<ul>
 <li><code>initmem_init</code> ,  <em>arch/x86/mm/numa_64.c</em>
-
 <ul>
-<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
+<ul>
 <li><code>numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
-
 <ul>
-<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em></li>
+<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em>
+<ul>
 <li><code>acpi_numa_init</code> ,  <em>drivers/acpi/numa.c</em></li>
-<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em></li>
-<li><code>setup_node_data</code> ,  <em>arch/x86/mm/numa.c</em></li>
-</ul></li>
-</ul></li>
-</ul></li>
 </ul>
-
+</li>
+<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em>
+<ul>
+<li><code>setup_node_data</code> ,  <em>arch/x86/mm/numa.c</em></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <p>需要说明的是，实际测试时，根据boot log， <code>x86_numa_init</code> 的执行过程如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -376,15 +351,14 @@
 </span><span class="cp"></span>    <span class="p">}</span>
     <span class="cm">/* 函数执行dummy_numa_init */</span>
     <span class="n">numa_init</span><span class="p">(</span><span class="n">dummy_numa_init</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>也就是说，默认情况下，x86架构开启NUMA配置， <code>x86_numa_init</code> 函数首先执行 <code>x86_acpi_numa_init</code> 函数，尝试从ACPI的SRAT中获取NUMA信息，成功的话函数直接退出；否则再调用 <code>amd_numa_init</code> ，从北桥的PCI配置空间获取NUMA信息，成功的话直接退出；否则再调用 <code>dummy_numa_init</code> ，直接将 <strong>0 - max_pfn</strong> 范围的物理页框作为节点0(这个范围内可能有空洞)。</p>
-
+</div><p>也就是说，默认情况下，x86架构开启NUMA配置， <code>x86_numa_init</code> 函数首先执行 <code>x86_acpi_numa_init</code> 函数，尝试从ACPI的SRAT中获取NUMA信息，成功的话函数直接退出；否则再调用 <code>amd_numa_init</code> ，从北桥的PCI配置空间获取NUMA信息，成功的话直接退出；否则再调用 <code>dummy_numa_init</code> ，直接将 <strong>0 - max_pfn</strong> 范围的物理页框作为节点0(这个范围内可能有空洞)。</p>
 <p>不论是哪种方式，成功获取到NUMA信息后，都会将其添加到 <strong>numa_meminofo</strong> 变量。这个变量由 <code>numa_init</code> 调用函数 <code>numa_register_memblks</code> 时作为参数传递，添加到 <strong>memblock</strong> 变量，同时传递给 <code>setup_node_data</code> 函数，即每个节点的起始页框索引。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -491,54 +465,72 @@
     <span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nid</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">node_spanned_pages</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">PAGE_SHIFT</span><span class="p">;</span>
 
     <span class="n">node_set_online</span><span class="p">(</span><span class="n">nid</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="1-2-2-free-area-init-node">1.2.2. free_area_init_node</h3>
-
+</div><h3 id="122-free_area_init_node">1.2.2. free_area_init_node</h3>
 <p><code>setup_node_data</code> 函数只会初始化 <strong>pg_data_t</strong> 的部分成员变量(节点信息，起始页框信息)，其余成员变量的初始化在函数 <code>free_area_init_node</code> 完成，两个函数的调用路径的先后顺序如下：</p>
-
 <ul>
 <li><code>start_kernel</code> ,  <em>init/main.c</em>
-
 <ul>
-<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em>
+<ul>
 <li><code>initmem_init</code> ,  <em>arch/x86/mm/numa_64.c</em>
-
 <ul>
-<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em></li>
+<li><code>x86_numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
+<ul>
 <li><code>numa_init</code> ,  <em>arch/x86/mm/numa.c</em>
-
 <ul>
-<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em></li>
+<li><code>x86_acpi_numa_init</code> ,  <em>arch/x86/mm/srat.c</em>
+<ul>
 <li><code>acpi_numa_init</code> ,  <em>drivers/acpi/numa.c</em></li>
-<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em></li>
+</ul>
+</li>
+<li><code>numa_register_memblks</code> ,  <em>arch/x86/mm/numa.c</em>
+<ul>
 <li><code>setup_node_data</code> ,  <em>arch/x86/mm/numa.c</em></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
-
 <ul>
-<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
+<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em>
+<ul>
 <li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
-
 <ul>
-<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em>
+<ul>
 <li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em></li>
-</ul></li>
-</ul></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><code>build_all_zonelists</code> ,  <em>mm/page_alloc.c</em></li>
 <li><code>page_alloc_init</code> ,  <em>mm/page_alloc.c</em></li>
-<li><code>mm_init</code> ,  <em>init/main.c</em></li>
+<li><code>mm_init</code> ,  <em>init/main.c</em>
+<ul>
 <li><code>mem_init</code> , <em>arch/x86/mm/init_64.c</em></li>
 <li><code>kmem_cache_init</code> ,  <em>mm/slub.c</em></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
+</li>
+</ul>
 <p><code>setup_node_data</code> 使用的NUMA信息来自ACPI表或者BIOS-e820，可能包含空洞，PFN的范围不准确； <code>free_area_init_node</code> 使用的内存信息来自 <strong>struct memblock memblock</strong> 变量，用 <strong>memblock</strong> 的信息对NUMA信息进一步修正( <strong>memblock</strong> 定义在 <em>mm/memblock.c</em> 中，保存始化阶段通过 <code>memblock_reserve</code> 、 <code>memblock_set_node</code> 函数保留的内存信息)：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -629,19 +621,16 @@
 </span><span class="cm">     @zholes_size = NULL */</span>
     <span class="n">free_area_init_core</span><span class="p">(</span><span class="n">pgdat</span><span class="p">,</span> <span class="n">start_pfn</span><span class="p">,</span> <span class="n">end_pfn</span><span class="p">,</span>
                 <span class="n">zones_size</span><span class="p">,</span> <span class="n">zholes_size</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>至此，变量 <strong>node_data</strong> 初始化完毕，包含的节点信息供后续的内存初始化操作使用。</p>
-
-<h2 id="1-3-zonelist的初始化">1.3. zonelist的初始化</h2>
-
+</div><p>至此，变量 <strong>node_data</strong> 初始化完毕，包含的节点信息供后续的内存初始化操作使用。</p>
+<h2 id="13-zonelist的初始化">1.3. zonelist的初始化</h2>
 <p><code>start_kernel</code> 调用 <code>build_all_zonelists</code> 初始化内存区域表，即 <strong>pg_data_t</strong> 的 <strong>node_zonelists</strong> 成员。</p>
-
 <p><code>build_all_zonelists</code> 调用 <code>__build_all_zonelists</code> ，后者分别调用 <code>build_zonelists</code> 和 <code>build_zonelist_cache</code> 完成zonelist的初始化：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -714,13 +703,13 @@
 </span><span class="cp"></span>    <span class="p">}</span>
 
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><strong>struct zonelist</strong> 结构如下，</p>
+</div><p><strong>struct zonelist</strong> 结构如下，</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -735,29 +724,27 @@
 <span class="cp">#ifdef CONFIG_NUMA
 </span><span class="cp"></span>    <span class="k">struct</span> <span class="n">zonelist_cache</span> <span class="n">zlcache</span><span class="p">;</span>               <span class="c1">// optional ...
 </span><span class="c1"></span><span class="cp">#endif
-</span><span class="cp"></span><span class="p">};</span></code></pre></td></tr></table>
+</span><span class="cp"></span><span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><strong>MAX_ZONES_PER_ZONELIST</strong> 为系统中的节点数和zone类型数的乘积，假如系统中共有2各节点，zone有3种类型(DMA，DMA32，NORMAL)，则  <strong>_zonerefs</strong>  的长度为6 + 1 = 7。数组的最后一个元素总是设置为空，作为结束标志。</p>
-
-<h3 id="1-3-1-build-zonelists">1.3.1. build_zonelists</h3>
-
+</div><p><strong>MAX_ZONES_PER_ZONELIST</strong> 为系统中的节点数和zone类型数的乘积，假如系统中共有2各节点，zone有3种类型(DMA，DMA32，NORMAL)，则  <strong>_zonerefs</strong>  的长度为6 + 1 = 7。数组的最后一个元素总是设置为空，作为结束标志。</p>
+<h3 id="131-build_zonelists">1.3.1. build_zonelists</h3>
 <p><code>build_zonelists</code> 函数完成  <strong>pg_data_t</strong>  成员 <strong>struct zonelist node_zonelists[MAX_ZONELISTS]</strong> 的初始化工作。zonelist是页面请求操作的对象，即伙伴系统分配内存时的操作对象；其中第一个zone是首选目标，其余的zone是备选项，按照优先级降序排列。</p>
-
 <p>NUMA系统中， <strong>MAX_ZONELISTS</strong> 为2，因为我们需要支持 <strong>__GFP_THISNODE</strong> ( <strong>__GFP_THISNODE</strong> 只会从当前节点分配内存)选项：</p>
-
 <ul>
-<li><p>node_zonelists[0]<br />
-带有备选node的zonelist</p></li>
-
-<li><p>node_zonelists[1]<br />
-没有备选node的zonelist</p></li>
+<li>
+<p>node_zonelists[0]<br>
+带有备选node的zonelist</p>
+</li>
+<li>
+<p>node_zonelists[1]<br>
+没有备选node的zonelist</p>
+</li>
 </ul>
-
 <p>zonelist的备选node通过函数 <code>find_next_best_node</code> 确定：备选node不能已经包含在zonelist中，应该是距离当前节点次近的节点，不属于任何CPU的节点更佳——这些节点没有分配内存的压力。距离根据距离数组计算——数组中包含系统中所有节点间的距离。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -831,6 +818,7 @@
 </span><span class="lnt">72
 </span><span class="lnt">73
 </span><span class="lnt">74
+</span><span class="lnt">75
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">build_zonelists</span><span class="p">(</span><span class="n">pg_data_t</span> <span class="o">*</span><span class="n">pgdat</span><span class="p">)</span>
@@ -906,17 +894,16 @@
 </span><span class="cm">     node_zonelists[1]。这种情况下，系统为非NUMA，只
 </span><span class="cm">     需要将节点0添加到zonelist两种即可 */</span>
     <span class="n">build_thisnode_zonelists</span><span class="p">(</span><span class="n">pgdat</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
-</div>
-</div>
-<p>可以看到，创建zonelist时，有两种策略，一种为了保证最大程度的局部性，即 <code>build_zonelists_in_node_order</code> ；一种为了避免DMA内存被耗尽，即 <code>build_zonelists_in_zone_order</code> 。两种策略可以通过grub参数“numa_zonelist_order”设置，也可以通过sysctl设置。</p>
+<span class="p">}</span>
 
-<h4 id="1-3-1-1-build-zonelists-in-node-order">1.3.1.1. build_zonelists_in_node_order</h4>
-
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，创建zonelist时，有两种策略，一种为了保证最大程度的局部性，即 <code>build_zonelists_in_node_order</code> ；一种为了避免DMA内存被耗尽，即 <code>build_zonelists_in_zone_order</code> 。两种策略可以通过grub参数“numa_zonelist_order”设置，也可以通过sysctl设置。</p>
+<h4 id="1311-build_zonelists_in_node_order">1.3.1.1. build_zonelists_in_node_order</h4>
 <p><code>build_zonelists_in_node_order</code> 找到传入的 <strong>pgdata</strong> 的 <strong>node_zonelists[0]</strong> 中第一个没有设置(为NULL)的 <strong>_zonerefs</strong> ，即 <strong>_zonerefs</strong> 中的最后一个元素，然后将 <strong>zonelist</strong> 中包含的所有zone按照类型从高到低的顺序添加到 <strong>_zonerefs</strong> 中：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -949,15 +936,14 @@
     <span class="cm">/* 设置_zonerefs中的最后一个元素为空，作为结束标志 */</span>
     <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">zone</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
     <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">zone_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h4 id="1-3-1-2-build-zonelists-in-zone-order">1.3.1.2. build_zonelists_in_zone_order</h4>
-
+</div><h4 id="1312-build_zonelists_in_zone_order">1.3.1.2. build_zonelists_in_zone_order</h4>
 <p><code>build_zonelists_in_zone_order</code> 则根据 <strong>node_order</strong> 数组中按照距当前节点的距离保存的内存节点先将同一类型的每个节点的所有zone添加，然后添加其他类型的zone，按照类型从高到低的顺序：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1010,32 +996,26 @@
     <span class="cm">/* 设置最后一个_zonerefs为空，作为结束标志 */</span>
     <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">zone</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
     <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">zone_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h4 id="1-3-1-3-示例说明">1.3.1.3. 示例说明</h4>
-
+</div><h4 id="1313-示例说明">1.3.1.3. 示例说明</h4>
 <p>假设系统中有两个内存节点0和1，每个节点都有ZONE_DMA，ZONE_DMA32，ZONE_NORMAL三种类型的区域，则NODE_DATA(0)的<strong>zonelist-&gt;_zonerefs</strong>在两种情况下初始化后分别为：</p>
-
 <ul>
-<li>node order<br />
-{ ZONE_NORMAL-0, ZONE_DMA32-0, ZONE_DMA-0，<br />
+<li>node order<br>
+{ ZONE_NORMAL-0, ZONE_DMA32-0, ZONE_DMA-0，<br>
 ZONE_NORMAL-1, ZONE_DMA32-1, ZONE_DMA-1 }</li>
-<li>zone order<br />
-{ ZONE_NORMAL-0, ZONE_NORMAL-1, ZONE_DMA32-0,<br />
+<li>zone order<br>
+{ ZONE_NORMAL-0, ZONE_NORMAL-1, ZONE_DMA32-0,<br>
 ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 </ul>
-
-<h3 id="1-3-2-build-zonelist-cache">1.3.2. build_zonelist_cache</h3>
-
-<h4 id="1-3-2-1-zlcache的说明">1.3.2.1. zlcache的说明</h4>
-
+<h3 id="132-build_zonelist_cache">1.3.2. build_zonelist_cache</h3>
+<h4 id="1321-zlcache的说明">1.3.2.1. zlcache的说明</h4>
 <p><code>build_zonelist_cache</code> 初始化 <strong>struct zonelist</strong> 中的剩余两个成员变量： <strong>zlcache_ptr</strong> 和 <strong>zlcache</strong> 。</p>
-
 <p><strong>struct zonelist_cache</strong> 缓存每个zonelist的关键信息，以便在<code>get_page_from_freelist()</code>函数中扫描空闲页面时减小高速缓存的footprint。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -1046,25 +1026,19 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
     <span class="kt">unsigned</span> <span class="kt">short</span> <span class="n">z_to_n</span><span class="p">[</span><span class="n">MAX_ZONES_PER_ZONELIST</span><span class="p">];</span>      <span class="cm">/* zone-&gt;nid */</span>
     <span class="n">DECLARE_BITMAP</span><span class="p">(</span><span class="n">fullzones</span><span class="p">,</span> <span class="n">MAX_ZONES_PER_ZONELIST</span><span class="p">);</span>  <span class="cm">/* zone full? */</span>
     <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">last_full_zap</span><span class="p">;</span>        <span class="cm">/* when last zap&#39;d (jiffies) */</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>位图 <strong>fullzones</strong> 追踪上次zero&rsquo;d fullzones之后，zonelist中缺少空闲内存的zone信息。</p>
-
+</div><p>位图 <strong>fullzones</strong> 追踪上次zero&rsquo;d fullzones之后，zonelist中缺少空闲内存的zone信息。</p>
 <p>数组 <strong>z_to_n[]</strong> 将zonelist中的每个zone映射到所属的节点的ID，以便快速确认该节点是否包含在当前进程的 <strong>mems_allowed</strong> 中。</p>
-
 <p><strong>fullzones</strong> 和 <strong>z_to_n[]</strong> 都和zonelist一一对应，通过zonelist的  <strong>_zonerefs</strong> 提供的偏移量进行索引。</p>
-
 <p><code>get_page_from_freelist</code> 函数执行两次扫描。第一次扫描时，跳过设置了 <strong>fullzones</strong> 中对应位的zone，以及对应的节点没有包含在 <strong>current-&gt;mems_allowed</strong> 中的zone。第二次扫描时，跳过 <strong>zonelist_cache</strong> ，保证查看了每个zone。</p>
-
 <p>每一秒钟执行一次zero out(zap) fullzones的操作， <strong>last_full_zap</strong> 保存上一次zap操作的时间。这种机制可以减少zone刚刚进入低内存状态，不停地检测zone是否有空闲内存所花费的时间。</p>
-
-<h4 id="1-3-2-2-zlcache的初始化">1.3.2.2. zlcache的初始化</h4>
-
+<h4 id="1322-zlcache的初始化">1.3.2.2. zlcache的初始化</h4>
 <p>函数 <code>build_zonelist_cache</code> 完成zlcache的初始化，</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1101,32 +1075,24 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
     <span class="cm">/* 将zonelist中的每个zone所属的节点信息保存在z_to_n[] */</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">z</span> <span class="o">=</span> <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">;</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">zone</span><span class="p">;</span> <span class="n">z</span><span class="o">++</span><span class="p">)</span>
         <span class="n">zlc</span><span class="o">-&gt;</span><span class="n">z_to_n</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="p">]</span> <span class="o">=</span> <span class="n">zonelist_node_idx</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="1-3-3-zonelist的额外说明">1.3.3. zonelist的额外说明</h3>
-
+</div><h3 id="133-zonelist的额外说明">1.3.3. zonelist的额外说明</h3>
 <p><strong>struct zonelist_cache</strong> 的成员属于 <strong>struct zonelist</strong> 。但是， <strong>MPOL_BIND</strong> 内存策略的zonelist结构体长度不同，通常更短—— <strong>MPOL_BIND</strong> 策略不需要 <strong>zonelist_cache</strong> 成员，因此我们将固定长度的成员放在zonelist结构体的起始位置，以 <strong>zonelist_cache</strong> 结尾。</p>
-
 <p><strong>zonelist_cache</strong> 这个可选的成员变量通过 <strong>zlcache_ptr</strong> 指针定位，在 <strong>MPOL_BIND</strong> 的情况下指针为NULL。</p>
-
 <p>由此， <strong>strut zonelist</strong> 有两种形式：</p>
-
 <ol>
 <li>完整的，固定长度的版本</li>
 <li>针对 <strong>MPOL_BIND</strong> 内存策略的版本( <strong>zlcache_ptr</strong> 为空)</li>
 </ol>
-
 <p>虽然存在多个CPU同时修改 <strong>zonelist_cache</strong> 的 <strong>fullzones</strong> 和 <strong>last_full_zap</strong> 的情况，我们没有加锁——这只是提示信息，如果这些信息有误，只不过会影响分配器的运行速度，但是不会影响分配器的功能。</p>
-
 <h1 id="2-内存区域">2. 内存区域</h1>
-
 <p>根据物理内存的使用方式，内核将物理内存分为多个内存区域(zone)，每个zone用 <strong>struct zone</strong> 来描述。以x86_64架构为例，内核包括ZONE_DMA，ZONE_DMA32，ZONE_NORMAL，ZONE_MOVABLE四种。</p>
-
 <p>定义在 <em>include/linux/mmzone.h</em> 中的 <strong>zone_type</strong> ：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1183,15 +1149,14 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <span class="cp">#endif
 </span><span class="cp"></span>    <span class="n">ZONE_MOVABLE</span><span class="p">,</span>
     <span class="n">__MAX_NR_ZONES</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="2-1-struct-zone">2.1. struct zone</h2>
-
+</div><h2 id="21-struct-zone">2.1. struct zone</h2>
 <p>Linux内核用 <strong>struct zone</strong> 描述内存区域：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1316,100 +1281,77 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
     <span class="n">ZONE_PADDING</span><span class="p">(</span><span class="n">_pad3_</span><span class="p">)</span>
     <span class="cm">/* Zone statistics */</span>
     <span class="n">atomic_long_t</span>       <span class="n">vm_stat</span><span class="p">[</span><span class="n">NR_VM_ZONE_STAT_ITEMS</span><span class="p">];</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h3 id="2-1-1-struct-zone的成员变量">2.1.1. struct zone的成员变量</h3>
-
-<h4 id="2-1-1-1-watermark">2.1.1.1. watermark</h4>
-
+</div><h3 id="211-struct-zone的成员变量">2.1.1. struct zone的成员变量</h3>
+<h4 id="2111-watermark">2.1.1.1. watermark</h4>
 <p>watermark数组长度为3，三个元素分别是WMARK_MIN，WMARK_LOW，WMARK_HIGH。</p>
-
 <p>watermark的描述来自 <strong>undering the linux virtual memory manager</strong> 一书：</p>
-
 <p>可用的内存少于LOW值， <strong>kswapd</strong> 程序就会被唤醒，执行页面释放操作。如果压力很大，进程会同步的释放内存，即direct-reclaim路径。</p>
-
 <p>每一个区域都有一个watermark数组，追踪区域的内存压力。MIN值在内存初始化时通过函数 <code>free_area_init_core</code> 计算，通常是ZoneSizeInPages/128。</p>
-
-<h5 id="2-1-1-1-1-wmark-low">2.1.1.1.1. WMARK_LOW</h5>
-
+<h5 id="21111-wmark_low">2.1.1.1.1. WMARK_LOW</h5>
 <p>区域的空闲页面数到达LOW时，伙伴分配器会唤醒 <strong>kswapd</strong> ，开始释放页面。LOW的默认值时MIN的两倍。</p>
-
-<h5 id="2-1-1-1-2-wmark-min">2.1.1.1.2. WMARK_MIN</h5>
-
-<p>到达MIN时，分配器会以同步的方式执行 <strong>kswapd</strong> 操作，被称作*direct-reclaim*路径。</p>
-
-<h5 id="2-1-1-1-3-wmark-high">2.1.1.1.3. WMARK_HIGH</h5>
-
+<h5 id="21112-wmark_min">2.1.1.1.2. WMARK_MIN</h5>
+<p>到达MIN时，分配器会以同步的方式执行 <strong>kswapd</strong> 操作，被称作<em>direct-reclaim</em>路径。</p>
+<h5 id="21113-wmark_high">2.1.1.1.3. WMARK_HIGH</h5>
 <p><strong>kswapd</strong> 唤醒之后，直到空闲页面的数量到达HIGH，内存区域才会被视为balanced，此时 <strong>kswapd</strong> 回到休眠状态。HIGH的默认值为MIN的三倍。</p>
-
-<h4 id="2-1-1-2-lowmem-reserve">2.1.1.2. lowmem_reserve</h4>
-
+<h4 id="2112-lowmem_reserve">2.1.1.2. lowmem_reserve</h4>
 <p>内核中的注释如下：</p>
-
 <blockquote>
 <p>我们不知道分配出去的内存最终是否会被释放，为了避免浪费数GB的内存，我们必须保留lower zone的内存，否则就有在lower zone出现OOM的风险，尽管在higher zone可能有大量可用的内存。</p>
-
 <p>这个数组在运行时会随着 <strong>sysctl_lowmem_reserve_ratio</strong> 的变化而变化。</p>
 </blockquote>
-
 <p>根据之前的说明，较高区域的内存通常较大，较低区域的内存通常较小。这个数组用来限制每个内存区域应该保留的内存页的数量，避免在较低内存区域出现OOM的情况。</p>
-
-<h4 id="2-1-1-3-xx-pages">2.1.1.3. xx_pages</h4>
-
-<h5 id="2-1-1-3-1-spanned-pages">2.1.1.3.1. spanned_pages</h5>
-
+<h4 id="2113-xx_pages">2.1.1.3. xx_pages</h4>
+<h5 id="21131-spanned_pages">2.1.1.3.1. spanned_pages</h5>
 <p><strong>spanned_pages</strong> 包含空洞，计算方法为 <code>spanned_pages = zone_end_pfn - zone_start_pfn</code> 。</p>
-
-<h5 id="2-1-1-3-2-present-pages">2.1.1.3.2. present_pages</h5>
-
+<h5 id="21132-present_pages">2.1.1.3.2. present_pages</h5>
 <p><strong>present_pages</strong> 是区域包含的物理页框数，不包含空洞，计算方法为 <code>present_pages = spanned_pages - absent_pages(pages in holes)</code> 。</p>
-
-<h5 id="2-1-1-3-3-managed-pages">2.1.1.3.3. managed_pages</h5>
-
+<h5 id="21133-managed_pages">2.1.1.3.3. managed_pages</h5>
 <p><strong>managed_pages</strong> 是伙伴系统当前管理的页框数，计算方法为 <code>managed_pages = present_pages - reserved_pages</code> 。</p>
-
 <p>因此，内存热插拔系统或者内存的电源管理逻辑可以使用 <code>present_pages - managed_pages</code> 来获得不受管理的页面数。页面分配器和VM扫描器负责计算被管理页面的所有阈值信息。</p>
-
-<h4 id="2-1-1-4-wait-table-xx">2.1.1.4. wait_table_xx</h4>
-
+<h4 id="2114-wait_table_xx">2.1.1.4. wait_table_xx</h4>
 <p><strong>wait_table</strong> 的相关变量用于追踪等待页面的进程信息，在页面可用时唤醒进程。问题是可能占用大量的空间，特别是同一时刻等待页面的进程很少。因此，我们使用哈希表来代替per-page等待队列。</p>
-
 <p>进程被唤醒时，必须再次确认等待的页面已经可用——由于使用的是哈希表，某一个页面可用时，被唤醒的进程可能有一大堆。</p>
-
 <p><strong>wait_table</strong> 保存等待队列哈希表； <strong>wait_table_hash_nr_entries</strong> 是哈希表的长度，即 <code>1 &lt;&lt; wait_table_bits</code> 。</p>
-
-<h3 id="2-1-2-内存区域的初始化">2.1.2. 内存区域的初始化</h3>
-
+<h3 id="212-内存区域的初始化">2.1.2. 内存区域的初始化</h3>
 <p><strong>strut zone</strong> 的成员变量的初始化主要由 <code>free_area_init_core</code> 函数完成，函数的调用路径如下：</p>
-
 <ul>
 <li><code>start_kernel</code> ,  <em>init/main.c</em>
-
 <ul>
-<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em></li>
+<li><code>setup_arch</code> ,  <em>arch/x86/kernel/setup.c</em>
+<ul>
 <li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ,  <em>arch/x86/kernel/x86_init.c</em>
-
 <ul>
-<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em></li>
+<li><code>paging_init</code> ,  <em>arch/x86/mm/init_64.c</em>
+<ul>
 <li><code>zone_sizes_init</code> ,  <em>arch/x86/mm/init.c</em> , 初始化 max_zone_pfns数组，包含各个zone可以包含的最大的page数
-
 <ul>
-<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em></li>
+<li><code>free_area_init_nodes(max_zone_pfns)</code>,  <em>mm/page_alloc.c</em>
+<ul>
 <li><code>free_area_init_node</code> ,  <em>mm/page_alloc.c</em>
-
 <ul>
 <li><code>free_area_init_core</code> ,  <em>mm/page_alloc.c</em></li>
-</ul></li>
-</ul></li>
-</ul></li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <p><code>free_area_init_node</code> 主要初始化内存节点的信息，而 <code>free_area_init_core</code> 则初始化节点内的所有内存区域的信息，</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+<pre class="chroma"><code><span class="lnt">  1
 </span><span class="lnt">  2
 </span><span class="lnt">  3
 </span><span class="lnt">  4
@@ -1634,25 +1576,20 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
         <span class="n">memmap_init</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">nid</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">zone_start_pfn</span><span class="p">);</span>
         <span class="n">zone_start_pfn</span> <span class="o">+=</span> <span class="n">size</span><span class="p">;</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="3-zone-pcp-init">3. zone_pcp_init</h1>
-
+</div><h1 id="3-zone_pcp_init">3. zone_pcp_init</h1>
 <p><code>free_area_init_core</code> 还会调用 <code>zone_pcp_init</code> 初始化 <strong>struct zone</strong> 的成员 <strong>struct per_cpu_pageset __percpu *pageset</strong> ，即《深入理解Linux内核》一书中第八章内存管理的“每cpu页框高速缓存”一节。</p>
-
 <p>根据书中所述：</p>
-
 <blockquote>
 <p>为了提升系统性能，每个内存管理区定义了一个“每CPU”页框高速缓存。所有“每CPU”页框高速缓存包含一些预先分配的页框，它们用于满足本地CPU发出的单一内存请求。</p>
 </blockquote>
-
 <p>这里的“每CPU”页框高速缓存就是 <strong>struct per_cpu_pageset</strong> ，定义在 <em>include/linux/mmzone.h</em> 。书中还说每个 <strong>per_cpu_pageset</strong> 对象都包含两个 <strong>struct per_cpu_pages</strong> 对象，一个热高速缓存，一个冷高速缓存——这个是2.6内核的实现，3.16只包含一个 <strong>per_cpu_pages</strong> 对象。</p>
-
 <p><strong>struct per_cpu_pages</strong> 定义如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -1669,15 +1606,14 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 
     <span class="cm">/* Lists of pages, one per migrate type stored on the pcp-lists */</span>
     <span class="k">struct</span> <span class="n">list_head</span> <span class="n">lists</span><span class="p">[</span><span class="n">MIGRATE_PCPTYPES</span><span class="p">];</span>
-<span class="p">};</span></code></pre></td></tr></table>
+<span class="p">};</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="3-1-boot-pageset">3.1. boot_pageset</h2>
-
+</div><h2 id="31-boot_pageset">3.1. boot_pageset</h2>
 <p><code>zone_pcp_init</code> 直接将zone的pageset指向定义在 <em>mm/page_alloc.c</em> 中的 <strong>boot_pageset</strong> 变量，这个变量在 <code>__build_all_zonelists</code> 函数中通过 <code>setup_pageset</code> 初始化：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">1
+<pre class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
@@ -1688,32 +1624,24 @@ ZONE_DMA32-1, ZONE_DMA-0, ZONE_DMA-1 }</li>
 <span class="p">{</span>
     <span class="n">pageset_init</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
     <span class="n">pageset_set_batch</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">batch</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>其中 <code>pageset_init</code> 初始化 <strong>struct per_cpu_pageset</strong> 的每个成员； <code>pageset_set_batch</code> 设置per-cpu页框高速缓存的batch为传入的值，即0。</p>
-
-<h2 id="3-2-rmqueue-bulk">3.2. rmqueue_bulk</h2>
-
-<p><code>zone_pcp_init</code> 将zone的pageset指向 <strong>boot_pageset</strong> 后，per-cpu页框高速缓存中没有可用的页。<br />
+</div><p>其中 <code>pageset_init</code> 初始化 <strong>struct per_cpu_pageset</strong> 的每个成员； <code>pageset_set_batch</code> 设置per-cpu页框高速缓存的batch为传入的值，即0。</p>
+<h2 id="32-rmqueue_bulk">3.2. rmqueue_bulk</h2>
+<p><code>zone_pcp_init</code> 将zone的pageset指向 <strong>boot_pageset</strong> 后，per-cpu页框高速缓存中没有可用的页。<br>
 buddy allocator分配内存页时，会调用 <code>rmqueue_bulk</code> 分配页框到per-cpu页框高速缓存。这个函数在buddy allocator一文中再进行详细说明。</p>
-
-<h1 id="4-free-area的初始化">4. free_area的初始化</h1>
-
+<h1 id="4-free_area的初始化">4. free_area的初始化</h1>
 <p>上面的函数建立了zone和zonelist，但是分配内存页真正用到的其实是 <strong>struct zone</strong> 中的 <strong>struct free_area free_area[MAX_ORDER]</strong> 成员，zone中的所有内存会分成 $2^{0}-2^{10}$ 个连续的页框，以解决外碎片的问题。</p>
-
-<h2 id="4-1-init-currently-empty-zone">4.1. init_currently_empty_zone</h2>
-
-<p><code>free_area_init_core</code> 调用 <code>init_currently_empty_zone</code> 函数完成 <strong>free_area</strong> 的初始化，这个函数只是将每种大小的 <strong>free_area</strong> 的数量初始化为零，并且初始化每种 <strong>free_area</strong> 包含的所有 migrate type 的链表。<br />
+<h2 id="41-init_currently_empty_zone">4.1. init_currently_empty_zone</h2>
+<p><code>free_area_init_core</code> 调用 <code>init_currently_empty_zone</code> 函数完成 <strong>free_area</strong> 的初始化，这个函数只是将每种大小的 <strong>free_area</strong> 的数量初始化为零，并且初始化每种 <strong>free_area</strong> 包含的所有 migrate type 的链表。<br>
 但是并没有真正建立可以分配内存页的 <strong>free_area</strong> 结构。</p>
-
-<h2 id="4-2-memmap-init-zone">4.2. memmap_init_zone</h2>
-
-<p><code>free_area_init_core</code> 调用的另一个函数 <code>memmap_init</code> ，x86架构下定义为 <code>memmap_init_zone</code> 。<br />
+<h2 id="42-memmap_init_zone">4.2. memmap_init_zone</h2>
+<p><code>free_area_init_core</code> 调用的另一个函数 <code>memmap_init</code> ，x86架构下定义为 <code>memmap_init_zone</code> 。<br>
 这个函数主要设置zone中每个page的具体信息，即 <strong>struct page</strong> 的各个成员变量。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1818,16 +1746,15 @@ buddy allocator分配内存页时，会调用 <code>rmqueue_bulk</code> 分配�
             <span class="n">set_page_address</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">__va</span><span class="p">(</span><span class="n">pfn</span> <span class="o">&lt;&lt;</span> <span class="n">PAGE_SHIFT</span><span class="p">));</span>
 <span class="cp">#endif
 </span><span class="cp"></span>    <span class="p">}</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="4-3-free-all-bootmem">4.3. free_all_bootmem</h2>
-
-<p><strong>free_area</strong> 初始化的过程，是在 <code>free_all_bootmem</code> 函数，这个函数由 <em>arch/x86/mm/init_64.c</em> 中的 <code>mem_init</code> 调用。<br />
+</div><h2 id="43-free_all_bootmem">4.3. free_all_bootmem</h2>
+<p><strong>free_area</strong> 初始化的过程，是在 <code>free_all_bootmem</code> 函数，这个函数由 <em>arch/x86/mm/init_64.c</em> 中的 <code>mem_init</code> 调用。<br>
 x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因此采用 <em>mm/nobootmem.c</em> 中的定义，调用 <code>free_low_memory_core_early</code> 函数完成主要工作：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1882,13 +1809,13 @@ x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因�
 <span class="cp">#endif
 </span><span class="cp"></span>
     <span class="k">return</span> <span class="n">count</span><span class="p">;</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>函数主要通过 <code>__free_memory_core</code> 释放 <strong>memblock</strong> 中保存的内存块，后者调用 <code>__free_pages_memory</code> ：</p>
+</div><p>函数主要通过 <code>__free_memory_core</code> 释放 <strong>memblock</strong> 中保存的内存块，后者调用 <code>__free_pages_memory</code> ：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1927,13 +1854,13 @@ x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因�
 
         <span class="n">start</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1UL</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">);</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><code>__free_pages_memory</code>最终会调用 <em>mm/page_alloc.c</em> 中的 <code>__free_pages_bootmem</code> ，传入起始页面和释放的order：</p>
+</div><p><code>__free_pages_memory</code>最终会调用 <em>mm/page_alloc.c</em> 中的 <code>__free_pages_bootmem</code> ，传入起始页面和释放的order：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -1972,16 +1899,13 @@ x86下， <strong>CONFIG_NO_BOOTMEM=y</strong> ，即没有开启bootmem，因�
     <span class="n">page_zone</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">managed_pages</span> <span class="o">+=</span> <span class="n">nr_pages</span><span class="p">;</span>
     <span class="n">set_page_refcounted</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
     <span class="n">__free_pages</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p><code>__free_pages_bootmem</code> 清除之前的reserved标志，先将 <strong>_count</strong> 设置为0，之后再设置为1，然后调用 <code>__free_pages</code>，将page释放到buddy系统。</p>
-
+</div><p><code>__free_pages_bootmem</code> 清除之前的reserved标志，先将 <strong>_count</strong> 设置为0，之后再设置为1，然后调用 <code>__free_pages</code>，将page释放到buddy系统。</p>
 <p><code>__free_pages</code> 是伙伴系统释放内存页的函数，放在下一篇buddy allocator进行说明。</p>
-
 <h1 id="5-总结">5. 总结</h1>
-
-<p>至此，伙伴系统分配页面所需的内存信息建立完成：zone，zonelist，以及每个zone的free_area信息。<br />
+<p>至此，伙伴系统分配页面所需的内存信息建立完成：zone，zonelist，以及每个zone的free_area信息。<br>
 buddy allocator的具体执行流程，在下一篇文章介绍。</p>
 
     </div>

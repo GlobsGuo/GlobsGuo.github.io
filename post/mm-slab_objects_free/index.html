@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
 
 
 <link rel="canonical" href="https://blog.globs.site/post/mm-slab_objects_free/" />
@@ -46,10 +46,8 @@
 <meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
 <meta itemprop="name" content="mm-slab对象的回收">
 <meta itemprop="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5">
-
-
-<meta itemprop="datePublished" content="2019-10-21T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2019-10-21T00:00:00&#43;00:00" />
+<meta itemprop="datePublished" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-21T00:00:00+00:00" />
 <meta itemprop="wordCount" content="6004">
 
 
@@ -135,36 +133,25 @@
   <h2 class="post-toc-title">Contents</h2>
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
-<ul>
-<li><a href="#1-kfree">1. kfree</a></li>
-<li><a href="#2-slab-free-mm-slub-c">2. slab_free( <em>mm/slub.c</em> )</a></li>
-<li><a href="#3-slab-free-mm-slub-c">3. __slab_free( <em>mm/slub.c</em> )</a></li>
-<li><a href="#4-slab的操作函数">4. slab的操作函数</a>
-<ul>
-<li><a href="#4-1-put-cpu-partial">4.1. <code>put_cpu_partial</code></a>
-<ul>
-<li><a href="#4-1-1-unfreeze-partials">4.1.1. <code>unfreeze_partials</code></a></li>
-</ul></li>
-<li><a href="#4-2-add-partial-remove-partial-remove-full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></a></li>
-<li><a href="#4-3-discard-slab">4.3. <code>discard_slab</code></a></li>
-</ul></li>
-<li><a href="#5-deactivate-slab">5. deactivate_slab</a></li>
-<li><a href="#6-总结">6. 总结</a></li>
-</ul>
+  <ul>
+    <li><a href="#41-put_cpu_partial">4.1. <code>put_cpu_partial</code></a>
+      <ul>
+        <li><a href="#411-unfreeze_partials">4.1.1. <code>unfreeze_partials</code></a></li>
+      </ul>
+    </li>
+    <li><a href="#42-add_partial--remove_partial--remove_full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></a></li>
+    <li><a href="#43-discard_slab">4.3. <code>discard_slab</code></a></li>
+  </ul>
 </nav>
   </div>
 </div>
     <div class="post-content">
-      
-
-<p>本文仍然以slab cache <strong>kmalloc_caches</strong> 为例，结合 <code>kfree</code> 函数的实现，说明slab对象的回收过程。</p>
-
+      <p>本文仍然以slab cache <strong>kmalloc_caches</strong> 为例，结合 <code>kfree</code> 函数的实现，说明slab对象的回收过程。</p>
 <h1 id="1-kfree">1. kfree</h1>
-
 <p>通过 <code>kfree</code> 函数释放 <code>kmalloc</code> 申请的内存时，对应的函数定义在 <em>mm/slub.c</em> 中。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -213,17 +200,15 @@
 </span><span class="cm">       所属的slab cache，*/</span>
     <span class="n">slab_free</span><span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">slab_cache</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">object</span><span class="p">,</span> <span class="n">_RET_IP_</span><span class="p">);</span>
 <span class="p">}</span>
-<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kfree</span><span class="p">);</span></code></pre></td></tr></table>
+<span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">kfree</span><span class="p">);</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="2-slab-free-mm-slub-c">2. slab_free( <em>mm/slub.c</em> )</h1>
-
+</div><h1 id="2-slab_free-mmslubc-">2. slab_free( <em>mm/slub.c</em> )</h1>
 <p>如果 <code>kfree</code> 的参数地址所在的页面属于slab分配器，通过 <code>slab_free</code> 函数释放。 <code>slab_free</code> 函数也有两个分支，快路径和慢路径。</p>
-
 <p>如果 <code>kfree</code> 的对象属于当前的cpu slab，执行快路径；否则执行慢路径。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -324,63 +309,61 @@
 </span><span class="cm">         2. 释放的对象属于其他CPU的slab  */</span>
         <span class="n">__slab_free</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">addr</span><span class="p">);</span>
 
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="3-slab-free-mm-slub-c">3. __slab_free( <em>mm/slub.c</em> )</h1>
-
+</div><h1 id="3-__slab_free-mmslubc-">3. __slab_free( <em>mm/slub.c</em> )</h1>
 <p>慢路径释放slab时，涉及到多个名称相近的变量，先对这些变量进行说明。</p>
-
 <ul>
-<li><p><strong>struct kmem_cache</strong> —— 描述一个slab cache：</p>
-
+<li>
+<p><strong>struct kmem_cache</strong> —— 描述一个slab cache：</p>
 <ul>
-<li><code>unsigned long min_partial</code><br />
-node结点中部分空slab缓冲区数量不能小于这个值，如果小于这个值，空闲slab缓冲区则不能够进行释放，而是将空闲slab加入到node结点的部分空slab链表中。<br /></li>
-<li><code>int cpu_partial</code><br />
+<li><code>unsigned long min_partial</code><br>
+node结点中部分空slab缓冲区数量不能小于这个值，如果小于这个值，空闲slab缓冲区则不能够进行释放，而是将空闲slab加入到node结点的部分空slab链表中。</li>
+<li><code>int cpu_partial</code><br>
 同min_partial类似，只是这个值表示的是对象的数量，而不是部分空slab数量，即CPU的partial对象数量不能小于这个值，小于的情况下要去对应node结点的部分空链表中获取若干个部分空slab；否则在 <code>put_cpu_partial</code> 函数中进行解冻操作。</li>
-</ul></li>
-
-<li><p><strong>struct kmem_cache_cpu</strong> —— 描述一个CPU的slab cache：</p>
-
-<ul>
-<li><code>void **freelist</code><br />
-指向下一个空闲的对象</li>
-<li><code>struct page *partial</code><br />
-CPU的部分空slab链表，放到CPU的部分空slab链表中的slab会被冻结，而放入node中的部分空slab链表则解冻，冻结标志在slab缓冲区描述符( <strong>struct page</strong> )中<br /></li>
-<li><code>struct page *page</code><br />
-当前分配对象的slab</li>
-</ul></li>
-
-<li><p><strong>struct kmem_cache_node</strong> —— 描述一个节点的slab cache：</p>
-
-<ul>
-<li><code>unsigned long nr_partial</code><br />
-节点中部分空slab的数量</li>
-<li><code>struct list_head partial</code><br />
-保存部分空slab的链表</li>
-</ul></li>
-
-<li><p><strong>struct page</strong> —— 描述一个slab：</p>
-
-<ul>
-<li><code>void *freelist</code><br />
-第一个空闲的对象</li>
-<li><code>unsigned inuse:16</code><br />
-slab中已经分配的对象的数量</li>
-<li><code>unsigned frozen:1</code><br />
-被冻结的slab不属于任何链表，不会进行列表的管理操作。<br />
-只有冻结slab的CPU可以执行列表操作——其他的CPU可以往freelist中添加对象，但是只有冻结slab的CPU可以从freelist中获取对象。因此， <code>slab_free</code> 函数会跳过列表的相关操作。<br />
-被冻结的slab主要用于特定目的，比如响应特定CPU的分配请求。<br />
-<strong>frozen</strong> 标志用来判断某一个slab(即内存页)是否已经被某个CPU用作slab cache，即属于某个 <strong>kmem_cache_cpu</strong>。</li>
-</ul></li>
 </ul>
-
-<p>和快路径 <code>slab_free</code> 不同，执行慢路径的原因是 <code>kfree</code> 释放的对象所属的内存页不是当前CPU正在分配对象的slab。<br />
+</li>
+<li>
+<p><strong>struct kmem_cache_cpu</strong> —— 描述一个CPU的slab cache：</p>
+<ul>
+<li><code>void **freelist</code><br>
+指向下一个空闲的对象</li>
+<li><code>struct page *partial</code><br>
+CPU的部分空slab链表，放到CPU的部分空slab链表中的slab会被冻结，而放入node中的部分空slab链表则解冻，冻结标志在slab缓冲区描述符( <strong>struct page</strong> )中</li>
+<li><code>struct page *page</code><br>
+当前分配对象的slab</li>
+</ul>
+</li>
+<li>
+<p><strong>struct kmem_cache_node</strong> —— 描述一个节点的slab cache：</p>
+<ul>
+<li><code>unsigned long nr_partial</code><br>
+节点中部分空slab的数量</li>
+<li><code>struct list_head partial</code><br>
+保存部分空slab的链表</li>
+</ul>
+</li>
+<li>
+<p><strong>struct page</strong> —— 描述一个slab：</p>
+<ul>
+<li><code>void *freelist</code><br>
+第一个空闲的对象</li>
+<li><code>unsigned inuse:16</code><br>
+slab中已经分配的对象的数量</li>
+<li><code>unsigned frozen:1</code><br>
+被冻结的slab不属于任何链表，不会进行列表的管理操作。<br>
+只有冻结slab的CPU可以执行列表操作——其他的CPU可以往freelist中添加对象，但是只有冻结slab的CPU可以从freelist中获取对象。因此， <code>slab_free</code> 函数会跳过列表的相关操作。<br>
+被冻结的slab主要用于特定目的，比如响应特定CPU的分配请求。<br>
+<strong>frozen</strong> 标志用来判断某一个slab(即内存页)是否已经被某个CPU用作slab cache，即属于某个 <strong>kmem_cache_cpu</strong>。</li>
+</ul>
+</li>
+</ul>
+<p>和快路径 <code>slab_free</code> 不同，执行慢路径的原因是 <code>kfree</code> 释放的对象所属的内存页不是当前CPU正在分配对象的slab。<br>
 因此，函数释放对象的时候修改的是 <strong>struct page</strong> 内的 <strong>freelist</strong> 指针，而不是CPU的freelist。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+<pre class="chroma"><code><span class="lnt">  1
 </span><span class="lnt">  2
 </span><span class="lnt">  3
 </span><span class="lnt">  4
@@ -619,32 +602,25 @@ slab中已经分配的对象的数量</li>
     <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
     <span class="cm">/* 释放slab */</span>
     <span class="n">discard_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="4-slab的操作函数">4. slab的操作函数</h1>
-
+</div><h1 id="4-slab的操作函数">4. slab的操作函数</h1>
 <p><code>__slab_free</code> 函数调用了多个操作slab的函数，包括 <code>put_cpu_partial</code> ， <code>add_partial</code> ， <code>remove_partial</code> ， <code>remove_full</code> ， <code>discard_slab</code> 。</p>
-
-<h2 id="4-1-put-cpu-partial">4.1. <code>put_cpu_partial</code></h2>
-
+<h2 id="41-put_cpu_partial">4.1. <code>put_cpu_partial</code></h2>
 <p><code>__slab_free</code> 函数执行时，如果如果slab不属于任何CPU的slab cache，就会在释放对象后把slab添加到当前CPU的slab cache中，作为partial slab。</p>
-
-<p><strong>struct kmem_cache</strong> 结构体的 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 成员，其 <strong>struct page *partial</strong> 包含CPU的所有partial slab。<br />
-这些slab通过 <strong>struct page</strong> 的 <strong>struct page *next</strong> 成员链接；每个slab(page)包含partial链表中剩余partial slabs所有对象的数量，即 <strong>pobjects</strong> ，还包含剩余的partial slabs的数量，即 <strong>pages</strong> 。<br />
+<p><strong>struct kmem_cache</strong> 结构体的 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 成员，其 <strong>struct page *partial</strong> 包含CPU的所有partial slab。<br>
+这些slab通过 <strong>struct page</strong> 的 <strong>struct page *next</strong> 成员链接；每个slab(page)包含partial链表中剩余partial slabs所有对象的数量，即 <strong>pobjects</strong> ，还包含剩余的partial slabs的数量，即 <strong>pages</strong> 。<br>
 也就是说，每个CPU的slab cache包含的partial slab都保存在一个链表中，这个链表通过 <code>*next</code> 指针链接；链表中的第一个slab包含链表中对象的总数和slab的总数，第二个slab包含除了第一个slab外对象的总数和slab的总数。</p>
-
-<p><code>put_cpu_partial</code> 函数的原型如下：<br />
-<code>static void put_cpu_partial(struct kmem_cache *s, struct page *page, int drain);</code> 。<br />
-<strong>s</strong> 是当前正在操作的slab cache， <strong>page</strong> 是要添加到partial list的slab， <strong>drain</strong> 是一个标志符，设置后如果当前CPU的slab cache已经超出了 <strong>s-&gt;cpu_partial</strong> ，就会执行 <code>unfreeze_partials</code> 函数，将当前CPU的slab cache中已有的partial slab全部解冻，然后将新增的slab中包含的partial对象的数量添加到统计信息。<br />
+<p><code>put_cpu_partial</code> 函数的原型如下：<br>
+<code>static void put_cpu_partial(struct kmem_cache *s, struct page *page, int drain);</code> 。<br>
+<strong>s</strong> 是当前正在操作的slab cache， <strong>page</strong> 是要添加到partial list的slab， <strong>drain</strong> 是一个标志符，设置后如果当前CPU的slab cache已经超出了 <strong>s-&gt;cpu_partial</strong> ，就会执行 <code>unfreeze_partials</code> 函数，将当前CPU的slab cache中已有的partial slab全部解冻，然后将新增的slab中包含的partial对象的数量添加到统计信息。<br>
 slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;objects - page-&gt;inuse</code> 。</p>
-
-<h3 id="4-1-1-unfreeze-partials">4.1.1. <code>unfreeze_partials</code></h3>
-
+<h3 id="411-unfreeze_partials">4.1.1. <code>unfreeze_partials</code></h3>
 <p><code>put_cpu_partial</code> 调用 <code>unfreeze_partial</code> 函数时，传入的参数为操作的slab cache和当前CPU的slab cache对象。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -777,17 +753,15 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
         <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="cp">#endif
-</span><span class="cp"></span><span class="p">}</span></code></pre></td></tr></table>
+</span><span class="cp"></span><span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h2 id="4-2-add-partial-remove-partial-remove-full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></h2>
-
+</div><h2 id="42-add_partial--remove_partial--remove_full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></h2>
 <p>三个函数都是操作 <strong>struct page</strong> 的 <strong>struct list_head lru</strong> 成员，即从双向链表中直接删除slab项，并且设置 <code>lru-&gt;prev = LIST_POISON2</code> ， <code>lru-&gt;next = LIST_POISON1</code> 。</p>
-
 <p>需要说明的是，在 <strong>struct page</strong> 中， <strong>lru</strong> 和 <strong>next</strong> ， <strong>pages</strong> ， <strong>pobjects</strong> 等成员位于一个union中：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -814,21 +788,17 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
         <span class="p">...</span>
     <span class="p">};</span>
     <span class="p">...</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>也就是说，在执行删除操作时，赋值 <code>lru-&gt;next</code> 和 <code>lru-&gt;prev</code> 会使 <strong>struct page *next</strong> 指向 <strong>LIST_POISON1</strong> ，其他地方比如 <code>unfreeze_partials</code> 函数通过 <strong>next</strong> 遍历partial表，不会访问已经删除的slab。</p>
-
-<h2 id="4-3-discard-slab">4.3. <code>discard_slab</code></h2>
-
+</div><p>也就是说，在执行删除操作时，赋值 <code>lru-&gt;next</code> 和 <code>lru-&gt;prev</code> 会使 <strong>struct page *next</strong> 指向 <strong>LIST_POISON1</strong> ，其他地方比如 <code>unfreeze_partials</code> 函数通过 <strong>next</strong> 遍历partial表，不会访问已经删除的slab。</p>
+<h2 id="43-discard_slab">4.3. <code>discard_slab</code></h2>
 <p><code>remove_partial</code> ， <code>remove_full</code> 只是将slab从表中删除，而 <code>discard_slab</code> 则将slab从slab cache中删除。</p>
-
 <p><code>discard_slab</code> 首先调用 <code>dec_slabs_node</code> 将要删除的slab包含对象的数量从slab cache中删除，并且减少节点的 <strong>nr_slabs</strong> ，然后调用 <code>free_slab</code> 函数。</p>
-
 <p><code>free_slab</code> 根据slab cache的标志执行不同的分支，这里介绍 <code>__free_slab</code> 分支。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -881,13 +851,13 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
     <span class="n">__free_pages</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
     <span class="cm">/* 从memcg系统删除 */</span>
     <span class="n">memcg_uncharge_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<p>其中，清除标志位的函数都通过 <em>include/linux/page-flags.h</em> 中的宏定义，包括以双下划线开头的和不以双下划线开头的，后者是原子的，前者不是原子的。</p>
+</div><p>其中，清除标志位的函数都通过 <em>include/linux/page-flags.h</em> 中的宏定义，包括以双下划线开头的和不以双下划线开头的，后者是原子的，前者不是原子的。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt"> 1
+<pre class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
 </span><span class="lnt"> 3
 </span><span class="lnt"> 4
@@ -918,20 +888,17 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
 </span><span class="cp"></span>
 <span class="cp">#define __CLEARPAGEFLAG(uname, lname)                   \
 </span><span class="cp">static inline void __ClearPage##uname(struct page *page)        \
-</span><span class="cp">            { __clear_bit(PG_##lname, &amp;page-&gt;flags); }</span></code></pre></td></tr></table>
+</span><span class="cp">            { __clear_bit(PG_##lname, &amp;page-&gt;flags); }
+</span></code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="5-deactivate-slab">5. deactivate_slab</h1>
-
+</div><h1 id="5-deactivate_slab">5. deactivate_slab</h1>
 <p>虽然释放slab对象的过程中没有调用 <code>deactivate_slab</code> 函数，但是在slab分配对象的慢路径 <code>__slab_alloc</code> 执行的过程中，如果CPU正在使用的slab不属于当前的节点，或者slab设置了pfmemalloc标志，但是请求对象时没有设置ALLOC_NO_WATERMARK，就会将slab移除，放到节点的partial list中</p>
-
-<p><code>deactivate_slab</code> 函数只有两个函数调用，一个是分配slab对象的慢路径，即 <code>__slab_alloc</code> ；另一个是 <code>flush_slab</code> 函数。<br />
+<p><code>deactivate_slab</code> 函数只有两个函数调用，一个是分配slab对象的慢路径，即 <code>__slab_alloc</code> ；另一个是 <code>flush_slab</code> 函数。<br>
 而且，从代码来看，前一种情况的可能性较小，更多的情况是通过后一种路径调用函数，因此默认将移除的slab放到表头。</p>
-
 <p>此处说明 <code>deactivate_slab</code> 时，假定通过 <code>__slab_alloc</code> 函数调用，即 <code>deactivate_slab(s, page, c-&gt;freelist)</code> ，则 <strong>page</strong> 为当前CPU正在使用的slab， <strong>freelist</strong> 不为空， <strong>page</strong> 可能位于当前的节点。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="lnt">  1
+<pre class="chroma"><code><span class="lnt">  1
 </span><span class="lnt">  2
 </span><span class="lnt">  3
 </span><span class="lnt">  4
@@ -1196,17 +1163,14 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
         <span class="n">discard_slab</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
         <span class="n">stat</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">FREE_SLAB</span><span class="p">);</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></td></tr></table>
+<span class="p">}</span>
+</code></pre></td></tr></table>
 </div>
-</div>
-<h1 id="6-总结">6. 总结</h1>
-
+</div><h1 id="6-总结">6. 总结</h1>
 <p>每个 <strong>struct kmem_cache</strong> 包含所有内存节点的partial slab信息，每个节点都有一个 <strong>struct list_head partial</strong> ，保存当前节点的所有partial slab；还有 <strong>unsigned long nr_partials</strong> 保存本节点partial slab的总数。</p>
-
-<p><strong>struct kmem_cache</strong> 包含所有CPU的slab信息，每个CPU只有一个正在分配对象的slab，即 <strong>struct page *page</strong> 成员，以及指向当前可用对象的指针 <strong>void **freelist</strong> 。<br />
+<p><strong>struct kmem_cache</strong> 包含所有CPU的slab信息，每个CPU只有一个正在分配对象的slab，即 <strong>struct page *page</strong> 成员，以及指向当前可用对象的指针 <strong>void **freelist</strong> 。<br>
 同时还有属于本CPU的partial slab列表 <strong>strut page *partial</strong> ，这些partial slab来自CPU的partial list，CPU会冻结属于自己的partial slab——别的CPU只能释放对象，不能执行其他操作。</p>
-
-<p>创建一个新的slab时， <strong>struct page</strong> 的成员 <strong>freelist</strong> 会被置空，只通过CPU的 <strong>freelist</strong> 分配空闲对象。释放对象时也只操作CPU的 <strong>freelist</strong>。<br />
+<p>创建一个新的slab时， <strong>struct page</strong> 的成员 <strong>freelist</strong> 会被置空，只通过CPU的 <strong>freelist</strong> 分配空闲对象。释放对象时也只操作CPU的 <strong>freelist</strong>。<br>
 如果其他CPU释放不属于本CPU的slab的对象，直接操作 <strong>struct page</strong> 的 <strong>freelist</strong> ，这样在移除slab时，可以根据这个信息判断是否有异地释放对象的操作。</p>
 
     </div>
