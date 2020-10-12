@@ -6,11 +6,11 @@
     <description>Recent content in slab_free on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/slab_free/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 29 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/slab_free/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>mm-slab对象的回收</title>
+      <title>mm-slab_initialization</title>
       <link>https://globsguo.github.io/post/mm/mm-slab_objects_free/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/post/mm/mm-slab_objects_free/</guid>
       <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5</description>

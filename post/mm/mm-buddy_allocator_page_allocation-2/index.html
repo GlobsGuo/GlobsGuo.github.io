@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>mm-buddy_allocator_initialization - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-2/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="mm-buddy_allocator_initialization" />
+<meta property="og:description" content="如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-2/" />
+<meta property="article:published_time" content="2019-11-11T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-11-11T00:00:00+00:00" />
+<meta itemprop="name" content="mm-buddy_allocator_initialization">
+<meta itemprop="description" content="如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，">
+<meta itemprop="datePublished" content="2019-11-11T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-11-11T00:00:00+00:00" />
+<meta itemprop="wordCount" content="3626">
+
+
+
+<meta itemprop="keywords" content="kernel-srcs,mm,buddy-allocator,__alloc_pages_nodemask,__alloc_pages_slowpath," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="mm-buddy_allocator_initialization"/>
+<meta name="twitter:description" content="如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">mm-buddy_allocator_initialization</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-11-11 </span>
+        
+          <span class="more-meta"> 3626 words </span>
+          <span class="more-meta"> 8 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#31-drain_pages">3.1. drain_pages</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>如果 <code>__alloc_pages_nodemask</code> 调用 <code>get_page_from_freelist</code> 没有申请到内存页，就会屏蔽掉传递的 <strong>gfp</strong> 中的 <strong>__GPF_IO</strong> 标志，调用 <code>__alloc_pages_slowpath</code> 申请内存。</p>
+<h1 id="1-__alloc_pages_slowpath">1. __alloc_pages_slowpath</h1>
+<p>和 <code>__alloc_pages_nodemask</code> 不同， slowpath 不会对 <strong>alloc_flags</strong> 设置较多限制，而是尽可能的满足分配请求，包括唤醒 <strong>kswapd</strong> 进程、进行高优先级的分配、通过内存压缩分配、回收内存后再进行分配。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span><span class="lnt">213
+</span><span class="lnt">214
+</span><span class="lnt">215
+</span><span class="lnt">216
+</span><span class="lnt">217
+</span><span class="lnt">218
+</span><span class="lnt">219
+</span><span class="lnt">220
+</span><span class="lnt">221
+</span><span class="lnt">222
+</span><span class="lnt">223
+</span><span class="lnt">224
+</span><span class="lnt">225
+</span><span class="lnt">226
+</span><span class="lnt">227
+</span><span class="lnt">228
+</span><span class="lnt">229
+</span><span class="lnt">230
+</span><span class="lnt">231
+</span><span class="lnt">232
+</span><span class="lnt">233
+</span><span class="lnt">234
+</span><span class="lnt">235
+</span><span class="lnt">236
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
+<span class="nf">__alloc_pages_slowpath</span><span class="p">(</span><span class="n">gfp_t</span> <span class="n">gfp_mask</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">,</span> <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+    <span class="n">nodemask_t</span> <span class="o">*</span><span class="n">nodemask</span><span class="p">,</span> <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">preferred_zone</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">migratetype</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="n">gfp_t</span> <span class="n">wait</span> <span class="o">=</span> <span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_WAIT</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">alloc_flags</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pages_reclaimed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">did_some_progress</span><span class="p">;</span>
+    <span class="k">enum</span> <span class="n">migrate_mode</span> <span class="n">migration_mode</span> <span class="o">=</span> <span class="n">MIGRATE_ASYNC</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">deferred_compaction</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">contended_compaction</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+    <span class="cm">/* 超过最大阶数的分配请求直接返回NULL */</span>
+     <span class="k">if</span> <span class="p">(</span><span class="n">order</span> <span class="o">&gt;=</span> <span class="n">MAX_ORDER</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">WARN_ON_ONCE</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOWARN</span><span class="p">));</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * NUMA 系统中， GFP_THISNODE = (__GFP_THISNODE |
+</span><span class="cm">     * __GFP_NORETRY | __GFP_NOWARN) ，没有后备选项，没有
+</span><span class="cm">     * 内存策略，分配失败时不会重试，这种情况下直接跳转到
+</span><span class="cm">     * nopage ，避免节点分配过多的内存 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">IS_ENABLED</span><span class="p">(</span><span class="n">CONFIG_NUMA</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+        <span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">GFP_THISNODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">GFP_THISNODE</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+
+<span class="nl">restart</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NO_KSWAPD</span><span class="p">))</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * 唤醒 zonelist 中所有 zone 类型小于 high_zoneidx 的
+</span><span class="cm">         * zone 的 kswapd_wait 等待队列
+</span><span class="cm">         */</span>
+        <span class="n">wake_all_kswapds</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">preferred_zone</span><span class="p">);</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 和 __alloc_pages_nodemask 调用 get_page_from_freelist
+</span><span class="cm">     * 不同， slow_path 使用的 alloc_pages 根据分配请求的 gfp 得到 
+</span><span class="cm">     */</span>
+    <span class="n">alloc_flags</span> <span class="o">=</span> <span class="n">gfp_to_alloc_flags</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">);</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 如果原本的内存请求没有 cpuset 限制也没有节点限制，就在没有
+</span><span class="cm">     * 任何限制的情况下，获取 preferred_zone 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_CPUSET</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">nodemask</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">zoneref</span> <span class="o">*</span><span class="n">preferred_zoneref</span><span class="p">;</span>
+        <span class="n">preferred_zoneref</span> <span class="o">=</span> <span class="n">first_zones_zonelist</span><span class="p">(</span><span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+                <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">preferred_zone</span><span class="p">);</span>
+        <span class="n">classzone_idx</span> <span class="o">=</span> <span class="n">zonelist_zone_idx</span><span class="p">(</span><span class="n">preferred_zoneref</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="nl">rebalance</span><span class="p">:</span>
+    <span class="cm">/* This is the last chance, in general, before the goto nopage. */</span>
+    <span class="cm">/*
+</span><span class="cm">     * 只考虑 watermark 限制，并且使用新的 preferred_zone ，再次调用
+</span><span class="cm">     * get_page_from_freelist 
+</span><span class="cm">     */</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">get_page_from_freelist</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span>
+            <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ALLOC_NO_WATERMARKS</span><span class="p">,</span>
+            <span class="n">preferred_zone</span><span class="p">,</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+
+    <span class="cm">/* Allocate without watermarks if the context allows */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_NO_WATERMARKS</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * 如果允许忽视 watermark 限制，分配请求是高优先级的，
+</span><span class="cm">         * 更有可能是系统发起的请求，而不是用户 
+</span><span class="cm">         */</span>
+        <span class="n">zonelist</span> <span class="o">=</span> <span class="n">node_zonelist</span><span class="p">(</span><span class="n">numa_node_id</span><span class="p">(),</span> <span class="n">gfp_mask</span><span class="p">);</span>
+
+        <span class="n">page</span> <span class="o">=</span> <span class="n">__alloc_pages_high_priority</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span>
+                <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span>
+                <span class="n">preferred_zone</span><span class="p">,</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* 原子分配，不允许等待 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">wait</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* 警告不允许失败的分配请求 */</span>
+        <span class="n">WARN_ON_ONCE</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">);</span>
+        <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Avoid recursion of direct reclaim */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">PF_MEMALLOC</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+
+    <span class="cm">/* Avoid allocations with no watermarks from looping endlessly */</span>
+
+    <span class="cm">/* 由于OOM被杀死的进程会设置 TIF_MEMDIE */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">test_thread_flag</span><span class="p">(</span><span class="n">TIF_MEMDIE</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">))</span>
+        <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * Try direct compaction. The first pass is asynchronous. Subsequent
+</span><span class="cm">     * attempts after direct reclaim are synchronous
+</span><span class="cm">     */</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">__alloc_pages_direct_compact</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span>
+                    <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span> <span class="n">alloc_flags</span><span class="p">,</span>
+                    <span class="n">preferred_zone</span><span class="p">,</span>
+                    <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">,</span>
+                    <span class="n">migration_mode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">contended_compaction</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">deferred_compaction</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">did_some_progress</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * It can become very expensive to allocate transparent hugepages at
+</span><span class="cm">     * fault, so use asynchronous memory compaction for THP unless it is
+</span><span class="cm">     * khugepaged trying to collapse.
+</span><span class="cm">     */</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 允许进行交换操作，或者当前的进程是内核进程，将迁移模式设置为轻量
+</span><span class="cm">     * 同步模式，意为可以在大多数操作阻塞，除了 current-&gt;writepage，
+</span><span class="cm">     * 因为可能停滞较长时间 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NO_KSWAPD</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">PF_KTHREAD</span><span class="p">))</span>
+        <span class="n">migration_mode</span> <span class="o">=</span> <span class="n">MIGRATE_SYNC_LIGHT</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 如果高阶分配的压缩操作被推迟，说明同步的压缩刚失败。
+</span><span class="cm">     * 如果调用者请求可以移动的内存，虽然不会严重扰乱系统，
+</span><span class="cm">     * 直接返回失败，以免进入直接回收操作 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">deferred_compaction</span> <span class="o">||</span> <span class="n">contended_compaction</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                        <span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NO_KSWAPD</span><span class="p">))</span>
+        <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+
+    <span class="cm">/* mm-buddy_allocator 初始化中提到的 direct-reclaim 路径 */</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">__alloc_pages_direct_reclaim</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span>
+                    <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+                    <span class="n">nodemask</span><span class="p">,</span>
+                    <span class="n">alloc_flags</span><span class="p">,</span> <span class="n">preferred_zone</span><span class="p">,</span>
+                    <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">did_some_progress</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * If we failed to make any progress reclaiming, then we are
+</span><span class="cm">     * running out of options and have to consider going OOM
+</span><span class="cm">     */</span>
+    <span class="c1">// dis_some_progress 在上面两个 direct 函数调用中会赋值为回收操作回收的页面数
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">did_some_progress</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// 设置 __GFP_FS 的同时没有设置 __GFP__NORETRY
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">oom_gfp_allowed</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">))</span> <span class="p">{</span>
+
+            <span class="cm">/* 关闭了 OOM killer */</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">oom_killer_disabled</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+            <span class="cm">/* Coredumps can quickly deplete all memory reserves */</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">PF_DUMPCORE</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+                <span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">))</span>
+                <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="n">__alloc_pages_may_oom</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span>
+                    <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+                    <span class="n">nodemask</span><span class="p">,</span> <span class="n">preferred_zone</span><span class="p">,</span>
+                    <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
+                <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">))</span> <span class="p">{</span>
+                <span class="cm">/*
+</span><span class="cm">                 * The oom killer is not called for high-order
+</span><span class="cm">                 * allocations that may fail, so if no progress
+</span><span class="cm">                 * is being made, there are no other options and
+</span><span class="cm">                 * retrying is unlikely to help.
+</span><span class="cm">                 */</span>
+                <span class="cm">/* 大于此值的分配被视为开销很大 */</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">order</span> <span class="o">&gt;</span> <span class="n">PAGE_ALLOC_COSTLY_ORDER</span><span class="p">)</span>
+                    <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+                <span class="cm">/*
+</span><span class="cm">                 * The oom killer is not called for lowmem
+</span><span class="cm">                 * allocations to prevent needlessly killing
+</span><span class="cm">                 * innocent tasks.
+</span><span class="cm">                 */</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">high_zoneidx</span> <span class="o">&lt;</span> <span class="n">ZONE_NORMAL</span><span class="p">)</span>
+                    <span class="k">goto</span> <span class="n">nopage</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">goto</span> <span class="n">restart</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Check if we should retry the allocation */</span>
+    <span class="n">pages_reclaimed</span> <span class="o">+=</span> <span class="n">did_some_progress</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * should_alloc_retry 根据 gfp_mask ， order ，
+</span><span class="cm">     * did_some_pregress 和 pages_reclaimed 判断当前的分配
+</span><span class="cm">     * 请求是否需要重试，并且等待一段时间，以便当前 zone 的
+</span><span class="cm">     * 写操作能够完成 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">should_alloc_retry</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">did_some_progress</span><span class="p">,</span>
+                        <span class="n">pages_reclaimed</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">wait_iff_congested</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">BLK_RW_ASYNC</span><span class="p">,</span> <span class="n">HZ</span><span class="o">/</span><span class="mi">50</span><span class="p">);</span>
+        <span class="k">goto</span> <span class="n">rebalance</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/*
+</span><span class="cm">         * High-order allocations do not necessarily loop after
+</span><span class="cm">         * direct reclaim and reclaim/compaction depends on compaction
+</span><span class="cm">         * being called after reclaim so call directly if necessary
+</span><span class="cm">         */</span>
+        <span class="cm">/* 如果不需要重试，在执行回收/压缩操作后，再次尝试分配 */</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">__alloc_pages_direct_compact</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span>
+                    <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span> <span class="n">alloc_flags</span><span class="p">,</span>
+                    <span class="n">preferred_zone</span><span class="p">,</span>
+                    <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">,</span>
+                    <span class="n">migration_mode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">contended_compaction</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">deferred_compaction</span><span class="p">,</span>
+                    <span class="o">&amp;</span><span class="n">did_some_progress</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
+            <span class="k">goto</span> <span class="n">got_pg</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="nl">nopage</span><span class="p">:</span>
+    <span class="n">warn_alloc_failed</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+<span class="nl">got_pg</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">kmemcheck_enabled</span><span class="p">)</span>
+        <span class="n">kmemcheck_pagealloc_alloc</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">gfp_mask</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="2-__alloc_pages_high_priority">2. __alloc_pages_high_priority</h1>
+<p>根据代码中的注释：设置了 <strong>ALLOC_NO_WATERMARKS</strong> 的分配请求是高优先级的，通常是系统发起的，通过 <code>__alloc_pages_high_priority</code> 执行分配操作。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
+<span class="nf">__alloc_pages_high_priority</span><span class="p">(</span><span class="n">gfp_t</span> <span class="n">gfp_mask</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">,</span> <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+    <span class="n">nodemask_t</span> <span class="o">*</span><span class="n">nodemask</span><span class="p">,</span> <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">preferred_zone</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">migratetype</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">get_page_from_freelist</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span>
+            <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">ALLOC_NO_WATERMARKS</span><span class="p">,</span>
+            <span class="n">preferred_zone</span><span class="p">,</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">page</span> <span class="o">&amp;&amp;</span> <span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">)</span>
+            <span class="n">wait_iff_congested</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">BLK_RW_ASYNC</span><span class="p">,</span> <span class="n">HZ</span><span class="o">/</span><span class="mi">50</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">page</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">));</span>
+
+    <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从代码来看，函数的逻辑很简单：<br>
+先调用 <code>get_page_from_freelist</code> 获取页框，如果获取成功直接返回。<br>
+如果获取失败，当前的 <strong>gfp_mask</strong> 不允许失败，就等待一段时间，以便 zone 完成写操作，之后再次尝试分配页框。</p>
+<h1 id="3-__alloc_pages_direct_compact">3. __alloc_pages_direct_compact</h1>
+<p><code>__alloc_pages_direct_compact</code> 函数在 <strong>CONFIG_COMPACTION</strong> 开启后有定义，否则直接返回 NULL，x86 下该配置项默认开启。</p>
+<p>这个函数只能在请求的内存大于一个页框的时候使用，函数的注释是：高阶分配请求 ( 请求的页面数大于 1 ) 在执行回收操作之前，尝试进行内存压缩。</p>
+<p><strong>struct zone</strong> 中有关于内存压缩的三个变量：</p>
+<ul>
+<li>
+<p>unsigned int <strong>compact_considered</strong><br>
+保存自从上次失败后尝试的次数</p>
+</li>
+<li>
+<p>unsigned int <strong>compact_defer_shift</strong><br>
+每次内存压缩失败后，要跳过 <strong>1 &laquo; compact_defer_shift</strong> 次压缩</p>
+</li>
+<li>
+<p>int <strong>compact_order_failed</strong><br>
+保存上次压缩失败的阶数，即阶数超过此值的请求都被推迟</p>
+</li>
+</ul>
+<p><code>__alloc_pages_direct_compact</code> 执行时，调用 <code>compaction_deferred</code> 通过这三个变量判断当前的分配请求是否应该被推迟。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
+<span class="nf">__alloc_pages_direct_compact</span><span class="p">(</span><span class="n">gfp_t</span> <span class="n">gfp_mask</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
+    <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">,</span> <span class="k">enum</span> <span class="n">zone_type</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+    <span class="n">nodemask_t</span> <span class="o">*</span><span class="n">nodemask</span><span class="p">,</span> <span class="kt">int</span> <span class="n">alloc_flags</span><span class="p">,</span> <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">preferred_zone</span><span class="p">,</span>
+    <span class="kt">int</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">migratetype</span><span class="p">,</span> <span class="k">enum</span> <span class="n">migrate_mode</span> <span class="n">mode</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="o">*</span><span class="n">contended_compaction</span><span class="p">,</span> <span class="kt">bool</span> <span class="o">*</span><span class="n">deferred_compaction</span><span class="p">,</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">did_some_progress</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* 单页请求直接返回空 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 如果当前请求的阶数小于 compact_order_failed ，不推迟；
+</span><span class="cm">     * 如果阶数大于失败的阶数，增加 compact_cosidered 变量，
+</span><span class="cm">     * 判断失败的次数是否达到了 (1 &lt;&lt; compact_defer_shift) ，
+</span><span class="cm">     * 如果达到了就不要推迟 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">compaction_deferred</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">deferred_compaction</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">current</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">|=</span> <span class="n">PF_MEMALLOC</span><span class="p">;</span>
+
+    <span class="cm">/* 执行内存压缩 */</span>
+    <span class="o">*</span><span class="n">did_some_progress</span> <span class="o">=</span> <span class="n">try_to_compact_pages</span><span class="p">(</span><span class="n">zonelist</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">gfp_mask</span><span class="p">,</span>
+                        <span class="n">nodemask</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span>
+                        <span class="n">contended_compaction</span><span class="p">);</span>
+    <span class="n">current</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">PF_MEMALLOC</span><span class="p">;</span>
+
+    <span class="cm">/* COMPACT_SKIPPED 表示直接跳过，没有进行压缩 */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">did_some_progress</span> <span class="o">!=</span> <span class="n">COMPACT_SKIPPED</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+
+        <span class="cm">/* Page migration frees to the PCP lists but we want merging */</span>
+        <span class="cm">/* 释放当前 CPU 的所有 per-cpu 页框高速缓存 */</span>
+        <span class="n">drain_pages</span><span class="p">(</span><span class="n">get_cpu</span><span class="p">());</span>
+        <span class="n">put_cpu</span><span class="p">();</span>
+
+        <span class="cm">/* 内存压缩后再次尝试分配 */</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">get_page_from_freelist</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">,</span>
+                <span class="n">order</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span>
+                <span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ALLOC_NO_WATERMARKS</span><span class="p">,</span>
+                <span class="n">preferred_zone</span><span class="p">,</span> <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="cm">/* 如果 PG_migrate_skip 应该被清除，设置为真 */</span>
+            <span class="n">preferred_zone</span><span class="o">-&gt;</span><span class="n">compact_blockskip_flush</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+            <span class="cm">/*
+</span><span class="cm">             * 内存压缩后成功响应分配请求，重置 compact_considered
+</span><span class="cm">             * 和 compact_defer_shift 为 0 。
+</span><span class="cm">             * 如果 order 大于等于 compact_order_failed，设置 fail
+</span><span class="cm">             * 值为 order + 1 
+</span><span class="cm">             */</span>
+            <span class="n">compaction_defer_reset</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+            <span class="n">count_vm_event</span><span class="p">(</span><span class="n">COMPACTSUCCESS</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * It&#39;s bad if compaction run occurs and fails.
+</span><span class="cm">         * The most likely reason is that pages exist,
+</span><span class="cm">         * but not enough to satisfy watermarks.&#39;
+</span><span class="cm">         */</span>
+        <span class="n">count_vm_event</span><span class="p">(</span><span class="n">COMPACTFAIL</span><span class="p">);</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * As async compaction considers a subset of pageblocks, only
+</span><span class="cm">         * defer if the failure was a sync compaction failure.
+</span><span class="cm">         */</span>
+        <span class="cm">/* 
+</span><span class="cm">         * 只有迁移类型是同步的，才进行推迟操作
+</span><span class="cm">         * 函数执行到这里，表示执行 compact 操作之后，仍然无法满足分配请求
+</span><span class="cm">         */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="o">!=</span> <span class="n">MIGRATE_ASYNC</span><span class="p">)</span>
+            <span class="cm">/*
+</span><span class="cm">             * 推迟操作重置 compact_considered 为 0，增加
+</span><span class="cm">             * compact_defer_shift 。
+</span><span class="cm">             * 如果 order 小于 compact_oder_failed ，更新
+</span><span class="cm">             * 其为 order 。
+</span><span class="cm">             * 如果 compact_defer_shift 增加后大于最大值，
+</span><span class="cm">             * 将其设置为最大值。 
+</span><span class="cm">             */</span>
+            <span class="n">defer_compaction</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
+
+        <span class="n">cond_resched</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>函数调用的 <code>try_to_compact_pages</code> 是内存压缩的主要函数，在另外的文章《内存压缩》进行详细介绍。</p>
+<h2 id="31-drain_pages">3.1. drain_pages</h2>
+<p><code>drain_pages</code> 释放指定 CPU 的所有 per-cpu 页框高速缓存。函数的主要功能通过 <code>free_pcppages_bulk</code> 实现。</p>
+<p>函数要求 CPU 必须是当前的 CPU，并且线程固定到当前 CPU ；或者 CPU 不在线。</p>
+<p><code>free_pcppages_bulk</code> 假定列表上所有的页框属于相同 zone，阶数相同。<br>
+如果 zone 之前的状态为“all page pinned”，释放页框之后要判断是否清除了这个状态。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="nf">free_pcppages_bulk</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">,</span>
+                    <span class="k">struct</span> <span class="n">per_cpu_pages</span> <span class="o">*</span><span class="n">pcp</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">migratetype</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">batch_free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">to_free</span> <span class="o">=</span> <span class="n">count</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">nr_scanned</span><span class="p">;</span>
+
+    <span class="n">spin_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+    <span class="n">nr_scanned</span> <span class="o">=</span> <span class="n">zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_PAGES_SCANNED</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">nr_scanned</span><span class="p">)</span>
+        <span class="n">__mod_zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_PAGES_SCANNED</span><span class="p">,</span> <span class="o">-</span><span class="n">nr_scanned</span><span class="p">);</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">to_free</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+        <span class="k">struct</span> <span class="n">list_head</span> <span class="o">*</span><span class="n">list</span><span class="p">;</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * Remove pages from lists in a round-robin fashion. A
+</span><span class="cm">         * batch_free count is maintained that is incremented when an
+</span><span class="cm">         * empty list is encountered.  This is so more pages are freed
+</span><span class="cm">         * off fuller lists instead of spinning excessively around empty
+</span><span class="cm">         * lists
+</span><span class="cm">         */</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="n">batch_free</span><span class="o">++</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">migratetype</span> <span class="o">==</span> <span class="n">MIGRATE_PCPTYPES</span><span class="p">)</span>
+                <span class="n">migratetype</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="n">list</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pcp</span><span class="o">-&gt;</span><span class="n">lists</span><span class="p">[</span><span class="n">migratetype</span><span class="p">];</span>
+        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">list_empty</span><span class="p">(</span><span class="n">list</span><span class="p">));</span>
+
+        <span class="cm">/* This is the only non-empty list. Free them all. */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">batch_free</span> <span class="o">==</span> <span class="n">MIGRATE_PCPTYPES</span><span class="p">)</span>
+            <span class="n">batch_free</span> <span class="o">=</span> <span class="n">to_free</span><span class="p">;</span>
+
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="kt">int</span> <span class="n">mt</span><span class="p">;</span> <span class="cm">/* migratetype of the to-be-freed page */</span>
+
+            <span class="n">page</span> <span class="o">=</span> <span class="n">list_entry</span><span class="p">(</span><span class="n">list</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span><span class="p">,</span> <span class="n">lru</span><span class="p">);</span>
+            <span class="cm">/* must delete as __free_one_page list manipulates */</span>
+            <span class="n">list_del</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">);</span>
+            <span class="n">mt</span> <span class="o">=</span> <span class="n">get_freepage_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+            <span class="cm">/* MIGRATE_MOVABLE list may include MIGRATE_RESERVEs */</span>
+            <span class="n">__free_one_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">page_to_pfn</span><span class="p">(</span><span class="n">page</span><span class="p">),</span> <span class="n">zone</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mt</span><span class="p">);</span>
+            <span class="n">trace_mm_page_pcpu_drain</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mt</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">likely</span><span class="p">(</span><span class="o">!</span><span class="n">is_migrate_isolate_page</span><span class="p">(</span><span class="n">page</span><span class="p">)))</span> <span class="p">{</span>
+                <span class="n">__mod_zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_FREE_PAGES</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">is_migrate_cma</span><span class="p">(</span><span class="n">mt</span><span class="p">))</span>
+                    <span class="n">__mod_zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_FREE_CMA_PAGES</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="o">--</span><span class="n">to_free</span> <span class="o">&amp;&amp;</span> <span class="o">--</span><span class="n">batch_free</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">list_empty</span><span class="p">(</span><span class="n">list</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>free_pcppages_bulk</code> 通过 <strong>batch_free</strong> 变量实现罗宾环式的释放操作：依次释放每种 migratetype 的一个页面；如果某个 migratetype 为空，则其后续 migratetype 多释放一个页面，直到释放所有的页面为止。</p>
+<p>释放页面的操作通过函数 <code>__free_one_page</code> 完成，这个函数也是 <code>free_one_page</code> 的核心，放在《 mm - buddy_allocator 页框回收》一文说明。</p>
+<h1 id="4-__alloc_pages_direct_reclaim">4. __alloc_pages_direct_reclaim</h1>
+<p>如果高优先级分配，压缩后再进行分配仍然失败，调用 <code>__alloc_pages_direct_reclaim</code> 回收页框后再进行分配。</p>
+<p><code>__alloc_pages_direct_reclaim</code> 直接调用 <code>__perform_reclaim</code> 函数回收页框。</p>
+<p>如果回收操作失败，直接返回 NULL。
+如果回收操作成功，将当前 zonelist 的 zlcache 清空，即清除所有 zone 的 full 标志。然后再次调用 <code>get_page_from_freelist</code> 分配页框。</p>
+<p>如果还是分配失败，而且没有执行过 drain 操作，将所有 cpu 的 per-cpu 页框高速缓存释放 ( drain 操作 ) ，再次进行分配尝试。<br>
+内核中这个操作的原因是回收的页框被固定到了 per-cpu 页框高速缓存中，因此先 drain 再进行分配尝试。</p>
+<hr>
+<p><code>__perform_reclaim</code> 调用 <em>mm/vmscan.c</em> 中的 <code>try_to_free_pages</code> 执行页面回收操作，后者最终调用 <code>do_try_to_free_pages</code> ，这个函数在《 mm - buddy_allocator 页框回收》一文说明。</p>
+<h1 id="5-__alloc_pages_may_oom">5. __alloc_pages_may_oom</h1>
+<p>如果回收操作也没有回收到页框，就调用 <code>__alloc_pages_may_oom</code> 分配内存。</p>
+<p>只有设置 <strong>__GFP_FS</strong> 的同时没有设置 <strong>__GFP_NORETRY</strong> ，而且启用了 oom killer，才会执行这个函数。</p>
+<p>函数首先获取 zonelist 内所有 zone 的 OOM killer 锁，在发出内存不足的信号之前，用 <strong>ALLOC_WMARK_HIGH</strong> 再次调用 <code>get_page_from_freelist</code> 。<br>
+如果成功分配页框，清除 zonelist 内所有 zone 的 <strong>ZONE_OOM_LOCKED</strong> 标志，返回页框。<br>
+如果分配失败，又没有设置 <strong>__GFP_NOFAIL</strong> ，下列三种情况不会调用 <code>out_of_memroy</code> 函数：</p>
+<ol>
+<li>分配请求的阶数大于 <strong>PAGE_ALLOC_COSTLY_RODER</strong></li>
+<li>分配请求允许的 zone 类型小于 <strong>ZONE_NORMAL</strong></li>
+<li>设置了 <strong>__GFP_THISNODE</strong> 标志</li>
+</ol>
+<p>否则， <code>__alloc_pages_may_oom</code> 会调用 <code>out_of_memory</code> 函数，选择一个最适合的进程杀死，然后再清除 <strong>ZONE_OOM_LOCKED</strong> 标志。</p>
+<p><code>__alloc_pages_slowpath</code> 函数执行 <code>__alloc_pages_may_oom</code> 返回后，会再次尝试分配页框。</p>
+<h1 id="6-总结">6. 总结</h1>
+<p>伙伴系统的 slowpath 首先尝试高优先级——无视 watermark 限制——的分配操作；再尝试执行内存压缩，以满足高阶的内存分配请求；然后执行回收操作，再进行分配。<br>
+如果三种尝试都失败，就执行 OOM 操作，杀死合适的进程后，再次执行分配操作。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-11-11
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/kernel-srcs/">kernel-srcs</a>
+          <a href="/tags/mm/">mm</a>
+          <a href="/tags/buddy-allocator/">buddy-allocator</a>
+          <a href="/tags/__alloc_pages_nodemask/">__alloc_pages_nodemask</a>
+          <a href="/tags/__alloc_pages_slowpath/">__alloc_pages_slowpath</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mm/mm-memory_compaction/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm/mm-slab_objects_free/">
+            <span class="next-text nav-default">mm-slab_initialization</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

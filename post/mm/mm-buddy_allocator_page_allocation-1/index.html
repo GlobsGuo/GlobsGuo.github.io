@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-buddy_allocator分配页框(上) - Globs&#39; Catchall</title>
+  <title>mm-buddy_allocator_initialization - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Globs Guo" /><meta name="description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内" />
+<meta name="author" content="Globs Guo" /><meta name="description" content="slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。 和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 kmalloc 函数的实现" />
 
 
 
@@ -38,24 +38,22 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-buddy_allocator分配页框(上)" />
-<meta property="og:description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内" />
+<meta property="og:title" content="mm-buddy_allocator_initialization" />
+<meta property="og:description" content="slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。 和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 kmalloc 函数的实现" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-1/" />
-<meta property="article:published_time" content="2019-10-24T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-10-24T00:00:00+00:00" />
-<meta itemprop="name" content="mm-buddy_allocator分配页框(上)">
-<meta itemprop="description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内">
-<meta itemprop="datePublished" content="2019-10-24T00:00:00+00:00" />
-<meta itemprop="dateModified" content="2019-10-24T00:00:00+00:00" />
-<meta itemprop="wordCount" content="7344">
+
+<meta itemprop="name" content="mm-buddy_allocator_initialization">
+<meta itemprop="description" content="slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。 和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 kmalloc 函数的实现">
+
+<meta itemprop="wordCount" content="6409">
 
 
 
-<meta itemprop="keywords" content="kernel-sources,memory,buddy-allocator,kmalloc,expand,get_page_from_freelist,__alloc_pages_nodemask,zlcache," />
+<meta itemprop="keywords" content="kernel-srcs,mm,buddy-allocator,__alloc_pages_nodemask,get_page_from_freelist," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-buddy_allocator分配页框(上)"/>
-<meta name="twitter:description" content="slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内"/>
+<meta name="twitter:title" content="mm-buddy_allocator_initialization"/>
+<meta name="twitter:description" content="slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。 和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 kmalloc 函数的实现"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -118,13 +116,13 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-buddy_allocator分配页框(上)</h1>
+      <h1 class="post-title">mm-buddy_allocator_initialization</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-10-24 </span>
+        <span class="post-time"> 0001-01-01 </span>
         
-          <span class="more-meta"> 7344 words </span>
-          <span class="more-meta"> 15 mins read </span>
+          <span class="more-meta"> 6409 words </span>
+          <span class="more-meta"> 13 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -152,8 +150,8 @@
   </div>
 </div>
     <div class="post-content">
-      <p>slab系统调用buddy分配器分配所需要的内存页，作为slab使用。</p>
-<p>和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内存分配请求，本文仍然从 <code>kmalloc</code> 函数的实现入手，结合伙伴系统的核心函数 <code>__alloc_pages_nodemask</code> ，说明伙伴系统分配页框的过程。</p>
+      <p>slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。</p>
+<p>和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 <code>kmalloc</code> 函数的实现入手，结合伙伴系统的核心函数 <code>__alloc_pages_nodemask</code> ，说明伙伴系统分配页框的过程。</p>
 <p>由于伙伴系统分配页框的流程十分复杂，本文只介绍分配页框的第一次尝试，即 <code>__alloc_pages_nodemask</code> 函数第一次调用 <code>get_page_from_freelist</code> 的具体流程； <code>__alloc_pages_slowpath</code> 函数放在下一篇文章。</p>
 <h1 id="1-kmalloc_large">1. kmalloc_large</h1>
 <p><code>kmalloc</code> 函数执行时，如果请求的内存大小大于 <strong>KMALLOC_MAX_CACHE_SIZE</strong> ，就会调用 <code>kmalloc_large</code> 函数完成内存分配操作。</p>
@@ -179,7 +177,6 @@
 </span><span class="lnt">17
 </span><span class="lnt">18
 </span><span class="lnt">19
-</span><span class="lnt">20
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="o">*</span><span class="nf">kmalloc_order</span><span class="p">(</span><span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">gfp_t</span> <span class="n">flags</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">)</span>
@@ -188,13 +185,12 @@
     <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
 
     <span class="cm">/*
-</span><span class="cm">     添加复合页面元数据标志，即释放内存时需要的信息。
-</span><span class="cm">     复合页面的一个应用是实现transhugepage，即透明的
-</span><span class="cm">     hugepage。
-</span><span class="cm">     复合页面用连续的多个页面组成一个hugepage，其中的
-</span><span class="cm">     第一个页面称作head page，其余的页面成为tail page。
-</span><span class="cm">     head page中保存着hugepage的元数据。 */</span> 
-	 
+</span><span class="cm">     * 添加复合页面元数据标志，即释放内存时需要的信息。复合页面的一个应用是
+</span><span class="cm">     * 实现 transhugepage ，即透明的 hugepage 。
+</span><span class="cm">     * 复合页面用连续的多个页面组成一个 hugepage ，其中的第一个页面称作 
+</span><span class="cm">     * head page ，其余的页面成为 tail page 。
+</span><span class="cm">     * head page 中保存着 hugepage 的元数据。 
+</span><span class="cm">     */</span>
     <span class="n">flags</span> <span class="o">|=</span> <span class="n">__GFP_COMP</span><span class="p">;</span>
     <span class="n">page</span> <span class="o">=</span> <span class="n">alloc_kmem_pages</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">page</span> <span class="o">?</span> <span class="n">page_address</span><span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="o">:</span> <span class="nb">NULL</span><span class="p">;</span>
@@ -205,8 +201,8 @@
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="11-alloc_kmem_pages">1.1. alloc_kmem_pages</h2>
-<p>内核里这个函数的注释写道： <code>alloc_keme_pages</code> 会将新分配的页charge到kmem资源计数器。</p>
-<p>这里的charge，即cgroup中的charge，结合charge字面的意思充电，可以理解为分配；对应的，uncharge可以理解为释放。</p>
+<p>内核里这个函数的注释写道： <code>alloc_kmem_pages</code> 会将新分配的页 charge 到 kmem 资源计数器。</p>
+<p>这里的 charge ，即 cgroup 中的 charge ，结合 charge 字面的意思充电，可以理解为分配；对应的， uncharge 可以理解为释放。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -242,7 +238,7 @@
     <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
     <span class="k">struct</span> <span class="n">mem_cgroup</span> <span class="o">*</span><span class="n">memcg</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 
-    <span class="cm">/* 判断memcg是否支持新的页面分配操作 */</span>
+    <span class="cm">/* 判断 memcg 是否支持新的页面分配操作 */</span>
     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">memcg_kmem_newpage_charge</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">memcg</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
     <span class="n">page</span> <span class="o">=</span> <span class="n">alloc_pages</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">);</span>
@@ -252,7 +248,7 @@
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="12-alloc_pages_current">1.2. alloc_pages_current</h2>
-<p>NUMA系统中， <code>alloc_pages</code> 函数最终调用 <em>mm/mempolicy.c</em> 中的 <code>alloc_pages_current</code> 完成页面分配的操作。</p>
+<p>NUMA 系统中， <code>alloc_pages</code> 函数最终调用 <em>mm/mempolicy.c</em> 中的 <code>alloc_pages_current</code> 完成页面分配的操作。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -318,10 +314,10 @@
 </code></pre></td></tr></table>
 </div>
 </div><p><code>alloc_pages_current</code> 根据当前进程绑定的内存策略，执行不同的函数路径。</p>
-<p>一种是 <strong>MPOL_INTERLEAVE</strong> ，执行 <code>alloc_page_interleave</code> ，首先获取可用的zonelist，最终通过 <code>__alloc_pages_nodemask</code> 分配内存页。<br>
+<p>一种是 <strong>MPOL_INTERLEAVE</strong> ，执行 <code>alloc_page_interleave</code> ，首先获取可用的 zonelist ，最终通过 <code>__alloc_pages_nodemask</code> 分配内存页。<br>
 否则直接调用 <code>__alloc_pages_nodemask</code> 函数分配内存页，第一种情况下 <strong>nodemask</strong> 参数为空。</p>
 <h1 id="2-__alloc_pages_nodemask">2. __alloc_pages_nodemask</h1>
-<p><code>__alloc_pages_nodemask</code> 函数即zoned buddy allocator，是伙伴系统的核心，执行内存页的分配操作。</p>
+<p><code>__alloc_pages_nodemask</code> 函数即 zoned buddy allocator ，是伙伴系统的核心，执行内存页的分配操作。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -401,6 +397,18 @@
 </span><span class="lnt">75
 </span><span class="lnt">76
 </span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="nf">__alloc_pages_nodemask</span><span class="p">(</span><span class="n">gfp_t</span> <span class="n">gfp_mask</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
@@ -411,26 +419,33 @@
     <span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">preferred_zone</span><span class="p">;</span>
     <span class="k">struct</span> <span class="n">zoneref</span> <span class="o">*</span><span class="n">preferred_zoneref</span><span class="p">;</span>
     <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="cm">/* 根据gfp标志得到页面迁移的类型 */</span>
+
+    <span class="cm">/* 根据 gfp 标志得到页面迁移的类型 */</span>
     <span class="kt">int</span> <span class="n">migratetype</span> <span class="o">=</span> <span class="n">allocflags_to_migratetype</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">);</span>
     <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">cpuset_mems_cookie</span><span class="p">;</span>
+
+    <span class="cm">/* alloc_flags 供第一次分配使用 */</span>
     <span class="kt">int</span> <span class="n">alloc_flags</span> <span class="o">=</span> <span class="n">ALLOC_WMARK_LOW</span><span class="o">|</span><span class="n">ALLOC_CPUSET</span><span class="o">|</span><span class="n">ALLOC_FAIR</span><span class="p">;</span>
     <span class="kt">int</span> <span class="n">classzone_idx</span><span class="p">;</span>
+
     <span class="cm">/* 移除不支持的标志 */</span>
     <span class="n">gfp_mask</span> <span class="o">&amp;=</span> <span class="n">gfp_allowed_mask</span><span class="p">;</span>
 
     <span class="n">lockdep_trace_alloc</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">);</span>
 
     <span class="n">might_sleep_if</span><span class="p">(</span><span class="n">gfp_mask</span> <span class="o">&amp;</span> <span class="n">__GFP_WAIT</span><span class="p">);</span>
+
     <span class="cm">/*
-</span><span class="cm">     根据mm/page_alloc.c中的变量fail_page_alloc判断
-</span><span class="cm">     当前的设置是否符合分配失败的情况 */</span>
+</span><span class="cm">     * 根据 mm/page_alloc.c 中的变量 fail_page_alloc 判断
+</span><span class="cm">     * 当前的设置是否符合分配失败的情况 
+</span><span class="cm">     */</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">should_fail_alloc_page</span><span class="p">(</span><span class="n">gfp_mask</span><span class="p">,</span> <span class="n">order</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 
     <span class="cm">/*
-</span><span class="cm">     初始化过后，zonelist-&gt;_zonerefs中包含所有可用的zone，
-</span><span class="cm">     并且以NULL作为结束标志 */</span>
+</span><span class="cm">     * 初始化过后， zonelist-&gt;_zonerefs 中包含所有可用的 zone，
+</span><span class="cm">     * 并且以 NULL 作为结束标志 
+</span><span class="cm">     */</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">zonelist</span><span class="o">-&gt;</span><span class="n">_zonerefs</span><span class="o">-&gt;</span><span class="n">zone</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
 
@@ -438,6 +453,11 @@
     <span class="n">cpuset_mems_cookie</span> <span class="o">=</span> <span class="n">read_mems_allowed_begin</span><span class="p">();</span>
 
     <span class="cm">/* The preferred zone is used for statistics later */</span>
+    <span class="cm">/*
+</span><span class="cm">     * 本次获取 preferred_zone 时，如果设置了 nodemask ，就采用
+</span><span class="cm">     * 传入的 nodemask ，否则就使用 cpuset 限制下，当前进程可用
+</span><span class="cm">     * 的内存节点 
+</span><span class="cm">     */</span>
     <span class="n">preferred_zoneref</span> <span class="o">=</span> <span class="n">first_zones_zonelist</span><span class="p">(</span><span class="n">zonelist</span><span class="p">,</span> <span class="n">high_zoneidx</span><span class="p">,</span>
                 <span class="n">nodemask</span> <span class="o">?</span> <span class="o">:</span> <span class="o">&amp;</span><span class="n">cpuset_current_mems_allowed</span><span class="p">,</span>
                 <span class="o">&amp;</span><span class="n">preferred_zone</span><span class="p">);</span>
@@ -482,7 +502,7 @@
 <span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">__alloc_pages_nodemask</span><span class="p">);</span>
 </code></pre></td></tr></table>
 </div>
-</div><p><code>__alloc_pages_nodemask</code> 通过 <code>first_zones_zonelist</code> 获取可以使用的第一个zoneref，成功后执行进一步操作—— <code>get_page_from_freelist</code> 。<br>
+</div><p><code>__alloc_pages_nodemask</code> 通过 <code>first_zones_zonelist</code> 获取可以使用的第一个 zoneref ，成功后执行进一步操作 —— <code>get_page_from_freelist</code> 。<br>
 如果分配失败，移除可能存在的 <strong>PF_MEMALLOC_NOIO</strong> 标志，然后调用 <code>__alloc_pages_slowpath</code> 函数，再次尝试分配内存页。</p>
 <h1 id="3-get_page_from_freelist">3. get_page_from_freelist</h1>
 <p><code>get_page_from_freelist</code> 是 <code>__alloc_pages_nodemask</code> 分配页面的第一次尝试：</p>
@@ -660,12 +680,21 @@
 </span><span class="lnt">170
 </span><span class="lnt">171
 </span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/*
-</span><span class="cm"> __alloc_pages_nodemask调用这个函数时，传入的参数
-</span><span class="cm"> 只有gfp_mask发生了变化，增加了__GFP_HARDWALL标志，
-</span><span class="cm"> 执行cpuset检查时会用到 */</span>
+</span><span class="cm"> * __alloc_pages_nodemask 调用这个函数时，传入的参数 gfp_mask 发生了变化，
+</span><span class="cm"> * 增加了 __GFP_HARDWALL 标志，执行 cpuset 检查时会用到 
+</span><span class="cm"> */</span>
 <span class="k">static</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
 <span class="nf">get_page_from_freelist</span><span class="p">(</span><span class="n">gfp_t</span> <span class="n">gfp_mask</span><span class="p">,</span> <span class="n">nodemask_t</span> <span class="o">*</span><span class="n">nodemask</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
         <span class="k">struct</span> <span class="n">zonelist</span> <span class="o">*</span><span class="n">zonelist</span><span class="p">,</span> <span class="kt">int</span> <span class="n">high_zoneidx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">alloc_flags</span><span class="p">,</span>
@@ -685,31 +714,34 @@
 <span class="nl">zonelist_scan</span><span class="p">:</span>
     <span class="n">zonelist_rescan</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 
-    <span class="cm">/* 扫描所有类型小于high_zoneidx的zone */</span>
+    <span class="cm">/* 扫描所有类型小于 high_zoneidx 的 zone */</span>
     <span class="n">for_each_zone_zonelist_nodemask</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">zonelist</span><span class="p">,</span>
                         <span class="n">high_zoneidx</span><span class="p">,</span> <span class="n">nodemask</span><span class="p">)</span> <span class="p">{</span>
         <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">mark</span><span class="p">;</span>
 
         <span class="cm">/*
-</span><span class="cm">         如果zlcache已经生效，只有bitmap中没有标记为满，
-</span><span class="cm">         并且区域所属的节点包含在allowednodes中的zone
-</span><span class="cm">         值得一试 */</span>
+</span><span class="cm">         * 如果 zlcache 已经生效，只有 bitmap 中没有标记为满，
+</span><span class="cm">         * 并且区域所属的节点包含在 allowednodes 中的 zone值得一试 
+</span><span class="cm">         */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">IS_ENABLED</span><span class="p">(</span><span class="n">CONFIG_NUMA</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">zlc_active</span> <span class="o">&amp;&amp;</span>
             <span class="o">!</span><span class="n">zlc_zone_worth_trying</span><span class="p">(</span><span class="n">zonelist</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">allowednodes</span><span class="p">))</span>
                 <span class="k">continue</span><span class="p">;</span>
+
         <span class="cm">/*
-</span><span class="cm">         开启了cpuset功能，ALLOC_CPUSET指明分配操作要考虑
-</span><span class="cm">         cpuset的限制，通过cpuset_zone_allowed_softwall
-</span><span class="cm">         判断当前的zone能否用于分配操作 */</span>
+</span><span class="cm">         * 开启了 cpuset 功能， ALLOC_CPUSET 指明分配操作要考虑 
+</span><span class="cm">         * cpuset 的限制，通过 cpuset_zone_allowed_softwall
+</span><span class="cm">         * 判断当前的 zone 能否用于分配操作 
+</span><span class="cm">         */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">cpusets_enabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
             <span class="p">(</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_CPUSET</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
             <span class="o">!</span><span class="n">cpuset_zone_allowed_softwall</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">gfp_mask</span><span class="p">))</span>
                 <span class="k">continue</span><span class="p">;</span>
+
         <span class="cm">/*
-</span><span class="cm">         如果设置了ALLOC_FAIR，并且当前的zone和传入的
-</span><span class="cm">         preferred_zone不属于相同的节点，直接从当前的
-</span><span class="cm">         zone分配页面；否则增加由于fair被跳过的zone的
-</span><span class="cm">         计数 */</span>
+</span><span class="cm">         * 如果设置了 ALLOC_FAIR ，并且当前的 zone 和传入的 preferred_zone
+</span><span class="cm">         * 不属于相同的节点，直接从当前的 zone 分配页面；否则增加由于 fair 被
+</span><span class="cm">         * 跳过的 zone 的计数 
+</span><span class="cm">         */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_FAIR</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">zone_local</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">zone</span><span class="p">))</span>
                 <span class="k">break</span><span class="p">;</span>
@@ -718,12 +750,13 @@
                 <span class="k">continue</span><span class="p">;</span>
             <span class="p">}</span>
         <span class="p">}</span>
-        <span class="cm">/* dirty页筛选，保证每个zone的dirty页数量在限制内 */</span>
+
+        <span class="cm">/* dirty 页筛选，保证每个 zone 的 dirty 页数量在限制内 */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">consider_zone_dirty</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">zone_dirty_ok</span><span class="p">(</span><span class="n">zone</span><span class="p">))</span>
             <span class="k">continue</span><span class="p">;</span>
 
         <span class="n">mark</span> <span class="o">=</span> <span class="n">zone</span><span class="o">-&gt;</span><span class="n">watermark</span><span class="p">[</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_WMARK_MASK</span><span class="p">];</span>
-        <span class="cm">/*# watermark is not OK */</span>
+        <span class="cm">/* watermark is not OK */</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">zone_watermark_ok</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">mark</span><span class="p">,</span>
                        <span class="n">classzone_idx</span><span class="p">,</span> <span class="n">alloc_flags</span><span class="p">))</span> <span class="p">{</span>
             <span class="kt">int</span> <span class="n">ret</span><span class="p">;</span>
@@ -736,17 +769,20 @@
 
             <span class="k">if</span> <span class="p">(</span><span class="n">IS_ENABLED</span><span class="p">(</span><span class="n">CONFIG_NUMA</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
                     <span class="o">!</span><span class="n">did_zlc_setup</span> <span class="o">&amp;&amp;</span> <span class="n">nr_online_nodes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+
                 <span class="cm">/*
-</span><span class="cm">                 建立zlcache，返回可用的节点。
-</span><span class="cm">                 如果距离上一次zap位图达到1s，执行zap操作 */</span>
+</span><span class="cm">                 * 建立 zlcache ，返回可用的节点。如果距离上一次
+</span><span class="cm">                 * zap 位图达到 1s ，执行 zap 操作 
+</span><span class="cm">                 */</span>
                 <span class="n">allowednodes</span> <span class="o">=</span> <span class="n">zlc_setup</span><span class="p">(</span><span class="n">zonelist</span><span class="p">,</span> <span class="n">alloc_flags</span><span class="p">);</span>
                 <span class="n">zlc_active</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
                 <span class="n">did_zlc_setup</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
             <span class="p">}</span>
 
             <span class="cm">/*
-</span><span class="cm">             系统不允许zone回收，或者允许zone回收，但是当前
-</span><span class="cm">             zone距离perferred_zone距离过大，标记为full */</span>
+</span><span class="cm">             * 系统不允许 zone 回收，或者允许 zone 回收，但是当前
+</span><span class="cm">             * zone 距离 perferred_zone 距离过大，标记为 full 
+</span><span class="cm">             */</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">zone_reclaim_mode</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span>
                 <span class="o">!</span><span class="n">zone_allows_reclaim</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">zone</span><span class="p">))</span>
                 <span class="k">goto</span> <span class="n">this_zone_full</span><span class="p">;</span>
@@ -784,10 +820,11 @@
 </span><span class="cm">                 * min watermarks.
 </span><span class="cm">                 */</span>
                 <span class="cm">/*
-</span><span class="cm">                 如果已经使用的是最小的watermark，或者只能
-</span><span class="cm">                 回收部分页面，但是仍然超过了watermark，在
-</span><span class="cm">                 zlcache标记zone为full。
-</span><span class="cm">                 这个标记动作只是在zlcache， */</span>
+</span><span class="cm">                 * 如果使用的已经是最小的 watermark，或者只能回收部分
+</span><span class="cm">                 * 页面，但是仍然超过了 watermark ，在 zlcache 标记
+</span><span class="cm">                 * zone 为 full。
+</span><span class="cm">                 * 这个标记动作只是在 zlcache 
+</span><span class="cm">                 */</span>
                 <span class="k">if</span> <span class="p">(((</span><span class="n">alloc_flags</span> <span class="o">&amp;</span> <span class="n">ALLOC_WMARK_MASK</span><span class="p">)</span> <span class="o">==</span> <span class="n">ALLOC_WMARK_MIN</span><span class="p">)</span> <span class="o">||</span>
                     <span class="n">ret</span> <span class="o">==</span> <span class="n">ZONE_RECLAIM_SOME</span><span class="p">)</span>
                     <span class="k">goto</span> <span class="n">this_zone_full</span><span class="p">;</span>
@@ -798,8 +835,9 @@
 
 <span class="nl">try_this_zone</span><span class="p">:</span>
         <span class="cm">/*
-</span><span class="cm">         wartermark高于限制值，或者设置了ALLOC_NO_WATERMARKS，
-</span><span class="cm">         或者执行了回收操作后watermark高于限制值 */</span>
+</span><span class="cm">         * wartermark 高于限制值，或者设置了 ALLOC_NO_WATERMARKS ，
+</span><span class="cm">         * 或者执行了回收操作后 watermark 高于限制值 
+</span><span class="cm">         */</span>
         <span class="n">page</span> <span class="o">=</span> <span class="n">buffered_rmqueue</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span>
                         <span class="n">gfp_mask</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">page</span><span class="p">)</span>
@@ -836,8 +874,9 @@
 <span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="31-cpuset_zone_allowed_softwall">3.1. cpuset_zone_allowed_softwall</h2>
-<p>如果系统开启了cpuset功能， <code>cpuset_zone_allowed_softwall</code> 最终调用 <code>__cpuset_node_allowed_softwall</code> 实现cpuset的限制功能：</p>
+</div><p><code>__alloc_pages_nodemask</code> 调用这个函数时，对 <strong>alloc_flags</strong> 进行了较多的限制，函数本身执行时，也会尽可能多的满足各种限制条件。</p>
+<h2 id="31-cpuset_zone_allowed_softwall">3.1. cpuset_zone_allowed_softwall</h2>
+<p>如果系统开启了 cpuset 功能， <code>cpuset_zone_allowed_softwall</code> 最终调用 <code>__cpuset_node_allowed_softwall</code> 实现 cpuset 的限制功能：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -918,8 +957,8 @@
 Otherwise, no.</p>
 </blockquote>
 <p>处于中断状态；设置了 <strong>__GFP_THISNODE</strong> ；节点包含在 <strong>mems_allowed</strong> ，三种情况下可以直接允许分配。<br>
-如果不是 <strong>__GFP_HARDWALL</strong> 请求，但是节点位于当前进程的cpuset的祖先cpuset内，允许分配。<br>
-如果进程由于OOM被杀死，允许分配。<br>
+如果不是 <strong>__GFP_HARDWALL</strong> 请求，但是节点位于当前进程的 cpuset 的祖先 cpuset 内，允许分配。<br>
+如果进程由于 OOM 被杀死，允许分配。<br>
 其他情况不允许分配。</p>
 <blockquote>
 <p>If __GFP_HARDWALL is set, cpuset_node_allowed_softwall() reduces to cpuset_node_allowed_hardwall().  Otherwise, cpuset_node_allowed_softwall() might sleep, and might allow a node from an enclosing cpuset.<br>
@@ -933,11 +972,11 @@ cpuset_node_allowed_hardwall() only handles the simpler case of hardwall cpusets
 <blockquote>
 <p>GFP_USER allocations are marked with the __GFP_HARDWALL bit, and do not allow allocations outside the current tasks cpuset unless the task has been OOM killed as is marked TIF_MEMDIE. GFP_KERNEL allocations are not so marked, so can escape to the nearest enclosing hardwalled ancestor cpuset.</p>
 </blockquote>
-<p><strong>GFP_USER</strong> 标志设置了 <strong>__GFP_HARDWALL</strong> ，不允许从当前进程的cpuset以外的zone分配内存，除非设置了 <strong>TIF_MEMDIE</strong> 标志。 <strong>GFP_KERNEL</strong> 没有这个标志，因此可以从最近的祖先cpuset分配内存。</p>
+<p><strong>GFP_USER</strong> 标志设置了 <strong>__GFP_HARDWALL</strong> ，不允许从当前进程的 cpuset 以外的 zone 分配内存，除非设置了 <strong>TIF_MEMDIE</strong> 标志。 <strong>GFP_KERNEL</strong> 没有这个标志，因此可以从最近的祖先 cpuset 分配内存。</p>
 <blockquote>
 <p>The first call here from mm/page_alloc:get_page_from_freelist() has __GFP_HARDWALL set in gfp_mask, enforcing hardwall cpusets, so no allocation on a node outside the cpuset is allowed (unless in interrupt, of course).</p>
 </blockquote>
-<p><em>mm/page_alloc.c</em> 中 <code>__alloc_pages_nodemask</code> 第一次调用 <code>get_page_from_freelist</code> 时，设置了 <strong>__GFP_HARDWALL</strong> 标志，不允许从cpuset外的节点分配内存(除非处于中断中)。</p>
+<p><em>mm/page_alloc.c</em> 中 <code>__alloc_pages_nodemask</code> 第一次调用 <code>get_page_from_freelist</code> 时，设置了 <strong>__GFP_HARDWALL</strong> 标志，不允许从 cpuset 外的节点分配内存(除非处于中断中)。</p>
 <blockquote>
 <p>The second pass through get_page_from_freelist() doesn&rsquo;t even call here for GFP_ATOMIC calls.  For those calls, the __alloc_pages() variable &lsquo;wait&rsquo; is not set, and the bit ALLOC_CPUSET is not set in alloc_flags.  That logic and the checks below have the combined affect that:</p>
 <p>in_interrupt - any node ok (current task context irrelevant)<br>
@@ -946,9 +985,9 @@ TIF_MEMDIE   - any node ok<br>
 GFP_KERNEL   - any node in enclosing hardwalled cpuset ok<br>
 GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </blockquote>
-<p><code>__alloc_pages_nodemask</code> 执行慢路径 <code>__alloc_pages_slowpath</code> 时，还会调用 <code>get_page_from_freelist</code> 。如果设置了 <strong>GFP_ATOMIC</strong> ，不会执行这个函数。这些函数调用不会设置 <code>__alloc_pages</code> 的wait变量， <strong>alloc_flags</strong> 的 <strong>ALLOC_CPUSET</strong> 也不会设置。</p>
+<p><code>__alloc_pages_nodemask</code> 执行慢路径 <code>__alloc_pages_slowpath</code> 时，还会调用 <code>get_page_from_freelist</code> 。如果设置了 <strong>GFP_ATOMIC</strong> ，不会执行这个函数。这些函数调用不会设置 <code>__alloc_pages</code> 的 wait 变量， <strong>alloc_flags</strong> 的 <strong>ALLOC_CPUSET</strong> 也不会设置。</p>
 <h2 id="32-zone_watermark_ok">3.2. zone_watermark_ok</h2>
-<p>对于列表中的每个zone，如果zlcache没有标记为满，并且位于可用的内存节点，符合cpuset的限制，并且没有设置 <strong>ALLOC_FAIR</strong> 分配标志，通过了dirty检查，则调用 <strong>zone_watermark_ok</strong> 函数判断当前zone的空闲页是否高于给定的watermark。</p>
+<p>对于列表中的每个 zone ，如果 zlcache 没有标记为满，并且位于可用的内存节点，符合 cpuset 的限制，并且没有设置 <strong>ALLOC_FAIR</strong> 分配标志，通过了 dirty 检查，则调用 <strong>zone_watermark_ok</strong> 函数判断当前 zone 的空闲页是否高于给定的 watermark 。</p>
 <p><code>zone_watermark_ok</code> 函数通过 <code>__zone_watermark_ok</code> 函数实现：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -989,6 +1028,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </span><span class="lnt">35
 </span><span class="lnt">36
 </span><span class="lnt">37
+</span><span class="lnt">38
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">bool</span> <span class="nf">__zone_watermark_ok</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">z</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span>
@@ -1012,8 +1052,9 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 <span class="cp">#endif
 </span><span class="cp"></span>
     <span class="cm">/*
-</span><span class="cm">     如果分配所需的页面后剩余的空闲页面的数量小于
-</span><span class="cm">     watermark + 每个zone的保留页的数量，返回false */</span>
+</span><span class="cm">     * 如果分配所需的页面后剩余的空闲页面的数量小于
+</span><span class="cm">     * watermark + 每个zone的保留页的数量，返回false 
+</span><span class="cm">     */</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">free_pages</span> <span class="o">-</span> <span class="n">free_cma</span> <span class="o">&lt;=</span> <span class="n">min</span> <span class="o">+</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">lowmem_reserve</span><span class="p">[</span><span class="n">classzone_idx</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">o</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">o</span> <span class="o">&lt;</span> <span class="n">order</span><span class="p">;</span> <span class="n">o</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
@@ -1031,7 +1072,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="33-buffered_rmqueue">3.3. buffered_rmqueue</h2>
-<p>如果找到了可以使用的zone，就通过 <code>buffered_rmqueue</code> 从zone中分配所需的内存页：</p>
+<p>如果找到了可以使用的 zone ，就通过 <code>buffered_rmqueue</code> 从 zone 中分配所需的内存页：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -1115,6 +1156,14 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </span><span class="lnt">79
 </span><span class="lnt">80
 </span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
 </span></code></pre></td>
 <td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span>
@@ -1133,11 +1182,14 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 
         <span class="n">local_irq_save</span><span class="p">(</span><span class="n">flags</span><span class="p">);</span>
         <span class="n">pcp</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">this_cpu_ptr</span><span class="p">(</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">pageset</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">pcp</span><span class="p">;</span>
-        <span class="cm">/* 获取当前CPU给定migratetype的page表 */</span>
+
+        <span class="cm">/* 获取当前 CPU 给定 migratetype 的 page 表 */</span>
         <span class="n">list</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pcp</span><span class="o">-&gt;</span><span class="n">lists</span><span class="p">[</span><span class="n">migratetype</span><span class="p">];</span>
+
         <span class="cm">/*
-</span><span class="cm">         per-cpu页框高速缓存为空，调用rmqueue_bulk从
-</span><span class="cm">         伙伴系统申请batch个内存页进行补充 */</span>
+</span><span class="cm">         * per-cpu 页框高速缓存为空，调用 rmqueue_bulk 从伙伴系统
+</span><span class="cm">         * 申请 batch 个内存页进行补充 
+</span><span class="cm">         */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">list_empty</span><span class="p">(</span><span class="n">list</span><span class="p">))</span> <span class="p">{</span>
             <span class="n">pcp</span><span class="o">-&gt;</span><span class="n">count</span> <span class="o">+=</span> <span class="n">rmqueue_bulk</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
                     <span class="n">pcp</span><span class="o">-&gt;</span><span class="n">batch</span><span class="p">,</span> <span class="n">list</span><span class="p">,</span>
@@ -1146,7 +1198,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
                 <span class="k">goto</span> <span class="n">failed</span><span class="p">;</span>
         <span class="p">}</span>
 
-        <span class="cm">/* 从list头部取hot page，从尾部取cold page */</span>
+        <span class="cm">/* 从 list 头部取 hot page ，从尾部取 cold page */</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">cold</span><span class="p">)</span>
             <span class="n">page</span> <span class="o">=</span> <span class="n">list_entry</span><span class="p">(</span><span class="n">list</span><span class="o">-&gt;</span><span class="n">prev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span><span class="p">,</span> <span class="n">lru</span><span class="p">);</span>
         <span class="k">else</span>
@@ -1156,40 +1208,45 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
         <span class="n">pcp</span><span class="o">-&gt;</span><span class="n">count</span><span class="o">--</span><span class="p">;</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">gfp_flags</span> <span class="o">&amp;</span> <span class="n">__GFP_NOFAIL</span><span class="p">))</span> <span class="p">{</span>
-            <span class="cm">/* 警告大于2个page的nofail申请 */</span>
+
+            <span class="cm">/* 警告大于 2 个 page 的 nofail 申请 */</span>
             <span class="n">WARN_ON_ONCE</span><span class="p">(</span><span class="n">order</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="n">spin_lock_irqsave</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">,</span> <span class="n">flags</span><span class="p">);</span>
+
         <span class="cm">/* 多页请求通过伙伴系统申请 */</span>
         <span class="n">page</span> <span class="o">=</span> <span class="n">__rmqueue</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
         <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">page</span><span class="p">)</span>
             <span class="k">goto</span> <span class="n">failed</span><span class="p">;</span>
-        <span class="cm">/* 减少zone的空闲页面计数 */</span>
+
+        <span class="cm">/* 减少 zone 的空闲页面计数 */</span>
         <span class="n">__mod_zone_freepage_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">),</span>
                       <span class="n">get_freepage_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">));</span>
     <span class="p">}</span>
 
-    <span class="cm">/* 减去zone的NR_ALLOC_BATCH计数 */</span>
+    <span class="cm">/* 减去 zone 的 NR_ALLOC_BATCH 计数 */</span>
     <span class="n">__mod_zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_ALLOC_BATCH</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">));</span>
-    <span class="cm">/* 将NR_ALLOC_BATCH为0的zone也标记为fair depleted */</span>
+
+    <span class="cm">/* 将 NR_ALLOC_BATCH 为 0 的 zon e也标记为 fair depleted */</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">zone_page_state</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">NR_ALLOC_BATCH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
         <span class="o">!</span><span class="n">zone_is_fair_depleted</span><span class="p">(</span><span class="n">zone</span><span class="p">))</span>
         <span class="n">zone_set_flag</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">ZONE_FAIR_DEPLETED</span><span class="p">);</span>
 
-    <span class="cm">/* 增加vm_event计数 */</span>
+    <span class="cm">/* 增加 vm_event 计数 */</span>
     <span class="n">__count_zone_vm_events</span><span class="p">(</span><span class="n">PGALLOC</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">);</span>
     <span class="n">zone_statistics</span><span class="p">(</span><span class="n">preferred_zone</span><span class="p">,</span> <span class="n">zone</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">);</span>
     <span class="n">local_irq_restore</span><span class="p">(</span><span class="n">flags</span><span class="p">);</span>
 
     <span class="n">VM_BUG_ON_PAGE</span><span class="p">(</span><span class="n">bad_range</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">),</span> <span class="n">page</span><span class="p">);</span>
-    <span class="cm">/* 根据分配标志符初始化申请到的内存页，下列原因会
-</span><span class="cm">     导致检查失败：
-</span><span class="cm">     1. _mapcount != 0
-</span><span class="cm">     2. mapping != NULL
-</span><span class="cm">     3. _count != 0
-</span><span class="cm">     4. 一些flag不为0
-</span><span class="cm">     5. cgroup检查失败  */</span>
+    <span class="cm">/*
+</span><span class="cm">     * 根据分配标志符初始化申请到的内存页，下列原因会导致检查失败：
+</span><span class="cm">     * 1. _mapcount != 0
+</span><span class="cm">     * 2. mapping != NULL
+</span><span class="cm">     * 3. _count != 0
+</span><span class="cm">     * 4. 一些 flag 不为0
+</span><span class="cm">     * 5. cgroup 检查失败  
+</span><span class="cm">     */</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">prep_new_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">))</span>
         <span class="k">goto</span> <span class="n">again</span><span class="p">;</span>
     <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
@@ -1201,10 +1258,10 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </code></pre></td></tr></table>
 </div>
 </div><h3 id="331-rmqueue_bulk">3.3.1. rmqueue_bulk</h3>
-<p>作为补充per-cpu页框高速缓存的内存页的函数， <code>rmqueue_bulk</code> 通过 <code>__rmqueue</code> 依次从伙伴系统申请 <strong>batch</strong> 个页框，并根据传入的 <strong>cold</strong> 参数将申请到的页面依次添加到传入的 <strong>list</strong> (即per-cpu页框高速缓存的页框链表)的头部(cold为false)或者尾部(cold为true)。</p>
-<p>函数会修改zone的空闲页面统计数，返回真正申请到的页面数。</p>
+<p>作为补充 per-cpu 页框高速缓存的内存页的函数， <code>rmqueue_bulk</code> 通过 <code>__rmqueue</code> 依次从伙伴系统申请 <strong>batch</strong> 个页框，并根据传入的 <strong>cold</strong> 参数将申请到的页面依次添加到传入的 <strong>list</strong> ( 即 per-cpu 页框高速缓存的页框链表 ) 的头部 ( cold 为 false ) 或者尾部 ( cold 为 true ) 。</p>
+<p>函数会修改 zone 的空闲页面统计数，返回真正申请到的页面数。</p>
 <h3 id="332-__rmqueue">3.3.2. __rmqueue</h3>
-<p><code>__rmqueue</code> 是“真正”的伙伴系统分配函数，函数第一次尝试分配请求的migratetype所需的页面数；如果失败，并且第一次请求的migratetype不是 <strong>MIGRATE_RESERVE</strong> ，再调用 <code>__rmqueue_fallback</code> 尝试分配；如果分配再次失败，则将migratetype置为 <strong>MIGRATE_RESERVE</strong> ，从保留内存区域进行分配。</p>
+<p><code>__rmqueue</code> 是“真正”的伙伴系统分配函数，函数第一次尝试分配请求的 migratetype 所需的页面数；如果失败，并且第一次请求的 migratetype 不是 <strong>MIGRATE_RESERVE</strong> ，再调用 <code>__rmqueue_fallback</code> 尝试分配；如果分配再次失败，则将 migratetype 置为 <strong>MIGRATE_RESERVE</strong> ，从保留内存区域进行分配。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -1263,7 +1320,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </div>
 </div><h4 id="3321-__rmqueue_smallest">3.3.2.1. __rmqueue_smallest</h4>
 <p><code>__rmqueue_smallest</code> 是 <code>__rmqueue</code> 函数分配页框的第一次尝试。<br>
-函数从传入的order开始，从zone中最接近order的 <strong>free_area</strong> 中分配页框。</p>
+函数从传入的 order 开始，从 zone 中最接近 order 的 <strong>free_area</strong> 中分配页框。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -1322,10 +1379,280 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 <span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>如果没有和给定的order相同的 <strong>free_area</strong> ，<code>__rmqueue_smallest</code> 从最接近order的 <strong>free_area</strong> 分配内存，然后 调用<code>expand</code> 函数将原来order较大的内存块切分成较小的内存块，并且添加到相应的链表中。</p>
+</div><p>如果没有和给定的 order 相同的 <strong>free_area</strong> ，<code>__rmqueue_smallest</code> 从最接近 order 的 <strong>free_area</strong> 分配内存，然后调用 <code>expand</code> 函数将原来 order 较大的内存块切分成较小的内存块，并且添加到相应的链表中。</p>
 <h4 id="3322-__rmqueue_fallback">3.3.2.2. __rmqueue_fallback</h4>
-<p>如果 <code>__rmqueue_smallest</code> 分配失败，并且migratetype不是reserve类型，则调用 <code>__rmqueue_fallback</code> 函数尝试分配。<br>
-和 <code>__rmqueue_smallest</code> 不同， <code>__rmqueue_fallback</code> 从最大的order开始，从 <strong>fallback</strong> 表中，查找当前migratetype对应的可用migratetype，获取可用的 <strong>free_area</strong> ，然后从中分配页框。</p>
+<p>如果 <code>__rmqueue_smallest</code> 分配失败，并且 migratetype 不是 reserve 类型，则调用 <code>__rmqueue_fallback</code> 函数尝试分配。<br>
+和 <code>__rmqueue_smallest</code> 不同， <code>__rmqueue_fallback</code> 从最大的 order 开始，从 <strong>fallback</strong> 表中，查找当前 migratetype 对应的可用 migratetype ，获取可用的 <strong>free_area</strong> ，然后从中分配页框。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
+<span class="nf">__rmqueue_fallback</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span> <span class="kt">int</span> <span class="n">start_migratetype</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">free_area</span> <span class="o">*</span><span class="n">area</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">current_order</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">migratetype</span><span class="p">,</span> <span class="n">new_type</span><span class="p">,</span> <span class="n">i</span><span class="p">;</span>
+
+    <span class="cm">/* Find the largest possible block of pages in the other list */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">=</span> <span class="n">MAX_ORDER</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+                <span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">order</span> <span class="o">&amp;&amp;</span> <span class="n">current_order</span> <span class="o">&lt;=</span> <span class="n">MAX_ORDER</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+                <span class="o">--</span><span class="n">current_order</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">migratetype</span> <span class="o">=</span> <span class="n">fallbacks</span><span class="p">[</span><span class="n">start_migratetype</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+
+            <span class="cm">/* MIGRATE_RESERVE handled later if necessary */</span>
+
+            <span class="cm">/* MIGRATE_RESERVE 是最后一个元素 */</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">migratetype</span> <span class="o">==</span> <span class="n">MIGRATE_RESERVE</span><span class="p">)</span>
+                <span class="k">break</span><span class="p">;</span>
+
+            <span class="n">area</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">free_area</span><span class="p">[</span><span class="n">current_order</span><span class="p">]);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">list_empty</span><span class="p">(</span><span class="o">&amp;</span><span class="n">area</span><span class="o">-&gt;</span><span class="n">free_list</span><span class="p">[</span><span class="n">migratetype</span><span class="p">]))</span>
+                <span class="k">continue</span><span class="p">;</span>
+
+            <span class="n">page</span> <span class="o">=</span> <span class="n">list_entry</span><span class="p">(</span><span class="n">area</span><span class="o">-&gt;</span><span class="n">free_list</span><span class="p">[</span><span class="n">migratetype</span><span class="p">].</span><span class="n">next</span><span class="p">,</span>
+                    <span class="k">struct</span> <span class="n">page</span><span class="p">,</span> <span class="n">lru</span><span class="p">);</span>
+            <span class="n">area</span><span class="o">-&gt;</span><span class="n">nr_free</span><span class="o">--</span><span class="p">;</span>
+
+            <span class="cm">/* start_migratetype 是首选， migratetype 是后备选项 */</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">try_to_steal_freepages</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+                              <span class="n">start_migratetype</span><span class="p">,</span>
+                              <span class="n">migratetype</span><span class="p">);</span>
+
+            <span class="cm">/* Remove the page from the freelists */</span>
+            <span class="n">list_del</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">);</span>
+            <span class="n">rmv_page_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+
+            <span class="cm">/*
+</span><span class="cm">             * expand 函数将
+</span><span class="cm">             * free_area[current_order].freelist[new_type]
+</span><span class="cm">             * 切分成较小 order 的内存块，保存到响应列表 
+</span><span class="cm">             */</span>
+            <span class="n">expand</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span>
+                   <span class="n">new_type</span><span class="p">);</span>
+            <span class="cm">/* The freepage_migratetype may differ from pageblock&#39;s
+</span><span class="cm">             * migratetype depending on the decisions in
+</span><span class="cm">             * try_to_steal_freepages. This is OK as long as it does
+</span><span class="cm">             * not differ for MIGRATE_CMA type.
+</span><span class="cm">             */</span>
+            <span class="n">set_freepage_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">new_type</span><span class="p">);</span>
+
+            <span class="n">trace_mm_page_alloc_extfrag</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span>
+                <span class="n">start_migratetype</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">,</span> <span class="n">new_type</span><span class="p">);</span>
+
+            <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>fallbacks</strong> 是定义在 <em>mm/page_alloc.c</em> 中的二维数组，保存着每种 migratetype 分配失败时，可以使用的其他 migratetype 。</p>
+<p>如果 <code>__rmqueue_fallback</code> 也分配失败， <code>__rmqueue</code> 将 migratetype 设置成 reserve 类型，再次执行上面两个函数进行分配。</p>
+<h5 id="33221-try_to_steal_freepages">3.3.2.2.1. try_to_steal_freepages</h5>
+<p>找到可用的 <strong>free_area</strong> 之后， <code>__rmqueue_fallback</code> 调用 <code>try_to_steal_freepages</code> ，根据 <strong>fallback_type</strong> 移动空闲页框。</p>
+<p>内核中函数的注释为：</p>
+<blockquote>
+<p>切分一个大块的内存时，将所有空闲页框移动到首选的分配列表。如果 fallback_type 是可回收的内核分配，更积极主动的获取空闲页面的所有权。</p>
+<p>另一方面，不要改变 <strong>MIGRATE_CMA</strong> 内存块的 migratetype ，也不要将 CMA 的页框移动到其他的空闲列表中，我们不想从 <strong>MIGRATE_CMA</strong> 区域分配不可用的页框。</p>
+</blockquote>
+<p>函数中的 <strong>pageblock_order</strong> 变量定义在 <em>include/linux/pageblock-flags.h</em> ，如果开启了 <strong>CONFIG_HUGETLB_PAGE</strong> ( 默认开启 ) ，并且没有通过内核配置提供 order 值，就采用 <strong>HUGETLB_PAGE_ORDER</strong> ，即 9 ；否则为 <strong>MAX_ORDER - 1</strong> ，即 10 。<br>
+<strong>page_group_by_mobility_disabled</strong> 变量在 <code>build_all_zonelists</code> 设置，如果系统中页框数量太低，将其置为 1 ，关闭“group by mobility”。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/*
+</span><span class="cm"> * @start_type为首选的迁移类型，即请求内存时的类型
+</span><span class="cm"> * @fallback_type为备选的类型，即通过fallbacks获取的类型 
+</span><span class="cm"> */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">try_to_steal_freepages</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+                  <span class="kt">int</span> <span class="n">start_type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">fallback_type</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="cm">/* current_order 为当前找到的内存块的阶数 */</span>
+    <span class="kt">int</span> <span class="n">current_order</span> <span class="o">=</span> <span class="n">page_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * When borrowing from MIGRATE_CMA, we need to release the excess
+</span><span class="cm">     * buddy pages to CMA itself. We also ensure the freepage_migratetype
+</span><span class="cm">     * is set to CMA so it is returned to the correct freelist in case
+</span><span class="cm">     * the page ends up being not actually allocated from the pcp lists.
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">is_migrate_cma</span><span class="p">(</span><span class="n">fallback_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">fallback_type</span><span class="p">;</span>
+
+    <span class="cm">/* Take ownership for orders &gt;= pageblock_order */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">pageblock_order</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * change_pageblock_range 将找到的内存块按照
+</span><span class="cm">         * pageblock_order 的大小分割，都设置 migratetype
+</span><span class="cm">         * 为 start_type ，即首选的迁移类型 
+</span><span class="cm">         */</span>
+        <span class="n">change_pageblock_range</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">start_type</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 下列情况还会移动页框，即更积极的获取空闲页框的所有权：
+</span><span class="cm">     * 1. 当前 order 大于等于 pageblock_order 的一半
+</span><span class="cm">     * 2. 首选为可回收的迁移类型
+</span><span class="cm">     * 3. 关闭了“group by mobility” 
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">pageblock_order</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">||</span>
+        <span class="n">start_type</span> <span class="o">==</span> <span class="n">MIGRATE_RECLAIMABLE</span> <span class="o">||</span>
+        <span class="n">page_group_by_mobility_disabled</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">pages</span><span class="p">;</span>
+
+        <span class="cm">/* 将内存块移动到 start_type 的列表 */</span>
+        <span class="n">pages</span> <span class="o">=</span> <span class="n">move_freepages_block</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
+
+        <span class="cm">/* Claim the whole block if over half of it is free */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pages</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">pageblock_order</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">||</span>
+                <span class="n">page_group_by_mobility_disabled</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="cm">/*
+</span><span class="cm">             * move_freepages 中设置 migratetype 的操作，可能没有
+</span><span class="cm">             * 设置 page 的迁移类型 —— 对齐到 pageblock_nr_pages 
+</span><span class="cm">             */</span>
+            <span class="n">set_pageblock_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">start_type</span><span class="p">;</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">fallback_type</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从代码可以看出，对于内存块阶数大于 <strong>pageblock_order</strong> 的情况，只是修改页框的 migratetype ，并没有真正移动空闲页；而“更积极的获取空闲页框的所有权”则意味着将空闲页框移动到指定的迁移类型的列表中。</p>
+<h5 id="33222-move_freepages">3.3.2.2.2. move_freepages</h5>
+<p><code>try_to_steal_freepages</code> 调用 <code>move_freepages_block</code> 移动空闲页框，后者先获取内存块的起止物理页框号对应的 <strong>struct page *</strong> ，并进行合法性检查 ( 这里有个疑问，不知道为什么将起止 pfn 对齐到 pageblock_nr_pages ) ，然后调用 <code>move_freepages</code> 函数，移动页框到参数指定的迁移类型。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -1388,258 +1715,6 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 </span><span class="lnt">58
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span>
-<span class="nf">__rmqueue_fallback</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span> <span class="kt">int</span> <span class="n">start_migratetype</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">struct</span> <span class="n">free_area</span> <span class="o">*</span><span class="n">area</span><span class="p">;</span>
-    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">current_order</span><span class="p">;</span>
-    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="n">migratetype</span><span class="p">,</span> <span class="n">new_type</span><span class="p">,</span> <span class="n">i</span><span class="p">;</span>
-
-    <span class="cm">/* Find the largest possible block of pages in the other list */</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">=</span> <span class="n">MAX_ORDER</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-                <span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">order</span> <span class="o">&amp;&amp;</span> <span class="n">current_order</span> <span class="o">&lt;=</span> <span class="n">MAX_ORDER</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-                <span class="o">--</span><span class="n">current_order</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">migratetype</span> <span class="o">=</span> <span class="n">fallbacks</span><span class="p">[</span><span class="n">start_migratetype</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
-
-            <span class="cm">/* MIGRATE_RESERVE handled later if necessary */</span>
-            <span class="cm">/* MIGRATE_RESERVE是最后一个元素 */</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">migratetype</span> <span class="o">==</span> <span class="n">MIGRATE_RESERVE</span><span class="p">)</span>
-                <span class="k">break</span><span class="p">;</span>
-
-            <span class="n">area</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">(</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">free_area</span><span class="p">[</span><span class="n">current_order</span><span class="p">]);</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">list_empty</span><span class="p">(</span><span class="o">&amp;</span><span class="n">area</span><span class="o">-&gt;</span><span class="n">free_list</span><span class="p">[</span><span class="n">migratetype</span><span class="p">]))</span>
-                <span class="k">continue</span><span class="p">;</span>
-
-            <span class="n">page</span> <span class="o">=</span> <span class="n">list_entry</span><span class="p">(</span><span class="n">area</span><span class="o">-&gt;</span><span class="n">free_list</span><span class="p">[</span><span class="n">migratetype</span><span class="p">].</span><span class="n">next</span><span class="p">,</span>
-                    <span class="k">struct</span> <span class="n">page</span><span class="p">,</span> <span class="n">lru</span><span class="p">);</span>
-            <span class="n">area</span><span class="o">-&gt;</span><span class="n">nr_free</span><span class="o">--</span><span class="p">;</span>
-            <span class="cm">/* start_migratetype是首选，migratetype是后备选项 */</span>
-            <span class="n">new_type</span> <span class="o">=</span> <span class="n">try_to_steal_freepages</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
-                              <span class="n">start_migratetype</span><span class="p">,</span>
-                              <span class="n">migratetype</span><span class="p">);</span>
-
-            <span class="cm">/* Remove the page from the freelists */</span>
-            <span class="n">list_del</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">);</span>
-            <span class="n">rmv_page_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
-
-            <span class="cm">/*
-</span><span class="cm">             expand函数将
-</span><span class="cm">             free_area[current_order].freelist[new_type]
-</span><span class="cm">             切分成较小order的内存块，保存到响应列表 */</span>
-            <span class="n">expand</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span>
-                   <span class="n">new_type</span><span class="p">);</span>
-            <span class="cm">/* The freepage_migratetype may differ from pageblock&#39;s
-</span><span class="cm">             * migratetype depending on the decisions in
-</span><span class="cm">             * try_to_steal_freepages. This is OK as long as it does
-</span><span class="cm">             * not differ for MIGRATE_CMA type.
-</span><span class="cm">             */</span>
-            <span class="n">set_freepage_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">new_type</span><span class="p">);</span>
-
-            <span class="n">trace_mm_page_alloc_extfrag</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span>
-                <span class="n">start_migratetype</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">,</span> <span class="n">new_type</span><span class="p">);</span>
-
-            <span class="k">return</span> <span class="n">page</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><p><strong>fallbacks</strong> 是定义在 <em>mm/page_alloc.c</em> 中的二维数组，保存着每种migratetype分配失败时，可以使用的其他migratetype。</p>
-<p>如果 <code>__rmqueue_fallback</code> 也分配失败， <code>__rmqueue</code> 将migratetype设置成reserve类型，再次执行上面两个函数进行分配。</p>
-<h5 id="33221-try_to_steal_freepages">3.3.2.2.1. try_to_steal_freepages</h5>
-<p>找到可用的 <strong>free_area</strong> 之后， <code>__rmqueue_fallback</code> 调用 <code>try_to_steal_freepages</code> ，根据 <strong>fallback_type</strong> 移动空闲页框。</p>
-<p>内核中函数的注释为：</p>
-<blockquote>
-<p>切分一个大块的内存时，将所有空闲页框移动到首选的分配列表。如果fallback_type是可回收的内核分配，更积极主动的获取空闲页面的所有权。</p>
-<p>另一方面，不要改变 <strong>MIGRATE_CMA</strong> 内存块的migratetype，也不要将CMA的页框移动到其他的空闲列表中，我们不想从 <strong>MIGRATE_CMA</strong> 区域分配不可用的页框。</p>
-</blockquote>
-<p>函数中的 <strong>pageblock_order</strong> 变量定义在 <em>include/linux/pageblock-flags.h</em> ，如果开启了 <strong>CONFIG_HUGETLB_PAGE</strong> (默认开启)，并且没有通过内核配置提供order值，就采用 <strong>HUGETLB_PAGE_ORDER</strong> ，即9；否则为 <strong>MAX_ORDER-1</strong> ，即10。<br>
-<strong>page_group_by_mobility_disabled</strong> 变量在 <code>build_all_zonelists</code> 设置，如果系统中页框数量太低，将其置为1，关闭“group by mobility”。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span><span class="lnt">55
-</span><span class="lnt">56
-</span><span class="lnt">57
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/*
-</span><span class="cm"> @start_type为首选的迁移类型，即请求内存时的类型
-</span><span class="cm"> @fallback_type为备选的类型，即通过fallbacks获取的类型 */</span>
-<span class="k">static</span> <span class="kt">int</span> <span class="nf">try_to_steal_freepages</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
-                  <span class="kt">int</span> <span class="n">start_type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">fallback_type</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="cm">/* current_order为当前找到的内存块的阶数 */</span>
-    <span class="kt">int</span> <span class="n">current_order</span> <span class="o">=</span> <span class="n">page_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
-
-    <span class="cm">/*
-</span><span class="cm">     * When borrowing from MIGRATE_CMA, we need to release the excess
-</span><span class="cm">     * buddy pages to CMA itself. We also ensure the freepage_migratetype
-</span><span class="cm">     * is set to CMA so it is returned to the correct freelist in case
-</span><span class="cm">     * the page ends up being not actually allocated from the pcp lists.
-</span><span class="cm">     */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">is_migrate_cma</span><span class="p">(</span><span class="n">fallback_type</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">fallback_type</span><span class="p">;</span>
-
-    <span class="cm">/* Take ownership for orders &gt;= pageblock_order */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">pageblock_order</span><span class="p">)</span> <span class="p">{</span>
-        <span class="cm">/*
-</span><span class="cm">         change_pageblock_range将找到的内存块按照
-</span><span class="cm">         pageblock_order的大小分割，都设置migratetype
-</span><span class="cm">         为start_type，即首选的迁移类型 */</span>
-        <span class="n">change_pageblock_range</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">current_order</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
-        <span class="k">return</span> <span class="n">start_type</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="cm">/*
-</span><span class="cm">     下列情况还会将页框移动到，即更积极的获取空闲页框的
-</span><span class="cm">     所有权：
-</span><span class="cm">     1. 当前order大于等于pageblock_order的一半
-</span><span class="cm">     2. 首选为可回收的迁移类型
-</span><span class="cm">     3. 关闭了“group by mobility” */</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">current_order</span> <span class="o">&gt;=</span> <span class="n">pageblock_order</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">||</span>
-        <span class="n">start_type</span> <span class="o">==</span> <span class="n">MIGRATE_RECLAIMABLE</span> <span class="o">||</span>
-        <span class="n">page_group_by_mobility_disabled</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">int</span> <span class="n">pages</span><span class="p">;</span>
-
-        <span class="cm">/* 将内存块移动到start_type的列表 */</span>
-        <span class="n">pages</span> <span class="o">=</span> <span class="n">move_freepages_block</span><span class="p">(</span><span class="n">zone</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
-
-        <span class="cm">/* Claim the whole block if over half of it is free */</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">pages</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">pageblock_order</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">||</span>
-                <span class="n">page_group_by_mobility_disabled</span><span class="p">)</span> <span class="p">{</span>
-
-            <span class="cm">/*
-</span><span class="cm">             move_freepages中设置migratetype的操作，可能没有
-</span><span class="cm">             设置page的迁移类型——对齐到pageblock_nr_pages */</span>
-            <span class="n">set_pageblock_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">start_type</span><span class="p">);</span>
-            <span class="k">return</span> <span class="n">start_type</span><span class="p">;</span>
-        <span class="p">}</span>
-
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="n">fallback_type</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>从代码可以看出，对于内存块阶数大于 <strong>pageblock_order</strong> 的情况，只是修改页框的migratetype，并没有真正移动空闲页；而“更积极的获取空闲页框的所有权”则意味着将空闲页框移动到指定的迁移类型的列表中。</p>
-<h5 id="33222-move_freepages">3.3.2.2.2. move_freepages</h5>
-<p><code>try_to_steal_freepages</code> 调用 <code>move_freepages_block</code> 移动空闲页框，后者先获取内存块的起止物理页框号对应的 <strong>struct page</strong> ，并进行合法性检查(这里有个疑问，不知道为什么将起止pfn对齐到pageblock_nr_pages)，然后调用 <code>move_freepages</code> 函数，移动页框到参数指定的迁移类型。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span><span class="lnt">50
-</span><span class="lnt">51
-</span><span class="lnt">52
-</span><span class="lnt">53
-</span><span class="lnt">54
-</span></code></pre></td>
-<td class="lntd">
 <pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">int</span> <span class="nf">move_freepages</span><span class="p">(</span><span class="k">struct</span> <span class="n">zone</span> <span class="o">*</span><span class="n">zone</span><span class="p">,</span>
               <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">start_page</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">end_page</span><span class="p">,</span>
               <span class="kt">int</span> <span class="n">migratetype</span><span class="p">)</span>
@@ -1664,10 +1739,11 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
         <span class="n">VM_BUG_ON_PAGE</span><span class="p">(</span><span class="n">page_to_nid</span><span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="o">!=</span> <span class="n">zone_to_nid</span><span class="p">(</span><span class="n">zone</span><span class="p">),</span> <span class="n">page</span><span class="p">);</span>
 
         <span class="cm">/*
-</span><span class="cm">         这个函数有两个调用者，一个是正在说明的伙伴系统的
-</span><span class="cm">         move_freepages_block，这种情况能够通过下列两项
-</span><span class="cm">         检查；另一个是mm/page_isolation.c中的函数，可能
-</span><span class="cm">         不会通过检查？ */</span>
+</span><span class="cm">         * 这个函数有两个调用者，一个是正在说明的伙伴系统的
+</span><span class="cm">         * move_freepages_block ，这种情况能够通过下列两项
+</span><span class="cm">         * 检查；另一个是 mm/page_isolation.c 中的函数，可能
+</span><span class="cm">         * 不会通过检查？ 
+</span><span class="cm">         */</span>
         <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pfn_valid_within</span><span class="p">(</span><span class="n">page_to_pfn</span><span class="p">(</span><span class="n">page</span><span class="p">)))</span> <span class="p">{</span>
             <span class="n">page</span><span class="o">++</span><span class="p">;</span>
             <span class="k">continue</span><span class="p">;</span>
@@ -1679,15 +1755,18 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
         <span class="p">}</span>
 
         <span class="n">order</span> <span class="o">=</span> <span class="n">page_order</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+
         <span class="cm">/* 移动内存块到相同阶数、传入的迁移类型 */</span>
         <span class="n">list_move</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">,</span>
               <span class="o">&amp;</span><span class="n">zone</span><span class="o">-&gt;</span><span class="n">free_area</span><span class="p">[</span><span class="n">order</span><span class="p">].</span><span class="n">free_list</span><span class="p">[</span><span class="n">migratetype</span><span class="p">]);</span>
+
         <span class="cm">/* 修改迁移类型 */</span>
         <span class="n">set_freepage_migratetype</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">migratetype</span><span class="p">);</span>
 
         <span class="cm">/*
-</span><span class="cm">         如果page没有通过上面两项检查，就会导致 1&lt;&lt;order
-</span><span class="cm">         不等于 end_pfn - start_pfn */</span>
+</span><span class="cm">         * 如果 page 没有通过上面两项检查，就会导致 1 &lt;&lt; order
+</span><span class="cm">         * 不等于 end_pfn - start_pfn 
+</span><span class="cm">         */</span>
         <span class="n">page</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">;</span>
         <span class="n">pages_moved</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">order</span><span class="p">;</span>
     <span class="p">}</span>
@@ -1696,12 +1775,12 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
 <span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>需要说明的是， <code>move_freepages</code> 每次都会获取page的order，order有多种可能值。</p>
+</div><p>需要说明的是， <code>move_freepages</code> 每次都会获取 page 的 order ， order 有多种可能值。</p>
 <h1 id="4-总结">4. 总结</h1>
-<p><code>__alloc_pages_nodemask</code> 函数首先调用 <code>get_page_from_freelist</code> ，尝试获取空闲页。<br>
-为了保证函数的执行速度， <code>get_page_from_freelist</code> 会使用zlcache加快空闲页框的查找速度。</p>
-<p><code>get_page_from_freelist</code> 会执行两次扫描，第一次扫描考虑所有的限制条件，包括cpuset，<strong>ALLOC_FAIR</strong> 标志，dirty限制，不考虑远程节点；第二次扫描会忽略 <strong>ALLOC_FAIR</strong> 标志，考虑远程节点。</p>
-<p>对于zone中空闲页框数低于watermark的情况， <code>get_page_from_freelist</code> 调用 <code>zone_reclaim</code> ，尝试从zone中回收页框，回收流程在《mm-buddy_allocator页框回收》介绍。</p>
+<p><code>__alloc_pages_nodemask</code> 函数先将 <strong>alloc_flags</strong> 设置成 <strong>ALLOC_WMARK_LOW|ALLOC_CPUSET|ALLOC_FAIR</strong> ，调用 <code>get_page_from_freelist</code> ，尝试获取空闲页。<br>
+为了保证函数的执行速度， <code>get_page_from_freelist</code> 会使用 zlcache 加快空闲页框的查找速度。</p>
+<p><code>get_page_from_freelist</code> 会执行两次扫描，第一次扫描考虑所有的限制条件，包括 cpuset ，<strong>ALLOC_FAIR</strong> 标志， dirty 限制，不考虑远程节点；第二次扫描会忽略 <strong>ALLOC_FAIR</strong> 标志，考虑远程节点。</p>
+<p>对于 zone 中空闲页框数低于 watermark 的情况， <code>get_page_from_freelist</code> 调用 <code>zone_reclaim</code> ，尝试从 zone 中回收页框，回收流程在《 mm - buddy_allocator 页框回收》介绍。</p>
 
     </div>
 
@@ -1713,7 +1792,7 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-10-24
+        0001-01-01
         
     </span>
   </p>
@@ -1736,19 +1815,20 @@ GFP_USER     - only nodes in current tasks mems allowed ok.</p>
   </div>
 </div><footer class="post-footer">
       <div class="post-tags">
-          <a href="/tags/kernel-sources/">kernel-sources</a>
-          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kernel-srcs/">kernel-srcs</a>
+          <a href="/tags/mm/">mm</a>
           <a href="/tags/buddy-allocator/">buddy-allocator</a>
-          <a href="/tags/kmalloc/">kmalloc</a>
-          <a href="/tags/expand/">expand</a>
-          <a href="/tags/get_page_from_freelist/">get_page_from_freelist</a>
           <a href="/tags/__alloc_pages_nodemask/">__alloc_pages_nodemask</a>
-          <a href="/tags/zlcache/">zlcache</a>
+          <a href="/tags/get_page_from_freelist/">get_page_from_freelist</a>
           </div>
       <nav class="post-nav">
-        
-        <a class="next" href="/post/mm/mm-buddy_allocator_initialization/">
-            <span class="next-text nav-default">mm-buddy_allocator初始化</span>
+        <a class="prev" href="/post/mm/mm-buddy_allocator_initialization/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm/mm-memsection/">
+            <span class="next-text nav-default">mm-buddy_allocator_initialization</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

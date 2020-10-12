@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>mm-buddy_allocator_initialization - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/mm/mm-memsection/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="mm-buddy_allocator_initialization" />
+<meta property="og:description" content="本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm/mm-memsection/" />
+
+<meta itemprop="name" content="mm-buddy_allocator_initialization">
+<meta itemprop="description" content="本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为">
+
+<meta itemprop="wordCount" content="3847">
+
+
+
+<meta itemprop="keywords" content="kernel-srcs,mm,mem_section&#34;," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="mm-buddy_allocator_initialization"/>
+<meta name="twitter:description" content="本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">mm-buddy_allocator_initialization</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 0001-01-01 </span>
+        
+          <span class="more-meta"> 3847 words </span>
+          <span class="more-meta"> 8 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11-flat-memory-model">1.1. Flat Memory Model</a></li>
+    <li><a href="#12-discontiguous-memory-model">1.2. Discontiguous Memory Model</a>
+      <ul>
+        <li><a href="#121-__pfn_to_page">1.2.1. __pfn_to_page</a></li>
+      </ul>
+    </li>
+    <li><a href="#13-sparse-memory-model">1.3. Sparse Memory Model</a>
+      <ul>
+        <li><a href="#131-__page_to_pfn">1.3.1. __page_to_pfn</a></li>
+        <li><a href="#132-__pfn_to_page">1.3.2. __pfn_to_page</a></li>
+        <li><a href="#133-vmemmap">1.3.3. VMEMMAP</a></li>
+      </ul>
+    </li>
+    <li><a href="#小结">小结</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#21-sparse_init">2.1. sparse_init</a>
+      <ul>
+        <li><a href="#211-sparse_early_usemaps_alloc_node">2.1.1. sparse_early_usemaps_alloc_node</a></li>
+        <li><a href="#212-sparse_early_mem_maps_alloc_node">2.1.2. sparse_early_mem_maps_alloc_node</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为 NUMA ， sparse memory model 。</p>
+<h1 id="1-memory-model">1. Memory Model</h1>
+<p>内存模型一部分内容主要来自<a href="http://www.wowotech.net/memory_management/memory_model.html">网上</a>， <em>Documentation</em> 中没有找到相关的内容。</p>
+<p>内存模型是从 CPU 的角度看，系统中物理内存的分布情况；在 Linux 内核中，使用何种方式来管理这些物理内存。</p>
+<p>Linux 支持三种内存模型， flat memory ， discontiguous memory 和 sparse memory 。</p>
+<p>本文假设所有的CPU共享同一段物理地址空间。</p>
+<h2 id="11-flat-memory-model">1.1. Flat Memory Model</h2>
+<p>从系统的任意一个 CPU 来看，访问物理内存的时候，物理地址空间是连续的，没有空洞的地址空间，这种计算机系统的内存模型就是 flat memory model 。</p>
+<p>这种情况下，节点数据 <strong>pg_data_t</strong> 只有一个，物理页框号和 <strong>struct page *mem_map</strong> 可以通过一个偏移量互相转化。将 <strong>mem_map</strong> 放在内存的直接映射区域，操作系统就不需要再为内存建立页表。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="c1">// include/asm-generic/memory_model.h
+</span><span class="c1"></span><span class="cp">#define __pfn_to_page(pfn)    (mem_map + ((pfn) - ARCH_PFN_OFFSET))
+</span><span class="cp">#define __page_to_pfn(page)    ((unsigned long)((page) - mem_map) + ARCH_PFN_OFFSET)
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="12-discontiguous-memory-model">1.2. Discontiguous Memory Model</h2>
+<p>如果物理内存的地址空间有空洞，这种内存模型就是 discontiguous memory model 。</p>
+<p>这种情况下，节点数据 <strong>pg_data_t</strong> 有多个，每个节点管理的物理内存都保存在 <strong>pg_data_t</strong> 中的 <strong>node_mem_map</strong> ( 类似于flat模型中的 <strong>mem_map</strong> ) 成员中。从物理页框号转化为 <strong>struct page</strong> 需要先从 PFN 中得到节点 ID ，然后找到对应的 <strong>pg_data_t</strong> ，就可以像 flat 模型一样获得 <strong>struct page</strong> 数组。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="c1">// include/asm-generic/memory_model.h
+</span><span class="c1"></span><span class="cp">#define __pfn_to_page(pfn)          \
+</span><span class="cp">({  unsigned long __pfn = (pfn);        \
+</span><span class="cp">    unsigned long __nid = arch_pfn_to_nid(__pfn);  \
+</span><span class="cp">    NODE_DATA(__nid)-&gt;node_mem_map + arch_local_page_offset(__pfn, __nid);\
+</span><span class="cp">})
+</span><span class="cp"></span>
+<span class="cp">#define __page_to_pfn(pg)                       \
+</span><span class="cp">({  const struct page *__pg = (pg);                 \
+</span><span class="cp">    struct pglist_data *__pgdat = NODE_DATA(page_to_nid(__pg)); \
+</span><span class="cp">    (unsigned long)(__pg - __pgdat-&gt;node_mem_map) +         \
+</span><span class="cp">     __pgdat-&gt;node_start_pfn;                   \
+</span><span class="cp">})
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="121-__pfn_to_page">1.2.1. __pfn_to_page</h3>
+<p>x86 下，只有 32 位 ( 选择 32 位内核才会出现 flat memory model ) 系统 <code>pfn_to_nid</code> 有定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="nf">pfn_to_nid</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pfn</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="cp">#ifdef CONFIG_NUMA
+</span><span class="cp"></span>    <span class="k">return</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span> <span class="n">physnode_map</span><span class="p">[(</span><span class="n">pfn</span><span class="p">)</span> <span class="o">/</span> <span class="n">PAGES_PER_SECTION</span><span class="p">]);</span>
+<span class="cp">#else
+</span><span class="cp"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>本文主要着眼于 64 位系统， 32 位的有关内容不再详细介绍。</p>
+<h2 id="13-sparse-memory-model">1.3. Sparse Memory Model</h2>
+<p>sparse 模型用来解决内存的热插拔可能导致的内存节点内的 <strong>mem_map</strong> 不连续的问题。这种模型将连续的地址空间按照 section ( x86_64 NUMA 架构下为 128M )分段，每一个 section 都是 hotplug 的。</p>
+<p>整个物理内存的地址空间通过指针 <strong>struct mem_section *</strong> 数组来描述，每个 <strong>mem_section *</strong> 指向一个 page ， page 中包含若干个 <strong>struct mem_section</strong> 对象，每个对象描述一个 section 。</p>
+<p>每一个 section 内部，内存地址都是连续的。因此， <strong>mem_map</strong> 的 page 数组依赖于 section 结构。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cp">#define __page_to_pfn(pg)                   \
+</span><span class="cp">({  const struct page *__pg = (pg);             \
+</span><span class="cp">    int __sec = page_to_section(__pg);          \
+</span><span class="cp">    (unsigned long)(__pg - __section_mem_map_addr(__nr_to_section(__sec))); \
+</span><span class="cp">})
+</span><span class="cp"></span>
+<span class="cp">#define __pfn_to_page(pfn)              \
+</span><span class="cp">({  unsigned long __pfn = (pfn);            \
+</span><span class="cp">    struct mem_section *__sec = __pfn_to_section(__pfn);    \
+</span><span class="cp">    __section_mem_map_addr(__sec) + __pfn;      \
+</span><span class="cp">})
+</span></code></pre></td></tr></table>
+</div>
+</div><p>如果开启了 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> 选项 ( 默认开启 ) ， PFN 和 <strong>struct page *</strong> 之间的转化十分简单：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cm">/* memmap is virtually contiguous.  */</span>
+<span class="cp">#define __pfn_to_page(pfn)  (vmemmap + (pfn))
+</span><span class="cp">#define __page_to_pfn(page) (unsigned long)((page) - vmemmap)
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="131-__page_to_pfn">1.3.1. __page_to_pfn</h3>
+<p>如果开启了 <strong>CONFIG_SPARSEMEM</strong> ，但是没有开启 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，就会开启 <strong>SECTION_IN_PAGE_FLAGS</strong> 选项，即在页表中包含 section 信息，据此实现 <code>page_to_section</code> 。</p>
+<p><code>__nr_to_section</code> 的实现也很简单，但是需要了解变量 <strong>mem_section</strong> 的定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="cp">#ifdef CONFIG_SPARSEMEM_EXTREME
+</span><span class="cp"></span><span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="n">mem_section</span><span class="p">[</span><span class="n">NR_SECTION_ROOTS</span><span class="p">]</span>
+    <span class="n">____cacheline_internodealigned_in_smp</span><span class="p">;</span>
+<span class="cp">#else
+</span><span class="cp"></span><span class="k">struct</span> <span class="n">mem_section</span> <span class="n">mem_section</span><span class="p">[</span><span class="n">NR_SECTION_ROOTS</span><span class="p">][</span><span class="n">SECTIONS_PER_ROOT</span><span class="p">]</span>
+    <span class="n">____cacheline_internodealigned_in_smp</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span><span class="n">EXPORT_SYMBOL</span><span class="p">(</span><span class="n">mem_section</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>取得 section 的 index 后，进行二维数组的访问操作即可获得对应的 section 结构体：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="nf">__nr_to_section</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">nr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">mem_section</span><span class="p">[</span><span class="n">SECTION_NR_TO_ROOT</span><span class="p">(</span><span class="n">nr</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">mem_section</span><span class="p">[</span><span class="n">SECTION_NR_TO_ROOT</span><span class="p">(</span><span class="n">nr</span><span class="p">)][</span><span class="n">nr</span> <span class="o">&amp;</span> <span class="n">SECTION_ROOT_MASK</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从 section 中获取对应的 <strong>struct page *</strong> 的首地址后，用要查找的 <strong>struct page *</strong> 减去 section 的首地址，即可获得对应的 PFN 。</p>
+<p>内核代码中有 <code>__page_to_pfn</code> 函数的注释如下：</p>
+<blockquote>
+<p>setion&rsquo;s mem_map is encoded to reflect its start_pfn.</p>
+<p>section[i].section_mem_map = mem_map&rsquo;s address = start_pfn.</p>
+</blockquote>
+<h3 id="132-__pfn_to_page">1.3.2. __pfn_to_page</h3>
+<p>同理，由 PFN 可以得到所在的 section 的 index ，然后通过 <code>__nr_to_section</code> 获得 section ，再根据 section 中保存的 <strong>struct page *</strong> 的起始地址，获取 PFN 对应的 <strong>struct page *</strong> 。</p>
+<h3 id="133-vmemmap">1.3.3. VMEMMAP</h3>
+<p>如果开启 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，所有的 <strong>struct page *</strong> 都保存在连续的地址空间中，起始地址为 <strong>VMEMMAP_START</strong> ，x86架构定义在 <em>arch/x86/include/asm/pgtable_64_types.h</em> ，为 0xffffea0000000000UL 。</p>
+<h2 id="小结">小结</h2>
+<p>内核的内存模型是为了描述物理内存，完成内存的物理页和 <strong>struct page*</strong> 之间的转换工作。</p>
+<h1 id="2-mem_section">2. mem_section</h1>
+<p>使用 sparse 内存模型的 NUMA 系统，将所有的物理内存分成内存段，即 mem_section 。 <em>mm/sparse.c</em> 中定义的 <strong>struct mem_section *mem_section[NR_SECTION_ROOTS]</strong> 变量 ( x86 下默认开启 <strong>CONFIG_SPARSEMEM_EXTREME</strong> ) ，包含系统中所有的内存段。</p>
+<p>根据定义可知， <strong>mem_section</strong> 变量是长度为 <strong>NR_SECTION_ROOTS</strong> 指针数组，而 <strong>NR_SECTION_ROOTS = 2K</strong> ，所以 <strong>mem_section</strong> 占用<strong>16B * 2K = 32KB</strong>的空间。</p>
+<p>这个数组是静态的，无论对应的内存段是否存在。</p>
+<p><strong>mem_section</strong> 的初始化过程由 <code>sparse_init</code> 完成，函数的调用路径如下：</p>
+<ul>
+<li><code>start_kernel</code> ( <em>init/main.c</em> )
+<ul>
+<li><code>setup_arch</code> ( <em>arch/x86/kernel/setup.c</em> )
+<ul>
+<li><code>x86_init.paging.pagetable_init</code> = <code>native_pagetable_init</code> ( <em>arch/x86/kernel/x86_init.c</em> )
+<ul>
+<li><code>paging_init</code> ( <em>arch/x86/mm/init_64.c</em> )
+<ul>
+<li><code>sparse_init</code> ( <em>arch/x86/mm/sparse.c</em> )</li>
+<li><code>zone_sizes_init</code> ( <em>arch/x86/mm/init.c</em> ) 初始化 max_zone_pfns 数组，包含各个zone可以包含的最大的page数
+<ul>
+<li><code>free_area_init_nodes(max_zone_pfns)</code> ( <em>mm/page_alloc.c</em> )
+<ul>
+<li><code>free_area_init_node</code> ( <em>mm/page_alloc.c</em> )</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>这里先说明 <em>arch/x86/mm/init_64.c</em> 中的 <code>paging_init</code> 函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">paging_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">sparse_memory_present_with_active_regions</span><span class="p">(</span><span class="n">MAX_NUMNODES</span><span class="p">);</span>
+    <span class="n">sparse_init</span><span class="p">();</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * clear the default setting with node 0
+</span><span class="cm">     * note: don&#39;t use nodes_clear here, that is really clearing when
+</span><span class="cm">     *   numa support is not compiled in, and later node_set_state
+</span><span class="cm">     *   will not set it back.
+</span><span class="cm">     */</span>  
+    <span class="n">node_clear_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N_MEMORY</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">N_MEMORY</span> <span class="o">!=</span> <span class="n">N_NORMAL_MEMORY</span><span class="p">)</span>
+        <span class="n">node_clear_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N_NORMAL_MEMORY</span><span class="p">);</span>
+
+    <span class="n">zone_sizes_init</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>paging_init</code> 首先调用 <code>sparse_memory_present_with_active_region</code> 将系统内所有内存节点的物理页框通过 <code>memroy_present</code> 保存到 <strong>mem_section</strong> ，并且初始化 <strong>mem_section</strong> 数组的成员大小为 <strong>SECTION_PER_ROOT * sizeof(struct mem_section)</strong> ( <strong>CONFIG_SPARSEMEM_EXTREME</strong> 的情况 ) ；然后调用 <code>sparse_init</code> 重新设置 <strong>section_mem_map</strong> 成员；最后通过 <code>zone_sizes_init</code> 初始化内存区域。</p>
+<p>需要说明的是， <code>memory_presents</code> 函数不但将节点包含的物理页框添加到 <strong>mem_section</strong> ，还会设置每个 <strong>mem_section</strong> 的 <strong>section_mem_map</strong> 成员为 <strong>( 所属的节点ID &laquo; SECTION_NID_SHIFT | SECTION_MARKED_PRESENT)</strong> 。</p>
+<h2 id="21-sparse_init">2.1. sparse_init</h2>
+<p><code>sparse_init</code> 主要设置 <strong>mem_section</strong> 的 <strong>section_mem_map</strong> 成员，将 <code>sparse_memory_present_with_active_regions</code> 函数保存的内容替换为对应的 PFN ，以便第一部分内存模型中介绍的 <code>pfn_to_page</code> 和 <code>page_to_pfn</code> 工作正常。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">sparse_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">map</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="n">usemap</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">**</span><span class="n">usemap_map</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">size</span><span class="p">;</span>
+<span class="cm">/* 默认情况下为真 */</span>
+<span class="cp">#ifdef CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER
+</span><span class="cp"></span>    <span class="kt">int</span> <span class="n">size2</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">**</span><span class="n">map_map</span><span class="p">;</span>
+<span class="cp">#endif
+</span><span class="cp"></span>
+    <span class="cm">/* see include/linux/mmzone.h &#39;struct mem_section&#39; definition */</span>
+    <span class="n">BUILD_BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="n">is_power_of_2</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">mem_section</span><span class="p">)));</span>
+
+    <span class="cm">/* Setup pageblock_order for HUGETLB_PAGE_SIZE_VARIABLE */</span>
+    <span class="n">set_pageblock_order</span><span class="p">();</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * map is using big page (aka 2M in x86 64 bit)
+</span><span class="cm">     * usemap is less one page (aka 24 bytes)
+</span><span class="cm">     * so alloc 2M (with 2M align) and 24 bytes in turn will
+</span><span class="cm">     * make next 2M slip to one more 2M later.
+</span><span class="cm">     * then in big system, the memory will have a lot of holes...
+</span><span class="cm">     * here try to allocate 2M pages continuously.
+</span><span class="cm">     *
+</span><span class="cm">     * powerpc need to call sparse_init_one_section right after each
+</span><span class="cm">     * sparse_early_mem_map_alloc, so allocate usemap_map at first.
+</span><span class="cm">     */</span>
+    <span class="cm">/*
+</span><span class="cm">     * size = 8B * 512K = 4MB 
+</span><span class="cm">     * 为每一个 section 分配一个指针所需的空间 
+</span><span class="cm">     */</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">*</span><span class="p">)</span> <span class="o">*</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">;</span>
+
+    <span class="cm">/*
+</span><span class="cm">     * 上面这段注释的意思是说如果轮流分配 usemap 和 map 的内存
+</span><span class="cm">     * 会留下许多内存空洞。
+</span><span class="cm">     * memblock_virt_alloc 从 memblock 中分配内存空间
+</span><span class="cm">     */</span>
+    <span class="n">usemap_map</span> <span class="o">=</span> <span class="n">memblock_virt_alloc</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">usemap_map</span><span class="p">)</span>
+        <span class="n">panic</span><span class="p">(</span><span class="s">&#34;can not allocate usemap_map</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+
+    <span class="cm">/*sparse_early_usemaps_alloc_node从给定的*/</span>
+    <span class="n">alloc_usemap_and_memmap</span><span class="p">(</span><span class="n">sparse_early_usemaps_alloc_node</span><span class="p">,</span>
+                            <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">usemap_map</span><span class="p">);</span>
+
+<span class="cp">#ifdef CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER
+</span><span class="cp"></span>    <span class="n">size2</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="p">)</span> <span class="o">*</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">;</span>
+    <span class="n">map_map</span> <span class="o">=</span> <span class="n">memblock_virt_alloc</span><span class="p">(</span><span class="n">size2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">map_map</span><span class="p">)</span>
+        <span class="n">panic</span><span class="p">(</span><span class="s">&#34;can not allocate map_map</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+    <span class="n">alloc_usemap_and_memmap</span><span class="p">(</span><span class="n">sparse_early_mem_maps_alloc_node</span><span class="p">,</span>
+                            <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">map_map</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+        <span class="n">usemap</span> <span class="o">=</span> <span class="n">usemap_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">usemap</span><span class="p">)</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+<span class="cp">#ifdef CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER
+</span><span class="cp"></span>        <span class="n">map</span> <span class="o">=</span> <span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">];</span>
+<span class="cp">#else
+</span><span class="cp"></span>        <span class="n">map</span> <span class="o">=</span> <span class="n">sparse_early_mem_map_alloc</span><span class="p">(</span><span class="n">pnum</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">map</span><span class="p">)</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+        <span class="n">sparse_init_one_section</span><span class="p">(</span><span class="n">__nr_to_section</span><span class="p">(</span><span class="n">pnum</span><span class="p">),</span> <span class="n">pnum</span><span class="p">,</span> <span class="n">map</span><span class="p">,</span>
+                                <span class="n">usemap</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">vmemmap_populate_print_last</span><span class="p">();</span>
+
+<span class="cp">#ifdef CONFIG_SPARSEMEM_ALLOC_MEM_MAP_TOGETHER
+</span><span class="cp"></span>    <span class="n">memblock_free_early</span><span class="p">(</span><span class="n">__pa</span><span class="p">(</span><span class="n">map_map</span><span class="p">),</span> <span class="n">size2</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="n">memblock_free_early</span><span class="p">(</span><span class="n">__pa</span><span class="p">(</span><span class="n">usemap_map</span><span class="p">),</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>sparse_init</code> 函数的主要工作由 <code>alloc_usemap_and_memmap</code> 完成，后者负责遍历 <strong>mem_section</strong> 数组，实际的工作由参数 <code>alloc_func</code> 完成：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="n">__init</span> <span class="nf">alloc_usemap_and_memmap</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">alloc_func</span><span class="p">)</span>
+                    <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">,</span>
+                    <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">,</span> <span class="kt">int</span><span class="p">),</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">map_count</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">nodeid_begin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_begin</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="cm">/* 遍历 mem_section 数组，寻找第一个标记为 present 的 section */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="n">ms</span><span class="p">;</span>
+
+        <span class="cm">/* 略过没有标记为 present 的 section */</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="cm">/*
+</span><span class="cm">         * 找到了标记为 present 的 section ,
+</span><span class="cm">         * 根据 section 的 index 获取对应的 section 指针 
+</span><span class="cm">         */</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">__nr_to_section</span><span class="p">(</span><span class="n">pnum</span><span class="p">);</span>
+        <span class="n">nodeid_begin</span> <span class="o">=</span> <span class="n">sparse_early_nid</span><span class="p">(</span><span class="n">ms</span><span class="p">);</span>
+        <span class="n">pnum_begin</span> <span class="o">=</span> <span class="n">pnum</span><span class="p">;</span>
+        <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">map_count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="cm">/* 
+</span><span class="cm">     * 从 present 的 section 开始，为属于同一个节点的所有 section
+</span><span class="cm">     * 调用 alloc_func 
+</span><span class="cm">     */</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="n">ms</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">nodeid</span><span class="p">;</span>
+
+        <span class="c1">// 跳过没有 present 的 section 
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">__nr_to_section</span><span class="p">(</span><span class="n">pnum</span><span class="p">);</span>
+        <span class="n">nodeid</span> <span class="o">=</span> <span class="n">sparse_early_nid</span><span class="p">(</span><span class="n">ms</span><span class="p">);</span>
+
+        <span class="c1">// 当前 section 和起始 section 属于相同的节点，增加 map count
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="n">nodeid</span> <span class="o">==</span> <span class="n">nodeid_begin</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">map_count</span><span class="o">++</span><span class="p">;</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="cm">/* ok, we need to take cake of from pnum_begin to pnum - 1*/</span>
+        <span class="n">alloc_func</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pnum_begin</span><span class="p">,</span> <span class="n">pnum</span><span class="p">,</span>
+                        <span class="n">map_count</span><span class="p">,</span> <span class="n">nodeid_begin</span><span class="p">);</span>
+        <span class="cm">/* new start, update count etc*/</span>
+        <span class="n">nodeid_begin</span> <span class="o">=</span> <span class="n">nodeid</span><span class="p">;</span>
+        <span class="n">pnum_begin</span> <span class="o">=</span> <span class="n">pnum</span><span class="p">;</span>
+        <span class="n">map_count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="cm">/* ok, last chunk */</span>
+    <span class="n">alloc_func</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pnum_begin</span><span class="p">,</span> <span class="n">NR_MEM_SECTIONS</span><span class="p">,</span>
+                        <span class="n">map_count</span><span class="p">,</span> <span class="n">nodeid_begin</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>sparse_init</code> 函数先后两次调用 <code>alloc_usemap_and_memmap</code> 函数，传入的 <strong>alloc_func</strong> 分别为 <code>sparse_early_usemaps_alloc_node</code> 和 <code>sparse_early_mem_maps_alloc_node</code> ， <strong>data</strong> 分别为保存 <strong>unsigned long *</strong> 对象的 <strong>usemap_map</strong>  和 <strong>struct page *</strong> 对象的 <strong>map_map</strong> 。</p>
+<h3 id="211-sparse_early_usemaps_alloc_node">2.1.1. sparse_early_usemaps_alloc_node</h3>
+<p>分配函数为 <code>sparse_early_usemaps_alloc_node</code> 时， <strong>data</strong> 参数为长度为 <strong>NR_MEM_SECTIONS</strong> 的 <strong>unsigned long *</strong> 数组 <strong>usemap_map</strong> 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="n">__init</span> <span class="nf">sparse_early_usemaps_alloc_node</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_begin</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_end</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">usemap_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nodeid</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">usemap</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">**</span><span class="n">usemap_map</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="o">**</span><span class="p">)</span><span class="n">data</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="n">usemap_size</span><span class="p">();</span>
+    <span class="cm">/* 
+</span><span class="cm">     * 从指定节点的memblock中分配所需的内存空间，
+</span><span class="cm">     * usemap_count 为存在的 section 的数量 
+</span><span class="cm">     */</span>
+    <span class="n">usemap</span> <span class="o">=</span> <span class="n">sparse_early_usemaps_alloc_pgdat_section</span><span class="p">(</span><span class="n">NODE_DATA</span><span class="p">(</span><span class="n">nodeid</span><span class="p">),</span>
+                              <span class="n">size</span> <span class="o">*</span> <span class="n">usemap_count</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">usemap</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_WARNING</span> <span class="s">&#34;%s: allocation failed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">pnum_end</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// 跳过不存在的 section
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+        <span class="c1">// 设置 section 对应的 usemap_map 数组元素指向分配的 usemap
+</span><span class="c1"></span>        <span class="n">usemap_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">usemap</span><span class="p">;</span>
+        <span class="n">usemap</span> <span class="o">+=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="n">check_usemap_section_nr</span><span class="p">(</span><span class="n">nodeid</span><span class="p">,</span> <span class="n">usemap_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="212-sparse_early_mem_maps_alloc_node">2.1.2. sparse_early_mem_maps_alloc_node</h3>
+<p>分配函数为 <code>sparse_early_mem_maps_alloc_node</code> 时， <strong>data</strong> 参数为长度为 <strong>NR_MEM_SECTIONS</strong> 的<strong>struct page *</strong> 数组 <strong>map_map</strong> 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">static</span> <span class="kt">void</span> <span class="n">__init</span> <span class="nf">sparse_early_mem_maps_alloc_node</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_begin</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_end</span><span class="p">,</span>
+                 <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">map_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nodeid</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">page</span> <span class="o">**</span><span class="n">map_map</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">page</span> <span class="o">**</span><span class="p">)</span><span class="n">data</span><span class="p">;</span>
+    <span class="n">sparse_mem_maps_populate_node</span><span class="p">(</span><span class="n">map_map</span><span class="p">,</span> <span class="n">pnum_begin</span><span class="p">,</span> <span class="n">pnum_end</span><span class="p">,</span>
+                     <span class="n">map_count</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>和 SPARSEMEM 相关的还有一个配置项，即前面说到的 <strong>CONFIG_SPARSEMEM_VMEMMAP</strong> ，开启此选项，系统中所有的 <strong>struct page *</strong> 对象保存在连续的内存地址空间中。对应的， <code>sparse_mem_maps_populate_node</code> 函数有两个定义。</p>
+<h4 id="2121-non-vmemmap">2.1.2.1. non-vmemmap</h4>
+<p>non-vmemmap情况下 <code>sparse_mem_maps_populate_node</code> 函数定义在 <em>mm/sparse.c</em> 中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">sparse_mem_maps_populate_node</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span> <span class="o">**</span><span class="n">map_map</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_begin</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_end</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">map_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nodeid</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">map</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum</span><span class="p">;</span>
+
+    <span class="c1">// size 为描述每个 section 包含的页框所需的内存大小 
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span><span class="p">)</span> <span class="o">*</span> <span class="n">PAGES_PER_SECTION</span><span class="p">;</span>
+
+    <span class="c1">// x86 下alloc_remap 函数返回 NULL
+</span><span class="c1"></span>    <span class="n">map</span> <span class="o">=</span> <span class="n">alloc_remap</span><span class="p">(</span><span class="n">nodeid</span><span class="p">,</span> <span class="n">size</span> <span class="o">*</span> <span class="n">map_count</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">map</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">pnum_end</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+                <span class="k">continue</span><span class="p">;</span>
+            <span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">map</span><span class="p">;</span>
+            <span class="n">map</span> <span class="o">+=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="n">PAGE_ALIGN</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="cm">/*
+</span><span class="cm">     * 从 memblock 中分配所需的内存，大小为描述节点内所有的
+</span><span class="cm">     * section 包含的页框所需的内存 
+</span><span class="cm">     */</span>
+    <span class="n">map</span> <span class="o">=</span> <span class="n">memblock_virt_alloc_try_nid</span><span class="p">(</span><span class="n">size</span> <span class="o">*</span> <span class="n">map_count</span><span class="p">,</span>
+                      <span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">__pa</span><span class="p">(</span><span class="n">MAX_DMA_ADDRESS</span><span class="p">),</span>
+                      <span class="n">BOOTMEM_ALLOC_ACCESSIBLE</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">map</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">pnum_end</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// 跳过不存在的section
+</span><span class="c1"></span>            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+                <span class="k">continue</span><span class="p">;</span>
+
+            <span class="cm">/*
+</span><span class="cm">             * 将 map_map 中对应的元素指向该 section 包含的所有页框
+</span><span class="cm">             * 的 struct page 的地址，即 section 内第一个页面对应的
+</span><span class="cm">             * struct page 的地址
+</span><span class="cm">             */</span>
+            <span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">map</span><span class="p">;</span>
+            <span class="n">map</span> <span class="o">+=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* fallback */</span>
+    <span class="c1">// fallback只是再次执行上述相同的操作 
+</span><span class="c1"></span>    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">pnum_end</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="n">ms</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_mem_map_populate</span><span class="p">(</span><span class="n">pnum</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">])</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">__nr_to_section</span><span class="p">(</span><span class="n">pnum</span><span class="p">);</span>
+        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_ERR</span> <span class="s">&#34;%s: sparsemem memory map backing failed &#34;</span>
+            <span class="s">&#34;some memory will not be available.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+        <span class="n">ms</span><span class="o">-&gt;</span><span class="n">section_mem_map</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到， non-vmemmap 情况下，每次调用 <code>sparse_mem_maps_populate_node</code> 函数只是从 memblock 中分配所需的内存空间，分配的内存空间很有可能不连续。</p>
+<h4 id="2122-vmemmap">2.1.2.2. vmemmap</h4>
+<p>配置 vmemmap 的情况下， <code>sparse_mem_maps_populate_node</code> 定义在 <em>mm/sprase-vmemmap.c</em> 中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-C" data-lang="C"><span class="kt">void</span> <span class="n">__init</span> <span class="nf">sparse_mem_maps_populate_node</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span> <span class="o">**</span><span class="n">map_map</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_begin</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum_end</span><span class="p">,</span>
+                      <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">map_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nodeid</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pnum</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">page</span><span class="p">)</span> <span class="o">*</span> <span class="n">PAGES_PER_SECTION</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">vmemmap_buf_start</span><span class="p">;</span>
+
+    <span class="cm">/* PMD_SIZE = 2MB，对齐到PMD_SIZE， 这里有个疑问，为什么
+</span><span class="cm">       要对齐到2MB */</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">PMD_SIZE</span><span class="p">);</span>
+
+    <span class="c1">// 从指定节点的 memblock 分配所需的内存空间
+</span><span class="c1"></span>    <span class="n">vmemmap_buf_start</span> <span class="o">=</span> <span class="n">__earlyonly_bootmem_alloc</span><span class="p">(</span><span class="n">nodeid</span><span class="p">,</span> <span class="n">size</span> <span class="o">*</span> <span class="n">map_count</span><span class="p">,</span>
+             <span class="n">PMD_SIZE</span><span class="p">,</span> <span class="n">__pa</span><span class="p">(</span><span class="n">MAX_DMA_ADDRESS</span><span class="p">));</span>
+
+    <span class="cm">/* 
+</span><span class="cm">     * 内存分配成功，保存起始地址和结束地址。
+</span><span class="cm">     * vmemmap_buf 用于分配下列操作中建立页表所需的内存空间，在
+</span><span class="cm">     * 页表建立完成后释放没有使用的缓冲区
+</span><span class="cm">     */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">vmemmap_buf_start</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">vmemmap_buf</span> <span class="o">=</span> <span class="n">vmemmap_buf_start</span><span class="p">;</span>
+        <span class="n">vmemmap_buf_end</span> <span class="o">=</span> <span class="n">vmemmap_buf_start</span> <span class="o">+</span> <span class="n">size</span> <span class="o">*</span> <span class="n">map_count</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum_begin</span><span class="p">;</span> <span class="n">pnum</span> <span class="o">&lt;</span> <span class="n">pnum_end</span><span class="p">;</span> <span class="n">pnum</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">mem_section</span> <span class="o">*</span><span class="n">ms</span><span class="p">;</span>
+
+        <span class="c1">// 跳过不存在的 section
+</span><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">present_section_nr</span><span class="p">(</span><span class="n">pnum</span><span class="p">))</span>
+            <span class="k">continue</span><span class="p">;</span>
+
+        <span class="cm">/*
+</span><span class="cm">         * 为 section 中包含的所有页框对应的 struct page 建立页表。
+</span><span class="cm">         * 建立页表时会使用第一部分中定义的 pfn_to_page 宏，从而将
+</span><span class="cm">         * section 内的所有 pfn 对应的 struct page * 都保存在连续
+</span><span class="cm">         * 的虚拟地址空间中，并且返回 section 中首个 pfn 对应的
+</span><span class="cm">         * struct page *，保存在 map_map 中 
+</span><span class="cm">         */</span>
+        <span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_mem_map_populate</span><span class="p">(</span><span class="n">pnum</span><span class="p">,</span> <span class="n">nodeid</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">map_map</span><span class="p">[</span><span class="n">pnum</span><span class="p">])</span>
+            <span class="k">continue</span><span class="p">;</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="n">__nr_to_section</span><span class="p">(</span><span class="n">pnum</span><span class="p">);</span>
+        <span class="n">printk</span><span class="p">(</span><span class="n">KERN_ERR</span> <span class="s">&#34;%s: sparsemem memory map backing failed &#34;</span>
+            <span class="s">&#34;some memory will not be available.</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">__func__</span><span class="p">);</span>
+        <span class="n">ms</span><span class="o">-&gt;</span><span class="n">section_mem_map</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 释放没有用到的 vmemmap 缓冲区
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">vmemmap_buf_start</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* need to free left buf */</span>
+        <span class="n">memblock_free_early</span><span class="p">(</span><span class="n">__pa</span><span class="p">(</span><span class="n">vmemmap_buf</span><span class="p">),</span>
+                    <span class="n">vmemmap_buf_end</span> <span class="o">-</span> <span class="n">vmemmap_buf</span><span class="p">);</span>
+        <span class="n">vmemmap_buf</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="n">vmemmap_buf_end</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>至此，系统中内存段的初始化完成，可以通过 pfn_to_page 和 page_to_pfn 将 <strong>PFN</strong> 和 <strong>struct page *</strong> 相互转化。</p>
+<h1 id="3-总结">3. 总结</h1>
+<p>memsection 初始化时，分配的内存都是从 memblock 中获取，后者是内核 boot 的早期阶段 slab 等内存分配器还没有初始化时使用的内存分配器。</p>
+<p>memsection 是内存管理时经常使用的 <strong>struct page*</strong> 和 <strong>PFN</strong> 之间相互转换的桥梁。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        0001-01-01
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/kernel-srcs/">kernel-srcs</a>
+          <a href="/tags/mm/">mm</a>
+          <a href="/tags/mem_section/">mem_section&#34;</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mm/mm-buddy_allocator_page_allocation-1/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

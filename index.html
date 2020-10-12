@@ -44,7 +44,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://globsguo.github.io/" />
-<meta property="og:updated_time" content="2019-10-24T00:00:00+00:00" />
+<meta property="og:updated_time" content="2019-11-21T00:00:00+00:00" />
 <meta itemprop="name" content="Globs&#39; Catchall">
 <meta itemprop="description" content="">
 <meta name="twitter:card" content="summary"/>
@@ -112,93 +112,72 @@
           <section id="posts" class="posts">
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_page_allocation-1/">mm-buddy_allocator分配页框(上)</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_free_page/">mm-buddy_allocator_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-24 </span>
+      <span class="post-time"> 2019-11-21 </span>
       
-        <span class="more-meta"> 7344 words </span>
-        <span class="more-meta"> 15 mins read </span>
+        <span class="more-meta"> 1688 words </span>
+        <span class="more-meta"> 4 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      slab系统调用buddy分配器分配所需要的内存页，作为slab使用。 和slab系统不同，buddy系统主要响应较大(至少为一个内存页)的内
+      1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义
     </div>
     <div class="read-more">
-      <a href="/post/mm/mm-buddy_allocator_page_allocation-1/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-buddy_allocator_free_page/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_initialization/">mm-buddy_allocator初始化</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-memory_compaction/">mm-buddy_allocator_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-24 </span>
+      <span class="post-time"> 2019-11-16 </span>
       
-        <span class="more-meta"> 9190 words </span>
-        <span class="more-meta"> 19 mins read </span>
+        <span class="more-meta"> 1545 words </span>
+        <span class="more-meta"> 4 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存
+      1. 背景介绍 Documentation 目录没有关于 memory compaction 的详细介绍，本文从 slab 分配器的一个慢路径分配函数 __alloc_pages_direct_compact 的主要函数 try_to_compact_pages 入手，介绍内存压缩的相关内容。 压缩操作用到的一个关键
     </div>
     <div class="read-more">
-      <a href="/post/mm/mm-buddy_allocator_initialization/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-memory_compaction/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_initialization/">mm-slab初始化</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_page_allocation-2/">mm-buddy_allocator_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-21 </span>
+      <span class="post-time"> 2019-11-11 </span>
       
-        <span class="more-meta"> 5009 words </span>
-        <span class="more-meta"> 10 mins read </span>
+        <span class="more-meta"> 3626 words </span>
+        <span class="more-meta"> 8 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分
+      如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，
     </div>
     <div class="read-more">
-      <a href="/post/mm/mm-slab_initialization/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-buddy_allocator_page_allocation-2/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_allocation/">mm-slab对象的分配</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_free/">mm-slab_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-21 </span>
-      
-        <span class="more-meta"> 4253 words </span>
-        <span class="more-meta"> 9 mins read </span>
-    </div>
-  </header>
-  
-  <div class="post-content">
-    <div class="post-summary">
-      slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内
-    </div>
-    <div class="read-more">
-      <a href="/post/mm/mm-slab_objects_allocation/" class="read-more-link">Read more...</a>
-    </div>
-  </div>
-</article>
-
-    <article class="post">
-  <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_free/">mm-slab对象的回收</a></h1>
-    <div class="post-meta">
-      <span class="post-time"> 2019-10-21 </span>
+      <span class="post-time"> 2019-10-29 </span>
       
         <span class="more-meta"> 6004 words </span>
         <span class="more-meta"> 12 mins read </span>
@@ -217,105 +196,126 @@
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/control_group/">control group</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_allocation/">mm-slab_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-12 </span>
+      <span class="post-time"> 2019-10-26 </span>
       
-        <span class="more-meta"> 17772 words </span>
-        <span class="more-meta"> 36 mins read </span>
+        <span class="more-meta"> 3986 words </span>
+        <span class="more-meta"> 8 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      1. Control Group 1.1. What is cgroup cgroup即control cgroup，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的
+      slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内
     </div>
     <div class="read-more">
-      <a href="/post/mm/control_group/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-slab_objects_allocation/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/driver_model/">driver model</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_initialization/">mm-slab_initialization</a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-12 </span>
+      <span class="post-time"> 2019-10-24 </span>
       
-        <span class="more-meta"> 6706 words </span>
-        <span class="more-meta"> 14 mins read </span>
+        <span class="more-meta"> 4089 words </span>
+        <span class="more-meta"> 9 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      1. The Linux Kernel Device Model 1.1. Overview 传统的驱动模型是一些树形结构，不同类型的总线之间没有联系；当前的驱动模型为总线和总线下的设备提供了一个通用的、一致的数据模型
+      SLAB 用来响应较小的内存分配请求，事实上，现在的 Linux 内核使用的是 SLUB —— unqueued SLAB 分配器。 Linux 内核支持三种分配器，分别为 SLAB ， SLOB ， SLUB 。 x86 架构下，默认采用 SLUB 分配
     </div>
     <div class="read-more">
-      <a href="/post/mm/driver_model/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-slab_initialization/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/grub_parameters/">grub参数&#34;console=&#34;</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-control_group/"></a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-12 </span>
+      <span class="post-time"> 0001-01-01 </span>
       
-        <span class="more-meta"> 6318 words </span>
-        <span class="more-meta"> 13 mins read </span>
+        <span class="more-meta"> 17086 words </span>
+        <span class="more-meta"> 35 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      本文主要分析Linux内核如何处理grub参数中的console=ttyS0,115200n8部分，中间还会穿插一些 include/linux/init.h 的内容。 grub参数中
+      1. Control Group 1.1. What is cgroup cgroup 即 control cgroup ，控制组，提供了一种将一组进程及其未来的子进程聚集/分离为具有特定行为和层次结构的组的机制。 一个 cgroup 将一个或多个子系统的
     </div>
     <div class="read-more">
-      <a href="/post/mm/grub_parameters/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-control_group/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/memory_policy/">Linux Memory Policy</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-memblock/"></a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-10-12 </span>
+      <span class="post-time"> 0001-01-01 </span>
       
-        <span class="more-meta"> 5382 words </span>
-        <span class="more-meta"> 11 mins read </span>
+        <span class="more-meta"> 41 words </span>
+        <span class="more-meta"> 1 min read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      内核中，内存策略决定了NUMA系统中分配内存的节点。 内存策略和cpuset不同，后者是限制进程内存分配节点的管理机制，而内存策略是NUMA-
+      arch/x86/kernel/setup.c 中的 setup_arch 会调用 e820__memblock_setup 方法，把 e820 表中包含的 memblock 保存到 memblock 变量中。 这篇文章关于 memblock 的介绍很详细。
     </div>
     <div class="read-more">
-      <a href="/post/mm/memory_policy/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-memblock/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
 
     <article class="post">
   <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/printk/">printk函数</a></h1>
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-page_migration/"></a></h1>
     <div class="post-meta">
-      <span class="post-time"> 2019-09-19 </span>
+      <span class="post-time"> 0001-01-01 </span>
       
-        <span class="more-meta"> 8674 words </span>
-        <span class="more-meta"> 18 mins read </span>
+        <span class="more-meta"> 2116 words </span>
+        <span class="more-meta"> 5 mins read </span>
     </div>
   </header>
   
   <div class="post-content">
     <div class="post-summary">
-      1. printk.c中的重要变量 首先介绍一些 kernel/printk/printk.c 中定义的一些十分重要的变量。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 /* console_sem用来
+      1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址
     </div>
     <div class="read-more">
-      <a href="/post/mm/printk/" class="read-more-link">Read more...</a>
+      <a href="/post/mm/mm-page_migration/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_initialization/">mm-buddy_allocator_initialization</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 0001-01-01 </span>
+      
+        <span class="more-meta"> 7857 words </span>
+        <span class="more-meta"> 16 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存
+    </div>
+    <div class="read-more">
+      <a href="/post/mm/mm-buddy_allocator_initialization/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>
@@ -324,7 +324,10 @@
   
   <nav class="pagination">
     
-    
+    <a class="next" href="/page/2/">
+        <span class="next-text">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
   </nav>
         </div>
         

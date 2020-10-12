@@ -6,32 +6,32 @@
     <description>Recent content in slub on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 21 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/slub/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 29 Oct 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/slub/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>mm-slab初始化</title>
-      <link>https://globsguo.github.io/post/mm/mm-slab_initialization/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      <title>mm-slab_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-slab_objects_free/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/mm/mm-slab_initialization/</guid>
-      <description>SLAB用来响应较小的内存分配请求，事实上，现在的Linux内核使用的是SLUB——unqueued SLAB分配器。 Linux内核支持三种分</description>
+      <guid>https://globsguo.github.io/post/mm/mm-slab_objects_free/</guid>
+      <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5</description>
     </item>
     
     <item>
-      <title>mm-slab对象的分配</title>
+      <title>mm-slab_initialization</title>
       <link>https://globsguo.github.io/post/mm/mm-slab_objects_allocation/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/post/mm/mm-slab_objects_allocation/</guid>
       <description>slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内</description>
     </item>
     
     <item>
-      <title>mm-slab对象的回收</title>
-      <link>https://globsguo.github.io/post/mm/mm-slab_objects_free/</link>
-      <pubDate>Mon, 21 Oct 2019 00:00:00 +0000</pubDate>
+      <title>mm-slab_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-slab_initialization/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/post/mm/mm-slab_objects_free/</guid>
-      <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5</description>
+      <guid>https://globsguo.github.io/post/mm/mm-slab_initialization/</guid>
+      <description>SLAB 用来响应较小的内存分配请求，事实上，现在的 Linux 内核使用的是 SLUB —— unqueued SLAB 分配器。 Linux 内核支持三种分配器，分别为 SLAB ， SLOB ， SLUB 。 x86 架构下，默认采用 SLUB 分配</description>
     </item>
     
   </channel>

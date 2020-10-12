@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>try_to_compact_pages on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/try_to_compact_pages/</link>
+    <description>Recent content in try_to_compact_pages on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 16 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/try_to_compact_pages/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-memory_compaction/</link>
+      <pubDate>Sat, 16 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-memory_compaction/</guid>
+      <description>1. 背景介绍 Documentation 目录没有关于 memory compaction 的详细介绍，本文从 slab 分配器的一个慢路径分配函数 __alloc_pages_direct_compact 的主要函数 try_to_compact_pages 入手，介绍内存压缩的相关内容。 压缩操作用到的一个关键</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-slab对象的回收 - Globs&#39; Catchall</title>
+  <title>mm-slab_initialization - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -38,23 +38,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-slab对象的回收" />
+<meta property="og:title" content="mm-slab_initialization" />
 <meta property="og:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-slab_objects_free/" />
-<meta property="article:published_time" content="2019-10-21T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
-<meta itemprop="name" content="mm-slab对象的回收">
+<meta property="article:published_time" content="2019-10-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-29T00:00:00+00:00" />
+<meta itemprop="name" content="mm-slab_initialization">
 <meta itemprop="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5">
-<meta itemprop="datePublished" content="2019-10-21T00:00:00+00:00" />
-<meta itemprop="dateModified" content="2019-10-21T00:00:00+00:00" />
+<meta itemprop="datePublished" content="2019-10-29T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-29T00:00:00+00:00" />
 <meta itemprop="wordCount" content="6004">
 
 
 
-<meta itemprop="keywords" content="kernel-sources,memory,kmem_cache,slub,kmalloc_caches,kmalloc,kfree,slab_free," />
+<meta itemprop="keywords" content="kernel-srcs,mm,kmem_cache,slub,kfree,slab_free," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-slab对象的回收"/>
+<meta name="twitter:title" content="mm-slab_initialization"/>
 <meta name="twitter:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5"/>
 
 <!--[if lte IE 9]>
@@ -118,10 +118,10 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-slab对象的回收</h1>
+      <h1 class="post-title">mm-slab_initialization</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-10-21 </span>
+        <span class="post-time"> 2019-10-29 </span>
         
           <span class="more-meta"> 6004 words </span>
           <span class="more-meta"> 12 mins read </span>
@@ -134,13 +134,13 @@
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#41-put_cpu_partial">4.1. <code>put_cpu_partial</code></a>
+    <li><a href="#41-put_cpu_partial">4.1. put_cpu_partial</a>
       <ul>
-        <li><a href="#411-unfreeze_partials">4.1.1. <code>unfreeze_partials</code></a></li>
+        <li><a href="#411-unfreeze_partials">4.1.1. unfreeze_partials</a></li>
       </ul>
     </li>
-    <li><a href="#42-add_partial--remove_partial--remove_full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></a></li>
-    <li><a href="#43-discard_slab">4.3. <code>discard_slab</code></a></li>
+    <li><a href="#42-add_partial--remove_partial--remove_full">4.2. add_partial / remove_partial / remove_full</a></li>
+    <li><a href="#43-discard_slab">4.3. discard_slab</a></li>
   </ul>
 </nav>
   </div>
@@ -607,7 +607,7 @@ slab中已经分配的对象的数量</li>
 </div>
 </div><h1 id="4-slab的操作函数">4. slab的操作函数</h1>
 <p><code>__slab_free</code> 函数调用了多个操作slab的函数，包括 <code>put_cpu_partial</code> ， <code>add_partial</code> ， <code>remove_partial</code> ， <code>remove_full</code> ， <code>discard_slab</code> 。</p>
-<h2 id="41-put_cpu_partial">4.1. <code>put_cpu_partial</code></h2>
+<h2 id="41-put_cpu_partial">4.1. put_cpu_partial</h2>
 <p><code>__slab_free</code> 函数执行时，如果如果slab不属于任何CPU的slab cache，就会在释放对象后把slab添加到当前CPU的slab cache中，作为partial slab。</p>
 <p><strong>struct kmem_cache</strong> 结构体的 <strong>struct kmem_cache_cpu __percpu *cpu_slab</strong> 成员，其 <strong>struct page *partial</strong> 包含CPU的所有partial slab。<br>
 这些slab通过 <strong>struct page</strong> 的 <strong>struct page *next</strong> 成员链接；每个slab(page)包含partial链表中剩余partial slabs所有对象的数量，即 <strong>pobjects</strong> ，还包含剩余的partial slabs的数量，即 <strong>pages</strong> 。<br>
@@ -616,7 +616,7 @@ slab中已经分配的对象的数量</li>
 <code>static void put_cpu_partial(struct kmem_cache *s, struct page *page, int drain);</code> 。<br>
 <strong>s</strong> 是当前正在操作的slab cache， <strong>page</strong> 是要添加到partial list的slab， <strong>drain</strong> 是一个标志符，设置后如果当前CPU的slab cache已经超出了 <strong>s-&gt;cpu_partial</strong> ，就会执行 <code>unfreeze_partials</code> 函数，将当前CPU的slab cache中已有的partial slab全部解冻，然后将新增的slab中包含的partial对象的数量添加到统计信息。<br>
 slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;objects - page-&gt;inuse</code> 。</p>
-<h3 id="411-unfreeze_partials">4.1.1. <code>unfreeze_partials</code></h3>
+<h3 id="411-unfreeze_partials">4.1.1. unfreeze_partials</h3>
 <p><code>put_cpu_partial</code> 调用 <code>unfreeze_partial</code> 函数时，传入的参数为操作的slab cache和当前CPU的slab cache对象。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -756,7 +756,7 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
 </span><span class="cp"></span><span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="42-add_partial--remove_partial--remove_full">4.2. <code>add_partial</code> / <code>remove_partial</code> / <code>remove_full</code></h2>
+</div><h2 id="42-add_partial--remove_partial--remove_full">4.2. add_partial / remove_partial / remove_full</h2>
 <p>三个函数都是操作 <strong>struct page</strong> 的 <strong>struct list_head lru</strong> 成员，即从双向链表中直接删除slab项，并且设置 <code>lru-&gt;prev = LIST_POISON2</code> ， <code>lru-&gt;next = LIST_POISON1</code> 。</p>
 <p>需要说明的是，在 <strong>struct page</strong> 中， <strong>lru</strong> 和 <strong>next</strong> ， <strong>pages</strong> ， <strong>pobjects</strong> 等成员位于一个union中：</p>
 <div class="highlight"><div class="chroma">
@@ -792,7 +792,7 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
 </code></pre></td></tr></table>
 </div>
 </div><p>也就是说，在执行删除操作时，赋值 <code>lru-&gt;next</code> 和 <code>lru-&gt;prev</code> 会使 <strong>struct page *next</strong> 指向 <strong>LIST_POISON1</strong> ，其他地方比如 <code>unfreeze_partials</code> 函数通过 <strong>next</strong> 遍历partial表，不会访问已经删除的slab。</p>
-<h2 id="43-discard_slab">4.3. <code>discard_slab</code></h2>
+<h2 id="43-discard_slab">4.3. discard_slab</h2>
 <p><code>remove_partial</code> ， <code>remove_full</code> 只是将slab从表中删除，而 <code>discard_slab</code> 则将slab从slab cache中删除。</p>
 <p><code>discard_slab</code> 首先调用 <code>dec_slabs_node</code> 将要删除的slab包含对象的数量从slab cache中删除，并且减少节点的 <strong>nr_slabs</strong> ，然后调用 <code>free_slab</code> 函数。</p>
 <p><code>free_slab</code> 根据slab cache的标志执行不同的分支，这里介绍 <code>__free_slab</code> 分支。</p>
@@ -1183,7 +1183,7 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-10-21
+        2019-10-29
         
     </span>
   </p>
@@ -1206,23 +1206,21 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
   </div>
 </div><footer class="post-footer">
       <div class="post-tags">
-          <a href="/tags/kernel-sources/">kernel-sources</a>
-          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kernel-srcs/">kernel-srcs</a>
+          <a href="/tags/mm/">mm</a>
           <a href="/tags/kmem_cache/">kmem_cache</a>
           <a href="/tags/slub/">slub</a>
-          <a href="/tags/kmalloc_caches/">kmalloc_caches</a>
-          <a href="/tags/kmalloc/">kmalloc</a>
           <a href="/tags/kfree/">kfree</a>
           <a href="/tags/slab_free/">slab_free</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/mm/mm-slab_objects_allocation/">
+        <a class="prev" href="/post/mm/mm-buddy_allocator_page_allocation-2/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">mm-slab对象的分配</span>
+            <span class="prev-text nav-default">mm-buddy_allocator_initialization</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/mm/control_group/">
-            <span class="next-text nav-default">control group</span>
+        <a class="next" href="/post/mm/mm-slab_objects_allocation/">
+            <span class="next-text nav-default">mm-slab_initialization</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

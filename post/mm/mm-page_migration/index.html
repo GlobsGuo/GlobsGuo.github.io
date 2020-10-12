@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title> - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/mm/mm-page_migration/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<link href="/dist/even.c2a46f00.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="" />
+<meta property="og:description" content="1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/mm/mm-page_migration/" />
+
+<meta itemprop="name" content="">
+<meta itemprop="description" content="1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址">
+
+<meta itemprop="wordCount" content="2116">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title"></h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 0001-01-01 </span>
+        
+          <span class="more-meta"> 2116 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址。</p>
+<p>页面迁移的主要目的是通过将页面移动到正在运行进程的处理器附近，以此减少内存的访问延迟。</p>
+<p>页面迁移允许进程在设置一个新的内存策略 ( <code>mbind</code> ) 时设置 <strong>MF_MOVE</strong> 和 <strong>MF_MOVE_ALL</strong> 选项，手动迁移内存页所在的节点。进程的页面也可以迁移自另一进程，通过 <code>sys_migrate_pages</code> 函数调用。<code>migrate_pages</code> 函数接收两个节点集合，将一个进程的页面所在的节点移动到另一个节点。<br>
+页面迁移的功能由 <code>numactl</code> 提供， <code>cat /proc/&lt;pid&gt;/numa_maps</code> 可以看到进程页面所在的节点。</p>
+<p>手动迁移可能很有用，比如调度器在一个较远的节点运行进程，批调度器或者一个管理员可能发现这种情况，将页面移动到更近的处理器。内核本身只提供手动页面迁移支持，自动的页面迁移可以通过用户空间的进程实现。<br>
+特殊的函数调用 <code>move_pages</code> 允许移动进程内的单个页面。</p>
+<p>更大的设置通常使用 cpuset 将系统节点分成几部分，一个进程从一个 cpuset 移动到另一个时，同时能够移动其内存页。<br>
+cpuset 实现了自动化的进程局部性，如果一个进程被移动到新的 cpuset ，同时也会移动所有的内存页，保证进程的性能不会大幅下降。如果 cpuset 包含的内存节点变化， cpuset 内的进程的内存页也会移动。</p>
+<p>针对所有的迁移技术，页面迁移允许保留一组节点内页面的相对位置，这可以维持一个特定的内存分配模式，即使在迁移一个进程之后。这对于维持内存延迟十分必要，进程在迁移之后有相同的性能。</p>
+<p>页面迁移包含几个步骤，首先是较高一层的</p>
+<h1 id="2-内核对-migrate_pages-的使用">2. 内核对 <code>migrate_pages</code> 的使用：</h1>
+<ol>
+<li>
+<p>从 LRU 中删除页面。<br>
+要迁移的页面列表通过扫描页面并且移动到表中生成，即方法 <code>isolate_lru_page</code> 。<br>
+调用 <code>isolate_lru_page</code> 增加引用计数，保证迁移过程中不会消失，同时阻止交换程序和其他的扫描涉及到页面。</p>
+</li>
+<li>
+<p>需要一个类型为 <strong>new_page_t</strong> 的方法，传递给 <code>migrate_pages</code> ，指出如何针对旧页面分配正确的新页面。</p>
+</li>
+<li>
+<p>试图迁移页面的进程调用 <code>migrate_pages</code> ，后者针对要移动的页面调用分配函数。</p>
+</li>
+</ol>
+<h1 id="3-migrate_pages-如何工作">3. <code>migrate_pages</code> 如何工作</h1>
+<p><code>migrate_pages</code> 多次遍历页面的列表，如果一个页面的所有引用都可以移动，就会移动页面。页面已经通过 <code>isolate_lru_page</code> 从 LRU 移除，增加引用计数，保证进行迁移时页面不会被释放。</p>
+<p>步骤：</p>
+<ol>
+<li>锁定要迁移的页面。</li>
+<li>保证写回操作完成。</li>
+<li>锁定要移动到的新页面。</li>
+<li>所有和页面相关的页表转化为迁移的项，这会减少页面的映射计数。如果最终的映射计数不是 0 ，不迁移页面。所有试图访问页面的用户空间程序会等待页面的锁。</li>
+<li>获取 <strong>i_pages</strong> 锁，这会导致所有通过映射试图访问页面的进程阻塞在自旋锁。</li>
+<li>检查页面的引用计数，如果仍然不是 0 ，退出；否则可以知道只有我们引用这个页面。</li>
+<li>检查 radix 数，如果不包含指向这个页面的指针，退出，因为其他人修改了 radix 树。</li>
+<li>根据旧页面的设置准备新页面，以便对于新页面的访问能够得到正确的设置。</li>
+<li>修改 radix 树，指向新页面。</li>
+<li>减少旧页面的引用计数，因为地址空间的引用计数已经消失。建立新页面的引用，因为地址空间使用的是新页面。</li>
+<li>释放 <strong>i_pages</strong> 锁，可以在 mapping 中查找。进程从自旋锁变成针对被锁的新页面休眠。</li>
+<li>拷贝页面的内容到新页面。</li>
+<li>拷贝剩余的页面标志到新页面。</li>
+<li>旧页面的标志被清除，表示页面不再提供任何信息。</li>
+<li>触发针对新页面的写回队列。</li>
+<li>如果迁移项是页面，用真实的 pte 替代， Doing so will enable access for user space processes not already waiting for the page lock 。</li>
+<li>新旧页面释放页面的锁，等待页面锁的进程重新执行缺页操作，获取到新页面。</li>
+<li>新页面移动到 LRU ，可以通过 swapper 等程序再次扫描到。</li>
+</ol>
+<h1 id="4-non-lru-页面迁移">4. non-LRU 页面迁移</h1>
+<p>尽管原本的迁移旨在减少 NUMA 系统的内存访问延迟，想要创造高阶页面的压缩操作也是一个主要使用者。</p>
+<p>当前实现的问题在于只会迁移 LRU 页面，然而，驱动中存在可以迁移的 non-LRU 页面，比如 zsmalloc ， virtio-balloon 页面。</p>
+<p>对于 virtio-balloon 页面，一些迁移的代码路径被连接，添加了 virtio-balloon 的函数，截断了迁移逻辑。这和驱动紧密相关，其他想要启动页面的驱动可能需要在迁移路径添加自己的连接。</p>
+<p>为了克服问题， VM 支持 non-LRU 页面迁移，为 non-LRU 可移动页面提供了通用的方法，不需要特定驱动关联到迁移路径。</p>
+<p>如果一个驱动想要使自己的页面可以移动，需要定义 <strong>struct address_space_operations</strong> 内的三个函数指针：</p>
+<ol>
+<li>
+<p><code>bool (*isolate_page) (struct page *page, isolate_mode_t mode);</code><br>
+VM 希望驱动的 <code>isolate_page</code> 函数成功隔离页面时返回 <strong>true</strong> ， VM 将页面标记为 <strong>PG_isolated</strong> ，以便多个 CPU 的并发隔离操作跳过页面。如果驱动无法隔离页面，返回 <strong>false</strong> 。<br>
+一旦页面成功隔离， VM 就会使用 <strong>page.lru</strong> ，驱动不能期望这个域的值保持不变。</p>
+</li>
+<li>
+<p><code>int (*migratepage) (struct address_space *mapping, struct page *newpage, struct page *oldpage, enum migrate_mode);</code><br>
+隔离后， VM 调用驱动的 <code>migratepage</code> 方法，将被隔离的页面作为参数传递。 <code>migratepage</code> 的功能是移动旧页面的内容到新页面，建立新页面的 <strong>struct page</strong> 内容。<br>
+如果成功迁移旧页面，应该在持有 <strong>page_lock</strong> 时通过 <code>__ClearPageMovable</code> 向 VM 指明旧页面无法再移动，并且返回 <strong>MIGRATEPAGE_SUCCESS</strong> 。<br>
+如果返回 <strong>-EAGAIN</strong> ， VM 会在短时间内重试页面迁移，因为 VM 理解为暂时的迁移失败。<br>
+其他的错误代码， VM 不会再次尝试，放弃页面迁移。</p>
+</li>
+<li>
+<p><code>void (*putback_page)(struct page *);</code><br>
+如果迁移隔离的页面失败， VM 应该返回隔离的页面给驱动，因此 VM 调用驱动的 <code>putback_page</code> 方法，传入迁移失败的页面。这个函数中驱动应该将被隔离的页面放回到自己的数据结构中。</p>
+</li>
+<li>
+<p>non-LRU 可移动页面标志<br>
+有两个页面标志支持 non-LRU 可移动页面：</p>
+<ul>
+<li>
+<p><strong>PG_movable</strong><br>
+驱动应该在 <strong>page_lock</strong> 下使用下列函数标记页面为可移动的：
+<code>void __SetPageMovable(struct page *page, struct address_space *mapping)</code><br>
+函数需要 <strong>address_space</strong> 参数注册迁移函数，供 VM 调用。确切的说， <strong>PG_movable</strong> 不是 <strong>struct page</strong> 的一个真正标志， VM 用 <strong>page-&gt;mapping</strong> 的低几位来表示。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define PAGE_MAPPING_MOVABLE 0x2
+</span><span class="cp"></span><span class="n">page</span><span class="o">-&gt;</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">mapping</span> <span class="o">|</span> <span class="n">PAGE_MAPPING_MOVABLE</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>因此驱动不能直接访问 <strong>page-&gt;mapping</strong> 。</p>
+</li>
+<li>
+<p><strong>PG_isolated</strong><br>
+为了防止多个 CPU 并发的隔离操作， VM 在 <strong>lock_page</strong> 下标记被隔离的页为 <strong>PG_isolated</strong> ，因此如果一个 CPU 涉及到 <strong>PG_islated</strong> non-LRU 可移动页面，跳过。驱动不需要操作这个标志， VM 自动设置和清除。</p>
+</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        0001-01-01
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      
+      <nav class="post-nav">
+        <a class="prev" href="/post/mm/mm-memblock/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default"></span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm/mm-buddy_allocator_initialization/">
+            <span class="next-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Globs Guo</span>
+  </span>
+</div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/dist/even.26188efa.min.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      showProcessingMessages: false,
+      messageStyle: 'none'
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"  integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

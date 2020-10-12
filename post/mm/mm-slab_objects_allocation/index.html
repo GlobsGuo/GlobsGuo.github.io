@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-slab对象的分配 - Globs&#39; Catchall</title>
+  <title>mm-slab_initialization - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -38,23 +38,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-slab对象的分配" />
+<meta property="og:title" content="mm-slab_initialization" />
 <meta property="og:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-slab_objects_allocation/" />
-<meta property="article:published_time" content="2019-10-21T00:00:00+00:00" />
-<meta property="article:modified_time" content="2019-10-21T00:00:00+00:00" />
-<meta itemprop="name" content="mm-slab对象的分配">
+<meta property="article:published_time" content="2019-10-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2019-10-26T00:00:00+00:00" />
+<meta itemprop="name" content="mm-slab_initialization">
 <meta itemprop="description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内">
-<meta itemprop="datePublished" content="2019-10-21T00:00:00+00:00" />
-<meta itemprop="dateModified" content="2019-10-21T00:00:00+00:00" />
-<meta itemprop="wordCount" content="4253">
+<meta itemprop="datePublished" content="2019-10-26T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2019-10-26T00:00:00+00:00" />
+<meta itemprop="wordCount" content="3986">
 
 
 
-<meta itemprop="keywords" content="kernel-sources,memory,kmem_cache,slub,kmalloc_caches,kmalloc,slab_alloc,kmem_cache_alloc," />
+<meta itemprop="keywords" content="kernel-srcs,mm,kmem_cache,slub,kmalloc,slab_alloc," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-slab对象的分配"/>
+<meta name="twitter:title" content="mm-slab_initialization"/>
 <meta name="twitter:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内"/>
 
 <!--[if lte IE 9]>
@@ -118,13 +118,13 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-slab对象的分配</h1>
+      <h1 class="post-title">mm-slab_initialization</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-10-21 </span>
+        <span class="post-time"> 2019-10-26 </span>
         
-          <span class="more-meta"> 4253 words </span>
-          <span class="more-meta"> 9 mins read </span>
+          <span class="more-meta"> 3986 words </span>
+          <span class="more-meta"> 8 mins read </span>
         <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
       </div>
     </header>
@@ -270,70 +270,8 @@ Should only be used for kmalloc() caches. Otherwise, use a slab created with SLA
 </ul>
 </blockquote>
 <p>更多的标志符定义在 <em>include/linux/gfp.h</em> 中，上面列出的都是常用的标志符。</p>
-<p>这些标志符可以分为三类：行为修饰符、区域修饰符、类型标志。其中区域修饰符最终会转化为 <em>include/linux/mmzone.h</em> 中的 <strong>zone_type</strong> ：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span></code></pre></td>
-<td class="lntd">
-<pre class="chroma"><code class="language-C" data-lang="C"><span class="k">enum</span> <span class="n">zone_type</span> <span class="p">{</span>
-<span class="cp">#ifdef CONFIG_ZONE_DMA
-</span><span class="cp"></span>    <span class="cm">/*
-</span><span class="cm">     用于不能寻址所有内存地址的DMA设备
-</span><span class="cm">     x86下为 &lt;16MB的地址 */</span>
-    <span class="n">ZONE_DMA</span><span class="p">,</span>
-<span class="cp">#endif
-</span><span class="cp">#ifdef CONFIG_ZONE_DMA32
-</span><span class="cp"></span>    <span class="cm">/*
-</span><span class="cm">     x86_64同时支持只能在16MB以下的地址空间
-</span><span class="cm">     执行DMA操作的设备和可以在4GB以下的地址
-</span><span class="cm">     空间执行DMA操作的32bit设备，因此需要
-</span><span class="cm">     两个DMA内存区域 */</span>
-    <span class="n">ZONE_DMA32</span><span class="p">,</span>
-<span class="cp">#endif
-</span><span class="cp"></span>    <span class="n">ZONE_NORMAL</span><span class="p">,</span>
-<span class="cp">#ifdef CONFIG_HIGHMEM
-</span><span class="cp"></span>    <span class="cm">/*
-</span><span class="cm">     只有内核将这些区域映射到自己的地址空间
-</span><span class="cm">     后才能正常访问，比如i386下内核要访问
-</span><span class="cm">     900MB以上的地址空间
-</span><span class="cm">     32bit的x86架构，为高于896MB的所有物理
-</span><span class="cm">     内存，其他架构为空 */</span>
-    <span class="n">ZONE_HIGHMEM</span><span class="p">,</span>
-<span class="cp">#endif
-</span><span class="cp"></span>    <span class="n">ZONE_MOVABLE</span><span class="p">,</span>
-    <span class="n">__MAX_NR_ZONES</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><h1 id="2-__kmalloc">2. __kmalloc</h1>
+<p>这些标志符可以分为三类：行为修饰符、区域修饰符、类型标志。</p>
+<h1 id="2-__kmalloc">2. __kmalloc</h1>
 <p>如果请求的内存小于8KB，就会调用 <code>__kmalloc</code> 函数， <strong>CONFIG_SLUB</strong> 下，这个函数定义在 <em>mm/slub.c</em> 中：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -932,7 +870,7 @@ Should only be used for kmalloc() caches. Otherwise, use a slab created with SLA
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-10-21
+        2019-10-26
         
     </span>
   </p>
@@ -955,23 +893,21 @@ Should only be used for kmalloc() caches. Otherwise, use a slab created with SLA
   </div>
 </div><footer class="post-footer">
       <div class="post-tags">
-          <a href="/tags/kernel-sources/">kernel-sources</a>
-          <a href="/tags/memory/">memory</a>
+          <a href="/tags/kernel-srcs/">kernel-srcs</a>
+          <a href="/tags/mm/">mm</a>
           <a href="/tags/kmem_cache/">kmem_cache</a>
           <a href="/tags/slub/">slub</a>
-          <a href="/tags/kmalloc_caches/">kmalloc_caches</a>
           <a href="/tags/kmalloc/">kmalloc</a>
           <a href="/tags/slab_alloc/">slab_alloc</a>
-          <a href="/tags/kmem_cache_alloc/">kmem_cache_alloc</a>
           </div>
       <nav class="post-nav">
-        <a class="prev" href="/post/mm/mm-slab_initialization/">
+        <a class="prev" href="/post/mm/mm-slab_objects_free/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">mm-slab初始化</span>
+            <span class="prev-text nav-default">mm-slab_initialization</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
-        <a class="next" href="/post/mm/mm-slab_objects_free/">
-            <span class="next-text nav-default">mm-slab对象的回收</span>
+        <a class="next" href="/post/mm/mm-slab_initialization/">
+            <span class="next-text nav-default">mm-slab_initialization</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

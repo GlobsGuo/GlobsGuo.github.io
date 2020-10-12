@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>kernel-srcs on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/kernel-srcs/</link>
+    <description>Recent content in kernel-srcs on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 21 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/kernel-srcs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/</link>
+      <pubDate>Thu, 21 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/</guid>
+      <description>1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义</description>
+    </item>
+    
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-memory_compaction/</link>
+      <pubDate>Sat, 16 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-memory_compaction/</guid>
+      <description>1. 背景介绍 Documentation 目录没有关于 memory compaction 的详细介绍，本文从 slab 分配器的一个慢路径分配函数 __alloc_pages_direct_compact 的主要函数 try_to_compact_pages 入手，介绍内存压缩的相关内容。 压缩操作用到的一个关键</description>
+    </item>
+    
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-2/</link>
+      <pubDate>Mon, 11 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-2/</guid>
+      <description>如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，</description>
+    </item>
+    
+    <item>
+      <title>mm-slab_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-slab_objects_free/</link>
+      <pubDate>Tue, 29 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-slab_objects_free/</guid>
+      <description>本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5</description>
+    </item>
+    
+    <item>
+      <title>mm-slab_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-slab_objects_allocation/</link>
+      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-slab_objects_allocation/</guid>
+      <description>slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内</description>
+    </item>
+    
+    <item>
+      <title>mm-slab_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-slab_initialization/</link>
+      <pubDate>Thu, 24 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-slab_initialization/</guid>
+      <description>SLAB 用来响应较小的内存分配请求，事实上，现在的 Linux 内核使用的是 SLUB —— unqueued SLAB 分配器。 Linux 内核支持三种分配器，分别为 SLAB ， SLOB ， SLUB 。 x86 架构下，默认采用 SLUB 分配</description>
+    </item>
+    
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_initialization/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-buddy_allocator_initialization/</guid>
+      <description>在介绍伙伴系统之前，我们先看一下伙伴系统所需要的数据结构的初始化流程。 伙伴系统使用的数据结构主要有每个内存节点的内存信息和每个内存区域的内存</description>
+    </item>
+    
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-buddy_allocator_page_allocation-1/</guid>
+      <description>slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。 和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 kmalloc 函数的实现</description>
+    </item>
+    
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-memsection/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-memsection/</guid>
+      <description>本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为</description>
+    </item>
+    
+  </channel>
+</rss>

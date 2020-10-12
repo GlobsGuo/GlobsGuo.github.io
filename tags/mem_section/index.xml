@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mem_section&#34; on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/mem_section/</link>
+    <description>Recent content in mem_section&#34; on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language><atom:link href="https://globsguo.github.io/tags/mem_section/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-memsection/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-memsection/</guid>
+      <description>本文从 Linux 内核的内存管理关键的数据结构出发，结合内核源码中的注释，说明 Linux 的内存管理用到的数据结构的初始化流程。本文以 x86-64 架构为例，假设系统类型为</description>
+    </item>
+    
+  </channel>
+</rss>

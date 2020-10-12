@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>shrink_zone on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/shrink_zone/</link>
+    <description>Recent content in shrink_zone on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 21 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/shrink_zone/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>mm-buddy_allocator_initialization</title>
+      <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/</link>
+      <pubDate>Thu, 21 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/</guid>
+      <description>1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义</description>
+    </item>
+    
+  </channel>
+</rss>
