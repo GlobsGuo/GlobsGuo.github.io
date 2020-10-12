@@ -62,15 +62,6 @@
     </item>
     
     <item>
-      <title></title>
-      <link>https://globsguo.github.io/post/mm/mm-page_migration/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://globsguo.github.io/post/mm/mm-page_migration/</guid>
-      <description>1. 简介 页面迁移允许进程处于运行状态时在 numa 系统中的节点之间移动物理内存页，这意味着进程看到的虚拟地址没有改动，而系统重新布置了内存页的物理地址</description>
-    </item>
-    
-    <item>
       <title>mm-buddy_allocator_initialization</title>
       <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_initialization/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
