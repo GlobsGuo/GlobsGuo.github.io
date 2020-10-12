@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-buddy_allocator_initialization - Globs&#39; Catchall</title>
+  <title>mm-buddy_allocator_free_page - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -38,13 +38,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-buddy_allocator_initialization" />
+<meta property="og:title" content="mm-buddy_allocator_free_page" />
 <meta property="og:description" content="1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/" />
 <meta property="article:published_time" content="2019-11-21T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-11-21T00:00:00+00:00" />
-<meta itemprop="name" content="mm-buddy_allocator_initialization">
+<meta itemprop="name" content="mm-buddy_allocator_free_page">
 <meta itemprop="description" content="1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义">
 <meta itemprop="datePublished" content="2019-11-21T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2019-11-21T00:00:00+00:00" />
@@ -54,7 +54,7 @@
 
 <meta itemprop="keywords" content="kernel-srcs,mm,buddy-allocator,zone_reclaim,shrink_zone," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-buddy_allocator_initialization"/>
+<meta name="twitter:title" content="mm-buddy_allocator_free_page"/>
 <meta name="twitter:description" content="1. 内存区域的回收操作 mm-buddy_allocator 分配页框中讲到的 get_page_from_freelist 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 zone_reclaim 试着释放一些页框。 zone_reclaim 定义"/>
 
 <!--[if lte IE 9]>
@@ -118,7 +118,7 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-buddy_allocator_initialization</h1>
+      <h1 class="post-title">mm-buddy_allocator_free_page</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2019-11-21 </span>
@@ -129,17 +129,7 @@
       </div>
     </header>
 
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content always-active">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#11-回收操作所需数据结构">1.1. 回收操作所需数据结构</a></li>
-    <li><a href="#12-__zone_reclaim">1.2. __zone_reclaim</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
+    
     <div class="post-content">
       <h1 id="1-内存区域的回收操作">1. 内存区域的回收操作</h1>
 <p>mm-buddy_allocator 分配页框中讲到的 <code>get_page_from_freelist</code> 函数，在 zone 的空闲页框数不满足 watermark 被视为 full 时，并且 zone 允许进行页框回收，就会调用 <code>zone_reclaim</code> 试着释放一些页框。</p>
@@ -631,7 +621,7 @@
       <nav class="post-nav">
         
         <a class="next" href="/post/mm/mm-memory_compaction/">
-            <span class="next-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="next-text nav-default">mm-buddy_allocator_memory_compaction</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>

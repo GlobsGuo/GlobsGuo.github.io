@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-slab_initialization - Globs&#39; Catchall</title>
+  <title>mm-slab_object_allocation - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -38,13 +38,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-slab_initialization" />
+<meta property="og:title" content="mm-slab_object_allocation" />
 <meta property="og:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-slab_objects_allocation/" />
 <meta property="article:published_time" content="2019-10-26T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-10-26T00:00:00+00:00" />
-<meta itemprop="name" content="mm-slab_initialization">
+<meta itemprop="name" content="mm-slab_object_allocation">
 <meta itemprop="description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内">
 <meta itemprop="datePublished" content="2019-10-26T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2019-10-26T00:00:00+00:00" />
@@ -54,7 +54,7 @@
 
 <meta itemprop="keywords" content="kernel-srcs,mm,kmem_cache,slub,kmalloc,slab_alloc," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-slab_initialization"/>
+<meta name="twitter:title" content="mm-slab_object_allocation"/>
 <meta name="twitter:description" content="slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内"/>
 
 <!--[if lte IE 9]>
@@ -118,7 +118,7 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-slab_initialization</h1>
+      <h1 class="post-title">mm-slab_object_allocation</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2019-10-26 </span>
@@ -129,21 +129,7 @@
       </div>
     </header>
 
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content always-active">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#21-kmalloc_slab">2.1. kmalloc_slab</a></li>
-    <li><a href="#22-slab_alloc">2.2. slab_alloc</a>
-      <ul>
-        <li><a href="#221-__slab_alloc">2.2.1. __slab_alloc</a></li>
-      </ul>
-    </li>
-  </ul>
-</nav>
-  </div>
-</div>
+    
     <div class="post-content">
       <p>slab cache建立后，就可以从中分配对象。以 <strong>kmalloc_caches</strong> 为例，执行 <code>kmalloc</code> 函数时会从中分配对象。</p>
 <h1 id="1-kmalloc">1. kmalloc</h1>
@@ -903,7 +889,7 @@ Should only be used for kmalloc() caches. Otherwise, use a slab created with SLA
       <nav class="post-nav">
         <a class="prev" href="/post/mm/mm-slab_objects_free/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">mm-slab_initialization</span>
+            <span class="prev-text nav-default">mm-slab_object_free</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
         <a class="next" href="/post/mm/mm-slab_initialization/">

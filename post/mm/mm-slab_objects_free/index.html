@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>mm-slab_initialization - Globs&#39; Catchall</title>
+  <title>mm-slab_object_free - Globs&#39; Catchall</title>
   <meta name="renderer" content="webkit" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
@@ -38,13 +38,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
-<meta property="og:title" content="mm-slab_initialization" />
+<meta property="og:title" content="mm-slab_object_free" />
 <meta property="og:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://globsguo.github.io/post/mm/mm-slab_objects_free/" />
 <meta property="article:published_time" content="2019-10-29T00:00:00+00:00" />
 <meta property="article:modified_time" content="2019-10-29T00:00:00+00:00" />
-<meta itemprop="name" content="mm-slab_initialization">
+<meta itemprop="name" content="mm-slab_object_free">
 <meta itemprop="description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5">
 <meta itemprop="datePublished" content="2019-10-29T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2019-10-29T00:00:00+00:00" />
@@ -54,7 +54,7 @@
 
 <meta itemprop="keywords" content="kernel-srcs,mm,kmem_cache,slub,kfree,slab_free," />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="mm-slab_initialization"/>
+<meta name="twitter:title" content="mm-slab_object_free"/>
 <meta name="twitter:description" content="本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5"/>
 
 <!--[if lte IE 9]>
@@ -118,7 +118,7 @@
           <article class="post">
     
     <header class="post-header">
-      <h1 class="post-title">mm-slab_initialization</h1>
+      <h1 class="post-title">mm-slab_object_free</h1>
 
       <div class="post-meta">
         <span class="post-time"> 2019-10-29 </span>
@@ -129,22 +129,7 @@
       </div>
     </header>
 
-    <div class="post-toc" id="post-toc">
-  <h2 class="post-toc-title">Contents</h2>
-  <div class="post-toc-content always-active">
-    <nav id="TableOfContents">
-  <ul>
-    <li><a href="#41-put_cpu_partial">4.1. put_cpu_partial</a>
-      <ul>
-        <li><a href="#411-unfreeze_partials">4.1.1. unfreeze_partials</a></li>
-      </ul>
-    </li>
-    <li><a href="#42-add_partial--remove_partial--remove_full">4.2. add_partial / remove_partial / remove_full</a></li>
-    <li><a href="#43-discard_slab">4.3. discard_slab</a></li>
-  </ul>
-</nav>
-  </div>
-</div>
+    
     <div class="post-content">
       <p>本文仍然以slab cache <strong>kmalloc_caches</strong> 为例，结合 <code>kfree</code> 函数的实现，说明slab对象的回收过程。</p>
 <h1 id="1-kfree">1. kfree</h1>
@@ -1216,11 +1201,11 @@ slab中包含的partial对象的数量计算方法为 <code>pobjects = page-&gt;
       <nav class="post-nav">
         <a class="prev" href="/post/mm/mm-buddy_allocator_page_allocation-2/">
             <i class="iconfont icon-left"></i>
-            <span class="prev-text nav-default">mm-buddy_allocator_initialization</span>
+            <span class="prev-text nav-default">mm-buddy_allocator_page_allocation-2</span>
             <span class="prev-text nav-mobile">Prev</span>
           </a>
         <a class="next" href="/post/mm/mm-slab_objects_allocation/">
-            <span class="next-text nav-default">mm-slab_initialization</span>
+            <span class="next-text nav-default">mm-slab_object_allocation</span>
             <span class="next-text nav-mobile">Next</span>
             <i class="iconfont icon-right"></i>
           </a>
