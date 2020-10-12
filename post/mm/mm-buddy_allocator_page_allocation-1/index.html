@@ -127,7 +127,40 @@
       </div>
     </header>
 
-    
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-kmalloc_large">1. kmalloc_large</a>
+      <ul>
+        <li><a href="#11-alloc_kmem_pages">1.1. alloc_kmem_pages</a></li>
+        <li><a href="#12-alloc_pages_current">1.2. alloc_pages_current</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-__alloc_pages_nodemask">2. __alloc_pages_nodemask</a></li>
+    <li><a href="#3-get_page_from_freelist">3. get_page_from_freelist</a>
+      <ul>
+        <li><a href="#31-cpuset_zone_allowed_softwall">3.1. cpuset_zone_allowed_softwall</a></li>
+        <li><a href="#32-zone_watermark_ok">3.2. zone_watermark_ok</a></li>
+        <li><a href="#33-buffered_rmqueue">3.3. buffered_rmqueue</a>
+          <ul>
+            <li><a href="#331-rmqueue_bulk">3.3.1. rmqueue_bulk</a></li>
+            <li><a href="#332-__rmqueue">3.3.2. __rmqueue</a>
+              <ul>
+                <li><a href="#3321-__rmqueue_smallest">3.3.2.1. __rmqueue_smallest</a></li>
+                <li><a href="#3322-__rmqueue_fallback">3.3.2.2. __rmqueue_fallback</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#4-总结">4. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
     <div class="post-content">
       <p>slab 系统调用 buddy 分配器分配所需要的内存页，作为 slab 使用。</p>
 <p>和 slab 系统不同， buddy 系统主要响应较大 ( 至少为一个内存页 ) 的内存分配请求，本文仍然从 <code>kmalloc</code> 函数的实现入手，结合伙伴系统的核心函数 <code>__alloc_pages_nodemask</code> ，说明伙伴系统分配页框的过程。</p>

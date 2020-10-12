@@ -129,7 +129,25 @@
       </div>
     </header>
 
-    
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-__alloc_pages_slowpath">1. __alloc_pages_slowpath</a></li>
+    <li><a href="#2-__alloc_pages_high_priority">2. __alloc_pages_high_priority</a></li>
+    <li><a href="#3-__alloc_pages_direct_compact">3. __alloc_pages_direct_compact</a>
+      <ul>
+        <li><a href="#31-drain_pages">3.1. drain_pages</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-__alloc_pages_direct_reclaim">4. __alloc_pages_direct_reclaim</a></li>
+    <li><a href="#5-__alloc_pages_may_oom">5. __alloc_pages_may_oom</a></li>
+    <li><a href="#6-总结">6. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
     <div class="post-content">
       <p>如果 <code>__alloc_pages_nodemask</code> 调用 <code>get_page_from_freelist</code> 没有申请到内存页，就会屏蔽掉传递的 <strong>gfp</strong> 中的 <strong>__GPF_IO</strong> 标志，调用 <code>__alloc_pages_slowpath</code> 申请内存。</p>
 <h1 id="1-__alloc_pages_slowpath">1. __alloc_pages_slowpath</h1>

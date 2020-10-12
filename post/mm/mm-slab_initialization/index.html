@@ -129,7 +129,38 @@
       </div>
     </header>
 
-    
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-struct-kmem_cache">1. struct kmem_cache</a></li>
+    <li><a href="#2-create_boot_cache">2. create_boot_cache</a>
+      <ul>
+        <li><a href="#21-init_kmem_cache_nodes">2.1. init_kmem_cache_nodes</a>
+          <ul>
+            <li><a href="#211-early_kmem_cache_node_alloc">2.1.1. early_kmem_cache_node_alloc</a>
+              <ul>
+                <li><a href="#2111-new_slab">2.1.1.1. new_slab</a></li>
+              </ul>
+            </li>
+            <li><a href="#212-kmem_cache_alloc_node">2.1.2. kmem_cache_alloc_node</a></li>
+          </ul>
+        </li>
+        <li><a href="#22-alloc_kmem_cache_cpus">2.2. alloc_kmem_cache_cpus</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-kmalloc_caches">3. kmalloc_caches</a>
+      <ul>
+        <li><a href="#31-create_kmalloc_caches">3.1. create_kmalloc_caches</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-其他-slab-cache-的初始化">4. 其他 slab cache 的初始化</a></li>
+    <li><a href="#5-总结">5. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
     <div class="post-content">
       <p>SLAB 用来响应较小的内存分配请求，事实上，现在的 Linux 内核使用的是 SLUB —— unqueued SLAB 分配器。</p>
 <p>Linux 内核支持三种分配器，分别为 SLAB ， SLOB ， SLUB 。 x86 架构下，默认采用 SLUB 分配器。<br>

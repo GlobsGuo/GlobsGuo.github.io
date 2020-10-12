@@ -129,7 +129,33 @@
       </div>
     </header>
 
-    
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-kmalloc">1. kmalloc</a></li>
+    <li><a href="#2-__kmalloc">2. __kmalloc</a>
+      <ul>
+        <li><a href="#21-kmalloc_slab">2.1. kmalloc_slab</a></li>
+        <li><a href="#22-slab_alloc">2.2. slab_alloc</a>
+          <ul>
+            <li><a href="#221-__slab_alloc">2.2.1. __slab_alloc</a>
+              <ul>
+                <li><a href="#2211-new_slab_objects">2.2.1.1. new_slab_objects</a></li>
+                <li><a href="#2212-deactivate_slab">2.2.1.2. deactivate_slab</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#3-kmem_cache_alloc">3. kmem_cache_alloc</a></li>
+    <li><a href="#4-总结">4. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
     <div class="post-content">
       <p>slab cache建立后，就可以从中分配对象。以 <strong>kmalloc_caches</strong> 为例，执行 <code>kmalloc</code> 函数时会从中分配对象。</p>
 <h1 id="1-kmalloc">1. kmalloc</h1>

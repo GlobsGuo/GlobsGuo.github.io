@@ -129,7 +129,31 @@
       </div>
     </header>
 
-    
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-kfree">1. kfree</a></li>
+    <li><a href="#2-slab_free-mmslubc-">2. slab_free( <em>mm/slub.c</em> )</a></li>
+    <li><a href="#3-__slab_free-mmslubc-">3. __slab_free( <em>mm/slub.c</em> )</a></li>
+    <li><a href="#4-slab的操作函数">4. slab的操作函数</a>
+      <ul>
+        <li><a href="#41-put_cpu_partial">4.1. put_cpu_partial</a>
+          <ul>
+            <li><a href="#411-unfreeze_partials">4.1.1. unfreeze_partials</a></li>
+          </ul>
+        </li>
+        <li><a href="#42-add_partial--remove_partial--remove_full">4.2. add_partial / remove_partial / remove_full</a></li>
+        <li><a href="#43-discard_slab">4.3. discard_slab</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-deactivate_slab">5. deactivate_slab</a></li>
+    <li><a href="#6-总结">6. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
     <div class="post-content">
       <p>本文仍然以slab cache <strong>kmalloc_caches</strong> 为例，结合 <code>kfree</code> 函数的实现，说明slab对象的回收过程。</p>
 <h1 id="1-kfree">1. kfree</h1>
