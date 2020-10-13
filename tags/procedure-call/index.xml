@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>procedure-call on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/procedure-call/</link>
+    <description>Recent content in procedure-call on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 16 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/procedure-call/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>1_chap6-procedure_calls,interrupts,exceptions</title>
+      <link>https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/</link>
+      <pubDate>Wed, 16 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/</guid>
+      <description>处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程</description>
+    </item>
+    
+  </channel>
+</rss>

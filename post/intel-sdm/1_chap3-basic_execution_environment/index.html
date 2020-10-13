@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>1_chap3-basic_execution_environment - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="1_chap3-basic_execution_environment" />
+<meta property="og:description" content="1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/" />
+<meta property="article:published_time" content="2020-10-13T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="name" content="1_chap3-basic_execution_environment">
+<meta itemprop="description" content="1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包">
+<meta itemprop="datePublished" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="wordCount" content="3307">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,EFLAGS,operand-addressing," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="1_chap3-basic_execution_environment"/>
+<meta name="twitter:description" content="1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">1_chap3-basic_execution_environment</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-13 </span>
+        
+          <span class="more-meta"> 3307 words </span>
+          <span class="more-meta"> 7 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-overview-of-the-basic-execution-environment">1. Overview of the Basic Execution Environment</a></li>
+    <li><a href="#2-basic-program-execution-registers">2. Basic Program Execution Registers</a>
+      <ul>
+        <li><a href="#21-general-purpose-registers">2.1. General-Purpose Registers</a></li>
+        <li><a href="#22-eflags-register">2.2. EFLAGS Register</a>
+          <ul>
+            <li><a href="#221-状态标志">2.2.1. 状态标志</a></li>
+            <li><a href="#222-df-标志">2.2.2. DF 标志</a></li>
+            <li><a href="#223-系统标志和-iopl-域">2.2.3. 系统标志和 IOPL 域</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#3-operand-size-and-address-size-attributes">3. Operand-Size and Address-Size Attributes</a></li>
+    <li><a href="#4-operand-addressing">4. Operand Addressing</a>
+      <ul>
+        <li><a href="#41-specifying-a-segment-selector">4.1. Specifying a Segment Selector</a></li>
+        <li><a href="#42-specifying-an-offset">4.2. Specifying an Offset</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-overview-of-the-basic-execution-environment">1. Overview of the Basic Execution Environment</h1>
+<p>Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 )  ; 后者增加了 IA-32e 模式 , 包括兼容模式和 64 位模式 .</p>
+<p>和 IA-32 相比 , 64 位模式增加了寄存器的数量 , 扩展了寄存器的宽度 , 指令使用的地址为 64 位 , 但是默认的操作数大小为 32 位 .<br>
+此外 , 64 位模式引入了新的操作码前缀 ( REX ) 以访问寄存器扩展 , 默认的操作数大小可以通过 REX 和操作数大小重载前缀覆盖 .</p>
+<p>SMM 模式处理器切换到一个单独的地址空间 , 称作系统管理 RAM ( SMRAM ) , 采用的内存模型和实地址模式相似 .</p>
+<p>IA-32e 模式下 , 所有的 16 位和 32 位地址会 0 扩展形成 64 位地址 , 因此兼容模式下 16 位和 32 位应用只能访问 64 位有效地址的低 4GB .</p>
+<p>64 位模式下 , 如果一个地址的 bit 63 到架构支持的最高位都是 0 或 1 , 这个地址就被视为 canonical .</p>
+<p>64 位架构定义了 64 的线性地址 , 但是可以实现更少 : 64 位架构的第一个 IA-32 处理器支持的线性地址是 48 位 , 其 canonical 地址的 bit 63:48 必须都是 0 或者 1 .</p>
+<p>虽然实现可以支持少于 64 位线性地址 , 但是应该检查 bit 63 到架构支持的最高位 , 判断地址是否是 canonical . 不是需要产生一个异常 , 通常是 #GP ; 如果是隐式的栈引用 , 产生栈异常 ( #SS ) .</p>
+<h1 id="2-basic-program-execution-registers">2. Basic Program Execution Registers</h1>
+<h2 id="21-general-purpose-registers">2.1. General-Purpose Registers</h2>
+<p>通用寄存器的特殊用法 :</p>
+<ul>
+<li>EAX : 操作数累加器 , 结果数据</li>
+<li>EBX : DS 段的数据指针</li>
+<li>ECX : 字符串和循环操作的计数器</li>
+<li>EDX : IO 指针</li>
+<li>ESI : 由 DS 寄存器指向的段中的数据指针 ; 字符串操作的源指针</li>
+<li>EDI : 由 ES 寄存器指向的段中的数据指针 ; 字符串操作的目的指针</li>
+<li>ESP : 栈指针</li>
+<li>EBP : 栈中的数据指针</li>
+</ul>
+<p>通用寄存器的高字节和低字节可以通过下面的方式引用 :</p>
+<p><img src="../images/836bcc57de9178f879c5d60514e23da2239fddea68f28d95cec341bf2219a3c2.png" alt="picture 1"></p>
+<p>64 位模式 , 虽然默认的操作数大小为 32 位 , 通用寄存器可以工作在 32 位或 64 位模式 , REX 前缀用于产生 64 位大小的操作数 .</p>
+<p><img src="../images/b29eb151d35272a8cbf99db8740eaa702c14ed3d78a13f57a699292032323e62.png" alt="picture 2"></p>
+<p>64 位模式 , 操作数的大小决定目的通用寄存器中有效位的数量 :</p>
+<ul>
+<li>64 位操作数产生 64 位结果 , 保存到目的通用寄存器 .</li>
+<li>32 位操作数产生 32 位结果 , 0 扩展为 64 位的结构 , 保存到目的通用寄存器 .</li>
+<li>8 位和 16 位操作数产生 8 位或 16 位结果 , 目的通用寄存器的高 56 位或 48 位不会被修改 . 如果操作的结果被用于 64 位地址计算 , 显式符号扩展为 64 位 .</li>
+</ul>
+<p>从 64 位模式切换到 32 位模式 , 通用寄存器的高 32 位未定义 , 其内容不会保留 .</p>
+<h2 id="22-eflags-register">2.2. EFLAGS Register</h2>
+<p>EFLAGS 寄存器的某些标志可以通过特殊目的的指令修改 , 但是无法直接检测或修改整个寄存器 .</p>
+<p>下列指令可以将标志移入和移出程序栈或 EAX 寄存器 : <code>LAHF</code> , <code>SAHF</code> , <code>PUSHF</code> , <code>PUSHFD</code> , <code>POPF</code> , <code>POPFD</code> . EFLAGS 寄存器的内容保存到程序栈或者 EAX 寄存器后 , 可以通过处理器的位操作 ( BT , BTS , BTR , BTC ) 指令检测或修改 .</p>
+<p>许多指令在执行时需要用到 EFLAGS 寄存器 , 寄存器结构如下 :</p>
+<p><img src="../images/eeb582a89e468d694d4fb982d610c6a4b33d7523b79e35dc4268e1ee8d068e89.png" alt="picture 2"></p>
+<p>挂起一个应用时 , 处理器自动保存 EFLAGS 寄存器的状态到被挂起进程的 TSS ; 执行新进程时 , 处理器从新进程的 TSS 加载 EFLAGS 寄存器 .</p>
+<h3 id="221-状态标志">2.2.1. 状态标志</h3>
+<p>EFLAGS 寄存器的状态标志 ( bit 0 , 2 , 4, 6 , 7 和 11 ) 表明算术指令的结果 , 比如 <code>ADD</code> , <code>SUB</code> , <code>MUL</code> 和 <code>DIV</code> 指令 . 状态标志的功能为 :</p>
+<ul>
+<li>
+<p>CF ( bit 0 )<br>
+carry flag , 如果一个算术操作结果的最高位产生了进位或借位 , 设置这个标志 ; 否则清除 . 无符号运算指明溢出 .</p>
+</li>
+<li>
+<p>PF ( bit 2 )<br>
+parity flag , 如果结果的最低字节包含偶数个 1 , 设置 ; 否则清除 .</p>
+</li>
+<li>
+<p>AF ( bit 4 )<br>
+auxiliary carry flag , 如果算术操作结果的 bit 3 产生进位或者借位 , 设置 ; 否则清除 . 在 binary-coded decimal ( BCD ) 算术中使用 .</p>
+</li>
+<li>
+<p>ZF ( bit 6 )<br>
+zero flag , 如果结果为 0 , 设置 ; 否则清除 .</p>
+</li>
+<li>
+<p>SF ( bit 7 )<br>
+sign flag , 设置为结果的最高位 , 即有符号数的符号位 .</p>
+</li>
+<li>
+<p>OF ( bit 11 )<br>
+overflow flag , 如果整数结果是过大的正数或过小的负数 , 无法保存到目的操作数 , 设置 ; 否则清除 . 指明有符号整数的算术运算的溢出条件 .</p>
+</li>
+</ul>
+<p>这些状态位中 , 只有 CF 标志可以直接通过 <code>STC</code> , <code>CLC</code> 和 <code>CMC</code> 指令修改 .</p>
+<h3 id="222-df-标志">2.2.2. DF 标志</h3>
+<p>direction flag ( DF , bit 10 ) 控制字符串指令 ( <code>MOVS</code> , <code>CMPS</code> , <code>SCAS</code> , <code>LODS</code> 和 <code>STOS</code> ) , 设置这个标志导致字符串指令自动减少 ( 从高地址向低地址处理字符串 ) ; 清除导致字符串指令自动增加 ( 从低地址向高地址处理字符串 ) .</p>
+<p><code>STD</code> 和 <code>CLD</code> 指令设置和清除这个标志 .</p>
+<h3 id="223-系统标志和-iopl-域">2.2.3. 系统标志和 IOPL 域</h3>
+<p>EFLAGS 寄存器的系统标志和 IOPL 域控制操作系统或可执行程序的操作 , <strong>不应该被应用程序修改</strong> , 系统标志的功能如下 :</p>
+<ul>
+<li>
+<p>TF ( bit 8 )<br>
+trap flag , 设置开启单步调试模式 ; 清除关闭单步调试模式 .</p>
+</li>
+<li>
+<p>IF ( bit 9 )<br>
+Interrupt enable flag , 设置处理器回应可屏蔽中断 ; 清除阻止可屏蔽中断 .</p>
+</li>
+<li>
+<p>IOPL ( bit 12 和 13 )<br>
+I/O privilege level filed , 指明当前正在执行的程序的 IO 特权级 , 当前程序的 CPL 必须小于等于 IOPL , 才能访问 IO 地址空间 . <code>POPF</code> 和 <code>IRET</code> 指令只有运行在 CPL 0 才能修改这个域 .</p>
+</li>
+<li>
+<p>NT ( bit 14 )<br>
+nested task flag , 控制被中断的和被调用的进程链 , 设置表明当前进程链接到之前执行的进程 ; 清除表明没有链接到另一个进程 .</p>
+</li>
+<li>
+<p>RF ( bit 16 )<br>
+resume flag , 控制处理器对于调试异常的回应 .</p>
+</li>
+<li>
+<p>VM ( bit 17 )<br>
+virtual-8086 mode flag , 设置开启 virtual-8086 模式 , 清除返回保护模式 .</p>
+</li>
+<li>
+<p>AC ( bit 18 )<br>
+alignment check ( or access control ) flag , 如果设置 CR0.AM , 当且仅当这个标志为 1 时 , 开启用户模式数据访问的对齐检查 .<br>
+如果设置 CR4.SMAP , 当且仅当这个标志为 1 时 , 允许显式的管理员模式对于用户模式页的访问 .</p>
+</li>
+<li>
+<p>VIF ( bit 19 )<br>
+virtual interrupt flag , IF 标志的虚拟映像 , 和 VIP 标志搭配使用 .</p>
+</li>
+<li>
+<p>VIP ( bit 20 )<br>
+virtual interrupt pending flag , 设置表明一个中断挂起 ; 清除表明没有中断挂起 .</p>
+</li>
+<li>
+<p>ID ( bit 21 )<br>
+identification flag , 程序设置或者清楚这个标志的能力表明对于 <code>CPUID</code> 指令的支持 .</p>
+</li>
+</ul>
+<h1 id="3-operand-size-and-address-size-attributes">3. Operand-Size and Address-Size Attributes</h1>
+<p>保护模式下 , 每个代码段的段描述符内的 D 标志指明操作数和地址 ( 用于内存寻址 ) 的大小 , 设置时大小为 32 位 , 清除时为 16 位 .<br>
+实地址模式 , virtual-8086 模式 , SMM 默认的操作数和地址大小总是为 16 位 .</p>
+<h1 id="4-operand-addressing">4. Operand Addressing</h1>
+<p>IA-32 机器指令接收 0 或多个操作数 , 一些操作数显式指明 , 一些隐式指明 . 源操作的数据可以位于 :</p>
+<ul>
+<li>
+<p>指令自己 ( 立即操作数 )<br>
+指令本身编码了源操作数 , 比如 <code>ADD EAX,14</code> .<br>
+所有的算术指令 ( 除了 <code>DIV</code> 和 <code>IDIV</code> ) 允许源操作数为立即数 .</p>
+</li>
+<li>
+<p>寄存器<br>
+一些指令用一对 32 位寄存器中的内容作为一个操作数 ( 64 位 ) , 形如 EDX:EAX , EDX 包含高位 , EAX 包含低位 .<br>
+64 位模式 EDX:EAX 代表 128 位的操作数 .</p>
+</li>
+<li>
+<p>内存地址<br>
+内存中的源和目的操作数通过段选择器和偏移引用 . 段选择器指明包含操作数的段 , 偏移指明操作数的线性或有效地址 , 偏移可以是 32 位或 16 位 .<br>
+64 位模式偏移可以是 16 位 , 32 位或 64 位 .</p>
+</li>
+<li>
+<p>I/O 端口</p>
+</li>
+</ul>
+<p>指令返回数据到目的寄存器时 , 可以返回到 :</p>
+<ul>
+<li>寄存器</li>
+<li>内存地址</li>
+<li>I/O 端口</li>
+</ul>
+<h2 id="41-specifying-a-segment-selector">4.1. Specifying a Segment Selector</h2>
+<p>处理器根据下表中的规则自动选择一个段 :</p>
+<p><img src="../images/5c20fbcdecf4a5000e55c015ef02d8eb4dd5e20ebbd946d633b7e07f2c1680b0.png" alt="picture 3"></p>
+<p>向内存中保存数据 , 或者从内存中加载数据时 , 默认的 DS 段可以被覆盖 , 以访问其他段 . 编译器内 , 段重载通常通过 &ldquo;:&rdquo; 操作符完成 . 比如下面的 <code>MOV</code> 指令将 EAX 内的值移动到 ES 寄存器指向的段 , 偏移地址包含在 EBX 寄存器 : <code>MOV ES:[EBX],EAX</code> .</p>
+<p>机器层面通过段覆盖前缀 ( 指令开始的一个字节 ) 实现段覆盖 , 但是下面的段无法被覆盖 :</p>
+<ul>
+<li>必须从代码段取指</li>
+<li>字符串指令的目的字符串必须保存在 ES 寄存器指向的数据段</li>
+<li>push 和 pop 操作必须引用 SS 段</li>
+</ul>
+<p>64 位模式 , 兼容模式下的段操作和 IA-32 模式相同 ; 64 位模式通常关闭分段 , 处理器将 CS , DS , ES , SS 的基地址当做 0 处理 .</p>
+<h2 id="42-specifying-an-offset">4.2. Specifying an Offset</h2>
+<p>内存地址的偏移部分可以直接声明为一个静态值 ( 称为 displacement ) 或者通过一个由一个或多个下面的组件计算而来的地址 :</p>
+<ul>
+<li>displacement , 一个 8- , 16- 或 32-bit 的值</li>
+<li>base , 通用寄存器中的值</li>
+<li>index , 通用寄存器中的值</li>
+<li>scale factor , 乘以 Index 值的 2 , 4 或 8</li>
+</ul>
+<p>通过这些组件计算而来的偏移称为有效地址 ( effective address ) , 每个组件都可以是正的或负的 , 除了 scale factor .</p>
+<p>这些组件的组合使用方式如下 :</p>
+<p><img src="../images/f9ab84dc40e283bbd3ae04705ae1d882f63a88fd13bf6116086171083396e13e.png" alt="picture 4"></p>
+<p>这些组件的受到以下限制 :</p>
+<ul>
+<li>ESP 寄存器无法作为索引寄存器 .</li>
+<li>base 为 ESP 或 EBP 时 , 默认段为 SS ; 其他情况下 DS 是默认段 .</li>
+</ul>
+<p>下面的寻址方式指明了寻址组件的推荐用法 :</p>
+<ul>
+<li>displacement , 单独一个 displacement 代表一个相对于操作数的直接偏移 , 由于 displacement 直接编码在指令内 , 这种地址有时被称为绝对或静态地址 , 通常用于访问静态分配的标量操作数 .</li>
+<li>base , 单独一个 base 代表相对于操作数的间接偏移 , 由于基寄存器的值可能改变 , 可以用于变量和数据结构的动态存储 .</li>
+<li>base + displacement , 基寄存器和 displacement 可以共同用于两种目的 :
+<ul>
+<li>元素的大小不是 2 , 4 或 8 字节时 , 作为数组内的索引 &mdash;- displacement 组件编码静态偏移为数组的开始 , 基寄存器保存计算的结果 , 确定数组内某个元素的偏移 .</li>
+<li>访问一个记录的一个域 : 基寄存器保存记录的开始地址 , displacement 是域的静态偏移 .</li>
+</ul>
+</li>
+<li>(index * scale) + displacement , 元素大小为 2 , 4 或 8 字节时 , 索引静态数组的高效方式 . displacement 确定数组的开始 , index 保存想要的数组元素的下标 , 处理器应用 scaling factor 自动转化下表为索引 .</li>
+<li>base + index + displacement , 一起使用两个寄存器支持一个二维数组 ( displacement 保存数组的起始地址 ) 或一些记录数组实例中的一个 ( displacement 作为记录内域的偏移 ) .</li>
+<li>base + (index * scale) + displacement , 元素为 2 , 4 或 8 字节时 , 高效索引一个二维数组 .</li>
+</ul>
+<p>64 位模式除了上面的 4 种组件外 , 还可以通过 RIP + displacement 的方式 , 符号扩展 32 位的 displacement , 加上 RIP 中的 64 位值 , 计算下一条指令的有效地址 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-13
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/eflags/">EFLAGS</a>
+          <a href="/tags/operand-addressing/">operand-addressing</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/intel-sdm/3a_chap4-paging/">
+            <span class="next-text nav-default">3A_chap4-paging</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

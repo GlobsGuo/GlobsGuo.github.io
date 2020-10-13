@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>PCID on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/pcid/</link>
+    <description>Recent content in PCID on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/pcid/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap4-paging</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/</guid>
+      <description>1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm .</description>
+    </item>
+    
+  </channel>
+</rss>

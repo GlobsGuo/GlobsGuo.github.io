@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>1_chap6-procedure_calls,interrupts,exceptions - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="1_chap6-procedure_calls,interrupts,exceptions" />
+<meta property="og:description" content="处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/" />
+<meta property="article:published_time" content="2020-09-16T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-16T00:00:00+00:00" />
+<meta itemprop="name" content="1_chap6-procedure_calls,interrupts,exceptions">
+<meta itemprop="description" content="处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程">
+<meta itemprop="datePublished" content="2020-09-16T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-16T00:00:00+00:00" />
+<meta itemprop="wordCount" content="4760">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,procedure-call,interrupt,exception," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="1_chap6-procedure_calls,interrupts,exceptions"/>
+<meta name="twitter:description" content="处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">1_chap6-procedure_calls,interrupts,exceptions</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-16 </span>
+        
+          <span class="more-meta"> 4760 words </span>
+          <span class="more-meta"> 10 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-stacks">1. Stacks</a></li>
+    <li><a href="#2-calling-procedures-using-call-and-ret">2. Calling Procedures Using CALL and RET</a>
+      <ul>
+        <li><a href="#21-parameter-passing">2.1. Parameter Passing</a></li>
+        <li><a href="#22-saving-procedure-state-information">2.2. Saving Procedure State Information</a></li>
+        <li><a href="#23-calls-to-other-privilege-levels">2.3. Calls to Other Privilege Levels</a></li>
+        <li><a href="#24-call-and-ret-operation-between-privilege">2.4. CALL and RET Operation Between Privilege</a></li>
+        <li><a href="#25-branch-functions-in-64-bit-mode">2.5. Branch Functions in 64-Bit Mode</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-interrupts-and-exceptions">3. Interrupts and Exceptions</a>
+      <ul>
+        <li><a href="#31-call-and-return-operation-for-interrupt-or-exception-handling-procedures">3.1. Call and Return Operation for Interrupt or Exception Handling Procedures</a></li>
+        <li><a href="#32-calls-to-interrupt-or-exception-handler-tasks">3.2. Calls to Interrupt or Exception Handler Tasks</a></li>
+        <li><a href="#33-interrupt-and-exception-handling-in-real-address-mode">3.3. Interrupt and Exception Handling in Real-Address Mode</a></li>
+        <li><a href="#34-int-n--into--int3--int1--and-bound-instructions">3.4. INT n , INTO , INT3 , INT1 , and BOUND Instructions</a></li>
+        <li><a href="#35-handling-floating-point-exceptions">3.5. Handling Floating-Point Exceptions</a></li>
+        <li><a href="#36-interrupt-and-exception-behavior-in-64-bit-mode">3.6. Interrupt and Exception Behavior in 64-Bit Mode</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-procedure-calls-for-block-structured-languages">4. Procedure Calls for Block-Structured Languages</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>处理器支持两种不同的程序调用方式 :</p>
+<ul>
+<li><code>CALL</code> 和 <code>RET</code> 指令</li>
+<li><code>ENTER</code> 和 <code>LEAVE</code> 指令 , 结合 <code>CALL</code> 和 <code>RET</code></li>
+</ul>
+<p>两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程序 , 保存当前正在执行的程序的局部变量 .</p>
+<p>支持控制流增强技术 ( CET ) 的处理器还支持一个额外的影子栈 , 开启时 , <code>CALL</code> 指令额外保存调用进程的状态到影子栈 , 如果栈和影子栈中调用进程的状态一致 , <code>RET</code> 指令才恢复栈 .</p>
+<h1 id="1-stacks">1. Stacks</h1>
+<p>栈是连续的内存 , 包含在 SS 寄存器中的段选择器指明的栈中 , 最大的栈是 4GB , 栈的宽度可以是 16 bit 或 32 bit .</p>
+<p><code>PUSH</code> 指令向栈中增加元素 , 处理器减少 ESP 寄存器 ; <code>POP</code> 指令从栈中移除元素 , 处理器增加 ESP 寄存器 .</p>
+<p>所有的栈操作处理器都会自动使用 SS 寄存器 , <code>CALL</code> , <code>RET</code> , <code>PUSH</code> , <code>POP</code> , <code>ENTER</code> 和 <code>LEAVE</code> 指令操作的都是当前的栈 .</p>
+<p>要创建一个栈作为当前栈使用 , 程序或操作系统必须执行以下步骤 :</p>
+<ol>
+<li>创建一个栈段 .</li>
+<li>通过 <code>MOV</code> , <code>POP</code> 或 <code>LSS</code> 指令加载栈段的段选择器到 SS 寄存器 .</li>
+<li>通过 <code>MOV</code> , <code>POP</code> 或 <code>LSS</code> 指令加载栈的栈指针到 ESP 寄存器 , <code>LSS</code> 指令可以在一个操作中加载 SS 和 ESP 寄存器 .</li>
+</ol>
+<p>当前代码段的段描述符的 D 标志设置栈段的宽度 , 16 bit 或 32 bit ; <code>PUSH</code> 和 <code>POP</code> 指令通过 D 标志确定执行入栈和出栈时减少和增加栈指针的大小 .<br>
+向 32 bit 的栈中压入 16 bit 的值会导致栈不对齐 ; 一个例外是将栈寄存器的内容 ( 16 bit 的栈选择器 ) 压入 32 bit 的栈 , 处理器自动对齐栈指针到下一个 32 bit 边界 .<br>
+处理器不会检查栈指针的对齐 , 运行的程序需要维护栈指针的对齐 . 栈指针不对齐会导致严重的性能下降和程序错误 .</p>
+<p>64 位模式 , 引用 SS 段的地址计算将段基地址作为 0 , 段描述符寄存器内的域 ( base , limit , attribute ) 都被忽略 , SS 的 DPL 总是被修改为等于 CPL .<br>
+<code>PUSH</code> 和 <code>POP</code> 指令以 64 bit 的宽度修改栈 . 段寄存器的内容压入到 64 位的栈时 , 指针自动对齐到 64 bit .</p>
+<p>影子栈和程序栈隔离 , 不是为了保存数据 , 因此对于软件不可显式写 . 影子栈只有开启了分页的保护模式才可用 , virtual 8086 模式下的程序无法开启 .</p>
+<h1 id="2-calling-procedures-using-call-and-ret">2. Calling Procedures Using CALL and RET</h1>
+<p>执行近的 <code>CALL</code> , 处理器操作如下 :</p>
+<ol>
+<li>将 EIP 的当前值压入栈中 .</li>
+<li>加载被调用进程的偏移到 EIP .</li>
+<li>执行被调用的进程 .</li>
+</ol>
+<p>执行近的 <code>RET</code> , 处理器操作如下 :</p>
+<ol>
+<li>移出栈顶的值到 EIP 寄存器 .</li>
+<li>如果 <code>RET</code> 指令包含可选的 n 个参数 , 增加栈指针 n 指明的字节数 , 从而释放栈中的参数 .</li>
+<li>恢复执行调用程序 .</li>
+</ol>
+<hr>
+<p>执行远的 <code>CALL</code> , 处理器操作如下 :</p>
+<ol>
+<li>将 CS 寄存器的当前值压入栈中 .</li>
+<li>将 EIP 寄存器的当前值压入栈中 .</li>
+<li>加载包含被调用程序的段的段选择器到 CS 寄存器 .</li>
+<li>加载被调用程序的偏移到 EIP 寄存器 .</li>
+<li>执行被调用程序 .</li>
+</ol>
+<p>执行远的 <code>RET</code> , 处理器操作如下 :</p>
+<ol>
+<li>移出栈顶的值到 EIP 寄存器 .</li>
+<li>移出栈顶的值到 CS 寄存器 .</li>
+<li>如果 <code>RET</code> 指令有 n 个参数 , 增加栈指针 , 从而释放栈中的参数 .</li>
+<li>恢复执行调用程序 .</li>
+</ol>
+<h2 id="21-parameter-passing">2.1. Parameter Passing</h2>
+<p>参数传递的方式有三种 :</p>
+<ul>
+<li>
+<p>通用寄存器<br>
+处理器调用程序时不会保存通用寄存器的状态 , 因此调用程序可以通过通用寄存器传递最多 6 个 ( 除了 ESP 和 EBP ) 参数 . 被调用程序可以通过类似的方式传递参数给调用程序 .</p>
+</li>
+<li>
+<p>参数列表<br>
+要传递大量的参数给被调用程序 , 可以将参数放到栈中 , 即调用程序的栈帧 . 这里栈帧的基指针 ( EBP 寄存器 ) 可以用来轻松访问参数 .<br>
+被调用程序也可以通过栈传递参数给调用程序 .</p>
+</li>
+<li>
+<p>栈<br>
+传递更多参数给被调用程序的另一种方式是将参数放到内存中其中一个数据段中的参数列表里 , 然后通过通用寄存器或栈传递参数列表的指针给被调用程序 . 可以用同样的方式传递参数回调用程序 .</p>
+</li>
+</ul>
+<h2 id="22-saving-procedure-state-information">2.2. Saving Procedure State Information</h2>
+<p>处理器调用程序时不会保存通用寄存器 , 段寄存器 , 和 EFLAGS 寄存器 , 如果调用程序需要在程序返回后用到其中的某些寄存器 , 必须显式保存这些寄存器的值到数据段中栈或者内存中 .</p>
+<p><code>PUSHA</code> 保存所有的通用寄存器到栈中 , 顺序如下 : EAX , ECX , EDX , EBX , ESP , EBP , ESI 和 EDI ; <code>POPA</code> 从栈中移除所有的通用寄存器 , 除了 ESP .</p>
+<p>如果一个被调用程序显式更改了任意一个段寄存器的状态 , 必须在返回调用程序时恢复到原来的值 .</p>
+<p>如果一个调用程序需要维护 EFLAGS 寄存器的状态, 可以通过 <code>PUSHF</code> / <code>PUSHFD</code> 和 <code>POPF</code> / <code>POPFD</code> 指令保存或恢复全部或者部分寄存器 .<br>
+<code>PUSHF</code> 压入 EFLAGS 的低两个字节 , <code>PUSHD</code> 压入整个寄存器 . <code>POPF</code> 将栈中值的低两个字节保存到 EFLAGS 寄存器 , <code>POPFD</code> 从栈中恢复 4 个字节到 EFLAGS .</p>
+<h2 id="23-calls-to-other-privilege-levels">2.3. Calls to Other Privilege Levels</h2>
+<p>低特权级段中的代码只能通过受到严密控制和保护的接口 &mdash;- 门 ( gate ) 访问更高特权级的段 ; 否则会产生 #GP .</p>
+<p>低特权级的程序调用更高特权级的程序的处理流程和远的调用类似 , 区别如下 :</p>
+<ul>
+<li>
+<p><code>CALL</code> 指令提供的段选择器引用一个特殊的数据结构调用门描述符 ( call gate descriptor ) , 提供下列信息 :</p>
+<ul>
+<li>访问权限</li>
+<li>被调用程序的代码段的段选择器</li>
+<li>代码段内的偏移 ( 即被调用程序的指令指针 )</li>
+</ul>
+</li>
+<li>
+<p>处理器切换到新栈执行被调用程序 , 每个特权级都有自己的栈 . 特权级 3 的栈的段选择器和栈指针保存在 SS 和 ESP 寄存器 , 发生针对调用特权级更高的调用时自动保存 . 特权级 2 , 1 和 0 栈的段选择器和栈指针保存在系统段 TSS .</p>
+</li>
+</ul>
+<p>切换栈时使用调用门和 TSS 对于调用程序是透明的 , 除了产生 #GP 异常时 .</p>
+<h2 id="24-call-and-ret-operation-between-privilege">2.4. CALL and RET Operation Between Privilege</h2>
+<p>调用更高特权级时 , 处理器执行以下操作 :</p>
+<ol>
+<li>执行访问权限检查 .</li>
+<li>临时保存 SS , ESP , CS 和 EIP 寄存器的内容 .</li>
+<li>从 TSS 加载新栈 ( 即被调用的搞特权级的栈 ) 的段选择器和栈指针到 SS 和 ESP 寄存器 , 并切换到新栈 .</li>
+<li>将临时保存的调用程序的栈的 SS 和 ESP 的值压入新的栈中 .</li>
+<li>从调用程序的栈拷贝参数到新栈 , 调用门描述符内的一个值决定了要拷贝到新栈的参数数量 .</li>
+<li>将临时保存的调用程序的 CS 和 EIP 的值压入新的栈中 .</li>
+<li>从调用门加载新的代码段的段选择器和新的指令指针到 CS 和 EIP 寄存器 .</li>
+<li>在新的特权级开始执行被调用程序 .</li>
+</ol>
+<p>从被调用程序返回时 , 处理器执行以下操作 :</p>
+<ol>
+<li>检查特权级 .</li>
+<li>恢复 CS 和 EIP 寄存器到调用前的值 .</li>
+<li>如果 <code>RET</code> 指令有可选参数 n , 增加栈指针 , 从栈中释放参数 . 如果调用门描述符指明一个或多个参数从一个栈拷贝到另一个 , 必须使用 <code>RET n</code> 指令从两个栈释放参数 . 这里 , n 操作数指明参数在每个栈中占用的字节数 . 返回时 , 处理器增加 ESP n 个字节以从栈中移除参数 .</li>
+<li>恢复 SS 和 ESP 寄存器为调用前的值 , 从而切换到调用程序的栈 .</li>
+<li>如果 <code>RET</code> 指令有参数 n , 增加栈指针 n 个字节 , 以从栈中移除参数 .</li>
+<li>恢复执行调用程序 .</li>
+</ol>
+<h2 id="25-branch-functions-in-64-bit-mode">2.5. Branch Functions in 64-Bit Mode</h2>
+<p>64 位模式所有近的分支指令 ( <code>CALL</code> , <code>RET</code> , <code>JCC</code> , <code>JCXZ</code> , <code>JMP</code> , <code>LOOP</code> ) 的操作数大小都强制为 64 bit , 这些指令更新 64 位的 RIP , 而不需要 REX 操作数大小前缀 .</p>
+<p>64 位模式下列所有操作都强制为 64 位 , 忽略操作数大小前缀 :</p>
+<ul>
+<li>指令指针大小的截取</li>
+<li><code>CALL</code> 或 <code>RET</code> 引起的出栈或入栈大小</li>
+<li><code>CALL</code> 或 <code>RET</code> 引起的栈指针的增加或减少</li>
+<li>间接分支操作数的大小</li>
+</ul>
+<p>但是 , 相对分支的 displacement 域依然限制为 32 位 , 近分支的地址大小也没有强制为 64 为 .</p>
+<p>地址大小影响 <code>JCXZ</code> 和 <code>LOOP</code> 使用的 RCX 的大小 ; 还影响内存间接分支的地址计算 . 这些地址默认是 64 位 , 但是可以通过 32 bit 的地址大小前缀覆盖 .</p>
+<p>64 位模式扩展了 32-bit 调用门描述符到 64-bit , 允许远分支引用支持的线性地址空间内的任意地址 .</p>
+<p>由于立即数通常最多为 32 位 , 64 位模式指明一个 64 位的绝对 RIP 的唯一方式是通过一个间接分支 , 因此 64 位模式将直接远分支从指令集移除 .</p>
+<h1 id="3-interrupts-and-exceptions">3. Interrupts and Exceptions</h1>
+<p>中断和异常是打断程序执行的两种机制 :</p>
+<ul>
+<li>中断是通常由 IO 设备触发的异步事件 .</li>
+<li>异常是处理器在执行一个指令时检测到一个或多个预定义的条件时产生的同步事件 . IA-32 架构定义了三类异常 : faults , traps , 和 aborts .</li>
+</ul>
+<p>处理器回应中断和异常的方式本质上是相同的 : 收到中断或异常时 , 处理器停止执行当前进程 , 切换到处理异常或中断的处理程序 . 处理器通过中断描述符表 ( IDT ) 中的项访问处理程序 , 处理程序完成后 , 控制权返回给被中断的程序 .</p>
+<p>IA-32 架构定义了 18 个预定义的中断和异常 , 224 个用户定义的中断 , 都和 IDT 表中的项关联 . IDT 中每个中断和异常都通过一个数字标识 , 称作一个向量 . IDT 中向量 0-8 , 10-14 , 16-19 是预定义的中断和异常 ; 向量 32-255 是软件定义的中断 , 用于软件中断或者可屏蔽硬件中断 .</p>
+<p>处理器定义了没有指向 IDT 中的项的额外中断 , 其中最重要的是 SMI 中断 .</p>
+<h2 id="31-call-and-return-operation-for-interrupt-or-exception-handling-procedures">3.1. Call and Return Operation for Interrupt or Exception Handling Procedures</h2>
+<p>调用中断处理函数的流程和调用另一个特权级的程序的流程十分相似 , 向量引用 IDT 中两种门之一 : 中断门或者陷入门 , 二者和调用门类似 , 提供下列信息 :</p>
+<ul>
+<li>访问权限信息</li>
+<li>包含处理函数的代码段的段选择器</li>
+<li>代码段内处理函数的第一条指令的偏移</li>
+</ul>
+<p>中断门和陷入门的区别如下 : 如果一个中断或异常处理函数通过中断门调用 , 处理器清除 EFLAGS 寄存器的 IF 标志 , 防止后续的中断干扰处理函数的执行 . 通过陷入门调用处理函数 , IF 标志的状态不会改变 .</p>
+<p>如果处理函数的代码段和当前正在执行的程序的特权级相同 , 处理函数就是用当前的栈 ; 如果处理函数特权级更高 , 处理器切换到处理函数的特权级 .</p>
+<p>如果没有发生栈切换 , 处理器调用中断处理函数时执行下列操作 :</p>
+<ol>
+<li>将 EFLAGS , CS 和 EIP 寄存器的值依次压入栈中 .</li>
+<li>将一个错误代码 ( 如果合适的话 ) 压入栈中 .</li>
+<li>加载新代码段的段选择器和新的指令指针到 CS 和 EIP 寄存器 .</li>
+<li>如果通过中断门调用 , 清除 EFLAGS 寄存器的 IF 标志 .</li>
+<li>开始执行处理函数 .</li>
+</ol>
+<p>如果发生了栈切换 , 处理器执行下列操作 :</p>
+<ol>
+<li>临时保存 SS , ESP , EFLAGS , CS 和 EIP 寄存器的值 .</li>
+<li>从 TSS 加载新栈的段选择器和栈指针到 SS 和 ESP 寄存器 , 并切换到新栈 .</li>
+<li>将临时保存的被中断程序的栈的 SS , ESP , EFLAGS , CS 和 EIP 压入新栈 .</li>
+<li>压入错误代码到新栈 ( 如果合适的话 ) .</li>
+<li>加载新代码段的段选择器和新的指令指针到 CS 和 EIP 寄存器 .</li>
+<li>如果通过中断门调用 , 清除 EFLAGS 寄存器的 IF 标志 .</li>
+<li>开始在新的特权级执行处理函数 .</li>
+</ol>
+<hr>
+<p>通过 <code>IRET</code> 指令从处理函数返回 , <code>IRET</code> 指令和远的 <code>RET</code> 指令类似 , 除了恢复被中断程序的 EFLAGS 寄存器外 . 从相同特权级执行的处理函数返回时 , 处理器执行以下操作 :</p>
+<ol>
+<li>恢复 CS 和 EIP 寄存器为中断前的值 .</li>
+<li>恢复 EFLAGS 寄存器 .</li>
+<li>增加栈指针 .</li>
+<li>恢复执行被中断的程序 .</li>
+</ol>
+<p>从不同特权级执行的中断处理函数返回时 , 处理器执行以下操作 :</p>
+<ol>
+<li>检查特权级 .</li>
+<li>恢复 CS 和 EIP 为中断前的值 .</li>
+<li>恢复 EFLAGS 寄存器 .</li>
+<li>恢复 SS 和 ESP 寄存器为中断前的值 , 从而切换回被中断程序的栈 .</li>
+<li>恢复执行被中断的程序 .</li>
+</ol>
+<h2 id="32-calls-to-interrupt-or-exception-handler-tasks">3.2. Calls to Interrupt or Exception Handler Tasks</h2>
+<p>中断处理函数还可以运行在单独的任务中 , 这里中断或异常导致切换任务到处理函数 , 处理函数任务有自己的地址空间 , 可以在比应用程序更高的特权级执行 .</p>
+<p>切换到处理函数任务的操作通过引用任务门描述符 ( task gate descriptor ) 的隐式任务调用完成 , 通过任务门访问处理函数任务的地址空间 . 作为任务切换的一部分 , 处理器保存被中断程序的全部状态信息 ; 从处理函数返回时 , 恢复被中断程序的状态信息 , 继续执行 .</p>
+<h2 id="33-interrupt-and-exception-handling-in-real-address-mode">3.3. Interrupt and Exception Handling in Real-Address Mode</h2>
+<p>实地址模式下 , 处理器通过隐式远调用中断处理函数回应中断 , 处理器用中断向量作为中断表中的索引 , 表中包含处理函数的指令指针 .</p>
+<p>切换到处理程序前 , 处理器保存 EFLAGS , EIP , CS 寄存器的状态和一个可选的错误代码到栈中 .</p>
+<p>使用 <code>IRET</code> 指令从处理函数返回 .</p>
+<h2 id="34-int-n--into--int3--int1--and-bound-instructions">3.4. INT n , INTO , INT3 , INT1 , and BOUND Instructions</h2>
+<p><code>INT n</code> , <code>INTO</code> , <code>INT3</code> , <code>BOUND</code> 指令允许程序显式调用一个中断处理函数 . <code>INT n</code> 指令使用中断向量作为参数 , 从而调用任何中断处理函数 .</p>
+<p>设置 ELFAGS 中的 OF 标志时 , <code>INTO</code> 指令显式调用 #OF ( 溢出异常 ) 处理函数 . OF 标志表明算术指令发生了溢出 , 但是不会自动产生溢出异常 . 溢出异常只能通过下面两种方式之一触发 :</p>
+<ul>
+<li>执行 <code>INTO</code> 指令</li>
+<li>测试 OF 标志 , 设置时执行 <code>INT n</code> 指令 , 参数为 4</li>
+</ul>
+<p><code>INT3</code> 指令显式调用 #BP ( 断点异常 ) 处理函数 , <code>INT</code> 调用 #DB ( 调试异常 ) 处理函数 .</p>
+<p>如果操作数不在内存中预先定义的边界内 , <code>BOUND</code> 指令显式调用 #BP ( 越界异常 ) 处理函数 . 这个指令用于检测对于数组和其他数据结构的引用 . 类似溢出异常 , #BR 只能通过 <code>BOUND</code> 指令或参数为 5 的 <code>INT n</code> 指令触发 . 处理器不会隐式执行边界检查 , 产生 #BR .</p>
+<h2 id="35-handling-floating-point-exceptions">3.5. Handling Floating-Point Exceptions</h2>
+<p>操作单个或打包好的浮点数时 , IA-32 架构支持 6 个浮点异常 , 执行 x87 指令或 SSE / SSE2 / SSE3 指令时可以产生 . x87 浮点指令产生异常时 , 生成 #MF ( 浮点错误异常 ) ; SSE / SSE2 / SSE3 指令产生浮点异常时 , 产生 #XM ( SIMD 浮点异常 ) .</p>
+<h2 id="36-interrupt-and-exception-behavior-in-64-bit-mode">3.6. Interrupt and Exception Behavior in 64-Bit Mode</h2>
+<p>64 位扩展了传统的 IA-32 中断处理机制 , 从而支持 64 位操作系统和应用 , 包括以下改变 :</p>
+<ul>
+<li>IDT 指向的所有中断处理函数都是 64 位代码 ( 除了 SMI 处理函数 ) .</li>
+<li>中断栈的 push 固定为 64 位 , 处理器使用 8 字节 , 0 扩展的保存操作 .</li>
+<li>中断时无条件的压栈栈指针 ( SS:RSP ) , 传统模式的压栈操作是有条件的 , 基于 CPL .</li>
+<li>如果 CPL 改变 , 新的 SS 设置为 NULL .</li>
+<li><code>IRET</code> 的行为不同 .</li>
+<li>新的中断栈切换机制和新的中断影子栈切换机制 .</li>
+<li>中断栈帧的对齐方式不同 .</li>
+</ul>
+<h1 id="4-procedure-calls-for-block-structured-languages">4. Procedure Calls for Block-Structured Languages</h1>
+<p>IA-32 架构支持一种方法调用的选项 : <code>ENTER</code> 和 <code>LEAVE</code> 指令 , 自动创建和释放被调用程序的栈帧 .</p>
+<p><code>ENTER</code> 创建的栈帧和块结构的编程语言的作用域规则兼容 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-16
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/procedure-call/">procedure-call</a>
+          <a href="/tags/interrupt/">interrupt</a>
+          <a href="/tags/exception/">exception</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap5-protection/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap5-protection</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/2_chap2-instruction_format/">
+            <span class="next-text nav-default">2_chap2-instruction_format</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

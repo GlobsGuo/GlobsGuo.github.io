@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 . 操作 SSE 状态的指令集扩展包括 streaming SIMD extensions" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states" />
+<meta property="og:description" content="1. 简介 本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 . 操作 SSE 状态的指令集扩展包括 streaming SIMD extensions" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/" />
+<meta property="article:published_time" content="2020-10-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states">
+<meta itemprop="description" content="1. 简介 本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 . 操作 SSE 状态的指令集扩展包括 streaming SIMD extensions">
+<meta itemprop="datePublished" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2198">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,SSE,XSAVE,AVX," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states"/>
+<meta name="twitter:description" content="1. 简介 本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 . 操作 SSE 状态的指令集扩展包括 streaming SIMD extensions"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-12 </span>
+        
+          <span class="more-meta"> 2198 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-向-os-提供-sse-扩展支持">2. 向 OS 提供 SSE 扩展支持</a></li>
+    <li><a href="#3-sse-扩展的模拟">3. SSE 扩展的模拟</a></li>
+    <li><a href="#4-保存和恢复-sse-状态">4. 保存和恢复 SSE 状态</a></li>
+    <li><a href="#5-设计-os-切换任务或上下文时保存-x87-fpu--sse-和扩展状态的工具">5. 设计 OS 切换任务或上下文时保存 x87 FPU , SSE 和扩展状态的工具</a></li>
+    <li><a href="#7-xsave-特性集和处理器扩展状态的管理">7. XSAVE 特性集和处理器扩展状态的管理</a></li>
+    <li><a href="#8-xsave-特性集和-fxsave--fxrstor-的协同工作">8. XSAVE 特性集和 FXSAVE / FXRSTOR 的协同工作</a></li>
+    <li><a href="#9-xsave-特性集和处理器-supervisor-状态管理">9. XSAVE 特性集和处理器 supervisor 状态管理</a></li>
+    <li><a href="#10-xsave-管理的特性的系统编程">10. XSAVE 管理的特性的系统编程</a>
+      <ul>
+        <li><a href="#101-intel-advanced-vector-extensions--intel-avx-">10.1. Intel Advanced Vector Extensions ( Intel AVX )</a></li>
+        <li><a href="#102-intel-advanced-vector-extensions-512--intel-avx-512-">10.2. Intel Advanced Vector Extensions 512 ( Intel AVX-512 )</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 .<br>
+操作 SSE 状态的指令集扩展包括 streaming SIMD extensions ( SSE ) , SSE2 , SSE3 , supplemental SSE3 ( SSSE3 ) , SSE4 , 统称为 SSE 扩展 , 对应的指令称作 SSE 指令 .</p>
+<p>XSAVE 特性集指 Intel 架构的扩展 , 允许系统可执行程序实现对于多处理器扩展状态和 FP / SSE 状态的支持 , 这些状态可能逐渐引入 , 每次引入一个状态时不需要修改系统可执行程序 .<br>
+XSAVE 特性集提供了机制可以枚举支持的扩展状态 , 开启某一些或全部状态供软件使用 , 提供了指令保存 / 恢复状态 , 枚举保存到内存时的状态布局 .<br>
+<code>XSAVE</code> / <code>XRSTOR</code> 指令是 XSAVE 特性集的一部分 , 在 FP / SSE 状态后引入 , 但是可以用于管理传统的 FP / SSE 状态和处理器扩展状态 .</p>
+<h1 id="2-向-os-提供-sse-扩展支持">2. 向 OS 提供 SSE 扩展支持</h1>
+<p>OS 必须执行以下步骤初始化处理器使用 SSE 扩展指令 :</p>
+<ol>
+<li>向 OS 添加对于 SSE 指令的支持</li>
+<li>检查 CPU 是否支持 SSE 指令</li>
+<li>初始化 SSE 扩展 , 以便应用程序使用</li>
+<li>提供 non-numeric 异常处理函数给 SSE 指令产生的异常</li>
+<li>提供处理函数给 SIME 浮点异常 ( #XM )</li>
+</ol>
+<h1 id="3-sse-扩展的模拟">3. SSE 扩展的模拟</h1>
+<p>Intel 64 和 IA-32 架构不支持 SSE 指令的模拟 , 如果 CR0.EM = 1 时执行 SSE 指令 , 产生无效的操作码异常 ( #UD ) .</p>
+<h1 id="4-保存和恢复-sse-状态">4. 保存和恢复 SSE 状态</h1>
+<p>SSE 状态由 XMM 和 MXCSR 寄存器组成 , Intel 推荐使用下列方法保存和恢复状态 :</p>
+<ul>
+<li>执行 <code>FXSAVE</code> 指令保存 XMM 和 MXCSR 到内存</li>
+<li>执行 <code>FXRSTOR</code> 指令从内存中恢复 XMM 和 MXCSR 寄存器</li>
+</ul>
+<p>也可以单独保存 XMM 和 MXSCR :</p>
+<ul>
+<li>执行 <code>MOVDQ</code> 指令保存 XMM 的内容到内存</li>
+<li>执行 <code>STMXCSR</code> 指令保存 MXSCR 的内容到内存</li>
+</ul>
+<p>然后通过下列方式恢复寄存器的内容 :</p>
+<ul>
+<li>执行 <code>MOVDQ</code> 指令从内存加载 XMM 寄存器的内容</li>
+<li>执行 <code>LDMXCSR</code> 指令从内存恢复 MXCSR 寄存器的内容</li>
+</ul>
+<h1 id="5-设计-os-切换任务或上下文时保存-x87-fpu--sse-和扩展状态的工具">5. 设计 OS 切换任务或上下文时保存 x87 FPU , SSE 和扩展状态的工具</h1>
+<p>x87 FPU 和 SSE 状态由 x87 FPU , XMM 和 MXCSR 寄存器的状态组成 , <code>FXSAVE</code> 和 <code>FXRSTOR</code> 可以快速保存和恢复这个状态 . <code>XSAVE</code> 也可以用于保存 FP 和 SSE 状态以及其他的扩展状态 .</p>
+<p>如果任务或上下文的切换工具重新编写 , 可以采取下列方式之一 , 利用 <code>FXSAVE</code> 和 <code>FXRSTOR</code> 指令或 <code>XSAVE</code> 特性保存和恢复 x87 FPU 和 SSE 状态 :</p>
+<ul>
+<li>OS 可以要求应用程序负责切换任务前保存状态 , 恢复任务时还原状态 . 这种方法适用于合作的多任务 OS , 应用决定何时发生任务切换 , 在切换前保存状态 .</li>
+<li>OS 负责保存状态 , 作为任务切换过程的一部分 , 并且在恢复执行任务时还原寄存器状态 . 适用于抢占式多任务 OS , 应用无法知晓何时被抢占 , 不能提前准备任务切换 .</li>
+<li>OS 负责保存状态 , 作为任务切换过程的一部分 , 但是推迟状态的还原 , 知道操作状态的指令由新任务真正执行 . 这种方法称作懒恢复 ( lay restore ) .<br>
+使用 XSAVE 特性时 , 不推荐在上下文切换中使用懒恢复机制 .</li>
+</ul>
+<hr>
+<p>CR0.TS 标志允许 OS 推迟保存 / 恢复 x87 FPU 和 SSE 状态 , 直到新任务执行了访问这个状态的指令 . 设置这个标志时 , 处理器监测 x87 FPU , MMX , SSE 指令的指令流 , 发现这些指令之一时 , 在执行指令前产生一个设备不可用异常 ( #NM ) .<br>
+#NM 异常的处理函数可以用于保存前一个任务的 x87 FPU 和 SSE 状态 , 并加载当前任务的 x87 FPU 和 SSE 状态 . 如果新任务没有 x87 FPU , MMX 或 SSE 指令 , 不会产生 #NM 异常 , 也不会不必要的保存任务状态 .</p>
+<h1 id="7-xsave-特性集和处理器扩展状态的管理">7. XSAVE 特性集和处理器扩展状态的管理</h1>
+<p>XSAVE 特性集包括 :</p>
+<ul>
+<li>现有和未来处理器状态扩展的一个可扩展的数据布局</li>
+<li>特性枚举的 CPUID 扩展</li>
+<li>用于开启每个处理器的扩展状态的控制寄存器扩展和专用寄存器</li>
+<li>从 XSAVE 区域保存或恢复状态的指令</li>
+</ul>
+<p>OS 可以使用 XSAVE 特性集管理 FP / SSE 状态和处理器扩展状态 , OS 需要执行一些步骤支持传统的 FP / SSE 状态和处理器扩展状态 :</p>
+<ol>
+<li>检查处理器支持 XSAVE 特性集</li>
+<li>确定 OS 要开启的 XSAVE 管理特性集 , 计算上下文切换和其他流中保存 / 恢复状态需要的缓冲区大小</li>
+<li>开启 XSAVE 特性集和 XSAVE 管理的特性</li>
+<li>提供 XSAVE 管理的特性状态组件的初始化</li>
+<li>提供每个 XSAVE 管理的特性产生的异常的处理函数</li>
+</ol>
+<h1 id="8-xsave-特性集和-fxsave--fxrstor-的协同工作">8. XSAVE 特性集和 FXSAVE / FXRSTOR 的协同工作</h1>
+<p><code>FXSAVE</code> 指令写入 x87 FPU 和 SSE 状态信息到一个 512 byte FXSAVE 保存区域 , <code>FXRSTOR</code> 从 FXSAVE 区域恢复处理器的 x87 FPU 和 SSE 状态 .<br>
+XSAVE 特性集支持 x87 FPU 和 SSE 状态使用和 FXSAVE 区域相同的布局 , 使得 FXSAVE 和 XSAVE , FXRSOTR 和 XRSTOR 协同工作 .<br>
+XSAVE 特性集允许系统软件独立于 x87 FPU 状态管理 SSE 状态 , 因此使用 <code>FXSAVE</code> 和 <code>FXRSTOR</code> 管理 x87 FPU 和 SSE 状态的系统软件能够以系统的和向前的方式转向 XSAVE 特性集 , 从而管理 x87 FPU , SSE 和其他处理器扩展状态 .</p>
+<h1 id="9-xsave-特性集和处理器-supervisor-状态管理">9. XSAVE 特性集和处理器 supervisor 状态管理</h1>
+<p>supervisor 状态只能在 ring 0 访问 , XSAVE 特性集的一个扩展允许通过 XSAVE 特性集管理 supervisor 状态 . supervisor 状态扩展包括以下 :</p>
+<ul>
+<li>枚举管理员状态集和 XSAVE 特性集可以管理的状态集大小的 CPUID 扩展</li>
+<li>一个新的开启 XSAVE 特性集的 MSR IA32_XSS , 管理一个或多个被枚举的管理员状态</li>
+<li>一对新的特权保存 / 恢复指令 , <code>XSAVES</code> 和 <code>XRSTORS</code> , 保存 / 恢复管理员状态和其他 XSAVE 管理的特性状态</li>
+</ul>
+<p>XSAVE 管理的管理员状态由 IA32_XSS MSR 开启 , 而不是 XCR0 . IA32_XSS MSR 开启的管理员状态 :</p>
+<ul>
+<li>即使没有在 IA32_XSS MSR 开启 , 也可以通过其他机制访问 , 比如 RDMSR / WRMSR .</li>
+<li>保存 / 恢复状态时可能有其他影响 , 比如关闭 / 开启和状态相关的特性 .</li>
+<li>保存 / 恢复状态时可能产生 fault .</li>
+<li>恢复已经由特性相关的机制开启的管理员特性的状态时 , <code>XRSTORS</code> 可能 fault .</li>
+</ul>
+<h1 id="10-xsave-管理的特性的系统编程">10. XSAVE 管理的特性的系统编程</h1>
+<h2 id="101-intel-advanced-vector-extensions--intel-avx-">10.1. Intel Advanced Vector Extensions ( Intel AVX )</h2>
+<p>Intel AVX 由 256-bit 和 128-bit 指令组成 , 操作 256-bit YMM 寄存器 , XSAVE 特性集可以用于保存和恢复这些寄存器的状态 .</p>
+<p>支持 YMM 状态的处理器 , YMM 状态在所有模式下都存在 , 但是不同模式下访问 YMM 状态的指令接口可能不同 .</p>
+<p>OS 支持 AVX 时 , 需要知晓下列事项 :</p>
+<ul>
+<li>以没有 SSE 状态的非压缩格式保存 / 恢复 AVX 状态 , 即使 MXSCR 不是 AVX 状态的一部分 , 也会保存 / 恢复 MXCSR . 使用压缩格式时不同 .</li>
+<li>少数指令 , 比如 <code>VZEROUPPER</code> / <code>VZEROALL</code> 可能操作 YMM 寄存器的未来扩展 .</li>
+</ul>
+<p>OS 必须开启 YMM 状态管理 , 才能支持 AVX 和 256-bit 扩展 ; 否则执行 AVX 扩展指令会产生 #UD 异常 .</p>
+<h2 id="102-intel-advanced-vector-extensions-512--intel-avx-512-">10.2. Intel Advanced Vector Extensions 512 ( Intel AVX-512 )</h2>
+<p>支持 Intel AVX-512 的处理器 , 扩展的处理器状态在所有模式下都存在 , 但是访问方式可能不同 .</p>
+<p>OS 必须使用 <code>XSAVE</code> / <code>XRSTOR</code> / <code>XSAVEOPT</code> 指令管理 ZMM 和 opmask 状态 ; OS 必须开启 ZMM 和 opmask 状态管理 , 才能支持 Intel AVX-512 指令 , 否则产生 #UD 异常 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-12
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/sse/">SSE</a>
+          <a href="/tags/xsave/">XSAVE</a>
+          <a href="/tags/avx/">AVX</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap12-Intel_MMX_technology_system_programming</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap11-memory_cache_control/">
+            <span class="next-text nav-default">3A_chap11-memory_cache_control</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

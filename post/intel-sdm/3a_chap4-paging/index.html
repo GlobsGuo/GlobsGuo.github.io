@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap4-paging - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm ." />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap4-paging" />
+<meta property="og:description" content="1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/" />
+<meta property="article:published_time" content="2020-10-13T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap4-paging">
+<meta itemprop="description" content="1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm .">
+<meta itemprop="datePublished" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-13T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2081">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,PCID,TLB," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap4-paging"/>
+<meta name="twitter:description" content="1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm ."/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap4-paging</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-13 </span>
+        
+          <span class="more-meta"> 2081 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-paging-modes-and-control-bits">1. Paging Modes and Control Bits</a></li>
+    <li><a href="#2-access-rights">2. Access Rights</a></li>
+    <li><a href="#3-page-fault-exceptions">3. Page-Fault Exceptions</a></li>
+    <li><a href="#4-caching-translation-information">4. Caching Translation Information</a>
+      <ul>
+        <li><a href="#41-process-context-identifiers--pcids-">4.1. Process-Context Identifiers ( PCIDs )</a></li>
+        <li><a href="#42-translation-lookaside-buffers--tlbs-">4.2. Translation Lookaside Buffers ( TLBs )</a></li>
+        <li><a href="#43-paging-structure-caches">4.3. Paging-Structure Caches</a></li>
+        <li><a href="#44-invalidation-of-tlbs-and-paging-structure-caches">4.4. Invalidation of TLBs and Paging-Structure Caches</a></li>
+        <li><a href="#45-propagation-of-paging-structure-changes-to-multiple-processors">4.5. Propagation of Paging-Structure Changes to Multiple Processors</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-interactions-with-vmx">5. Interactions with VMX</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-paging-modes-and-control-bits">1. Paging Modes and Control Bits</h1>
+<p>分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm .</p>
+<p>不同分页模式相关寄存器的值和差异列出如下 :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Paging Mode</th>
+<th style="text-align:left">CR0.PG</th>
+<th style="text-align:left">CR4.PAE</th>
+<th style="text-align:left">IA32_EFER.LME</th>
+<th style="text-align:left">CR4.LA57</th>
+<th style="text-align:left">Lin-Addr Width</th>
+<th style="text-align:left">Phys-Addr Width</th>
+<th style="text-align:left">Page Sizes</th>
+<th style="text-align:left">Execute-Disable Support</th>
+<th style="text-align:left">PCIDs and Protection Keys Supports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">None</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">32</td>
+<td style="text-align:left">32</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">No</td>
+<td style="text-align:left">No</td>
+</tr>
+<tr>
+<td style="text-align:left">32-bit</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">32</td>
+<td style="text-align:left">Up to 40</td>
+<td style="text-align:left">4KB 4MB</td>
+<td style="text-align:left">No</td>
+<td style="text-align:left">No</td>
+</tr>
+<tr>
+<td style="text-align:left">PAE</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">N/A</td>
+<td style="text-align:left">32</td>
+<td style="text-align:left">Up to 52</td>
+<td style="text-align:left">4KB 2MB</td>
+<td style="text-align:left">Yes</td>
+<td style="text-align:left">No</td>
+</tr>
+<tr>
+<td style="text-align:left">4-level</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">48</td>
+<td style="text-align:left">Up to 52</td>
+<td style="text-align:left">4KB 2MB 1GB</td>
+<td style="text-align:left">Yes</td>
+<td style="text-align:left">Yes</td>
+</tr>
+<tr>
+<td style="text-align:left">5-level</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">57</td>
+<td style="text-align:left">Up to 52</td>
+<td style="text-align:left">4KB 2MB 1GB</td>
+<td style="text-align:left">Yes</td>
+<td style="text-align:left">Yes</td>
+</tr>
+</tbody>
+</table>
+<h1 id="2-access-rights">2. Access Rights</h1>
+<p>线性地址的转换过程完成后可以得到一个物理地址 , 转换的访问是否允许受访问权限的限制 .</p>
+<p>线性地址的访问根据 CPL 分为用户模式或管理员模式的访问 : CPL = 3 是用户模式的访问 , CPL &lt; 3 是管理员模式的访问 .</p>
+<p>分页模式确定访问权限的方式和其访问模式密切相关 , 此外还受到分页结构项中的访问权限位 , CR0 , CR4 , IA32_EFER , EFLAGS 的影响 , 具体的判断方式查阅 sdm .</p>
+<hr>
+<p>4 级和 5 级分页每个线性地址可以管理一个保护 key , 控制地址的数据访问 , 对于取指操作没有影响 .</p>
+<h1 id="3-page-fault-exceptions">3. Page-Fault Exceptions</h1>
+<p>访问线性地址可能产生缺页异常 , 原因可能是 :</p>
+<ol>
+<li>访问的线性地址无法通过分页转化为物理地址 .</li>
+<li>访问的线性地址可以转化 , 但是访问权限不允许 .</li>
+</ol>
+<p>处理器通过缺页错误代码指明缺页产生的原因 :</p>
+<p><img src="../images/7d934c4c4bf7459427970eac82b10e2dfb82d6e32d6bf00a4f9c44723472ae9c.png" alt="picture 3"></p>
+<h1 id="4-caching-translation-information">4. Caching Translation Information</h1>
+<h2 id="41-process-context-identifiers--pcids-">4.1. Process-Context Identifiers ( PCIDs )</h2>
+<p>PCID 是一个 12-bit 的标识符 , 供逻辑处理器缓存多个线性地址空间的信息 , 处理器可以在软件切换到使用不同 PCID 的不同线性地址空间时获取信息 .</p>
+<p>逻辑处理器在 TLB 和分页高速缓存中创建项时 , 关联这些项到当前的 PCID ; 使用 TLB 和分页结构高速缓存中的项转化一个线性地址时 , 逻辑处理器只会用和当前 PCID 相关的项 .</p>
+<h2 id="42-translation-lookaside-buffers--tlbs-">4.2. Translation Lookaside Buffers ( TLBs )</h2>
+<p>TLB 包含虚拟页号到物理页号的映射 , 缓存线性地址的转化信息 .<br>
+TLB 中的每一项通过一个虚拟页号索引 , 包含线性地址转化过程中使用的分页结构项的以下信息 :</p>
+<ul>
+<li>和虚拟页号对应的物理页号</li>
+<li>转化线性地址使用的分页结构项的访问权限 :
+<ul>
+<li>R / W 标志的逻辑与</li>
+<li>U / S 标志的逻辑与</li>
+<li>XD 标志的逻辑或</li>
+<li>保护 key</li>
+</ul>
+</li>
+<li>标识最终页框的分页结构项中的属性 :
+<ul>
+<li>脏标志</li>
+<li>内存类型</li>
+</ul>
+</li>
+</ul>
+<p>TLB 项可能包含其他信息 , 处理器可以实现多个 TLB , 根据用途包含不同的信息 , 比如只用于取指的 TLB 可能没有 R / W 标志信息 .</p>
+<p>TLB 并不是处理器必须实现的组件 , 处理器也可以在任何时刻无效任何 TLB , 软件不能依赖 TLB .</p>
+<p>TLB 只会缓存转化线性地址过程中用到的分页结构项 , 但是可能缓存由于分支预测或者投机执行产生的 , 实际执行程序时并不会发生的线性地址转化 .</p>
+<p>CR4.PGE = 1 时 , 系统允许使用全局页 , 使用全局页的 TLB 项也是全局的 .<br>
+全局的 TLB 可以供所有 PCID 使用 .</p>
+<h2 id="43-paging-structure-caches">4.3. Paging-Structure Caches</h2>
+<p>分页结构高速缓存是处理器在内存中缓存的分页结构信息 , 通过线性地址的一部分索引 , 保存的信息和 TLB 项类似 .</p>
+<p>处理器可能为实际的代码路径中不会执行的 , 由于指令预取和投机执行的地址转化创建分页结构高速缓存 .</p>
+<p>需要说明的是 , 分页结构高速缓存只包含引用其他分页结构 ( 没有映射页的结构 ) 的分页结构项中的信息 , 由于这些分页结构项没有使用 G 标志 , 全局页特性不会影响分页结构高速缓存的行为 .</p>
+<h2 id="44-invalidation-of-tlbs-and-paging-structure-caches">4.4. Invalidation of TLBs and Paging-Structure Caches</h2>
+<p>处理器可能在线性地址转化时在 TLB 和分页结构高速缓存中创建项 , 并且在创建时使用的分页结构改变后仍然保有这些项 . 为了保证转化线性地址时使用修改过的分页结构 , 软件需要无效任何可能包含已经修改的信息的被缓存的项 .</p>
+<p>下列指令可以无效 TLB 和分页结构高速缓存中的项 :</p>
+<ul>
+<li><code>INVLPG</code></li>
+<li><code>INVPCID</code></li>
+<li><code>MOV to CR0</code></li>
+<li><code>MOV to CR3</code></li>
+<li><code>MOV to CR4</code></li>
+<li>进程切换</li>
+<li>VMX 会话</li>
+</ul>
+<p>此外 , 缺页也会无效 TLB 和分页结构高速缓存中的项 . 特别的 , 试图使用线性地址导致的缺页异常会无效关联到当前 PCID 所有和线性地址对应的虚拟页号的 TLB 项 ; 也会无效关联到当前 PCID 的所有该线性地址的分页结构高速缓存项 .<br>
+这些无效操作保证如果缺页异常不是由内存中的分页结构导致 , 缺页异常不会再次发生 ( 如果再次执行缺失的指令 ) .</p>
+<p>对于大于 4KB 的页的分页结构项的 TLB 项 , 软件无法知道使用了多个更小页的转换操作 , <code>INVLPG</code> 指令和缺页会无效所有和转化对应的 TLB 项 .</p>
+<h2 id="45-propagation-of-paging-structure-changes-to-multiple-processors">4.5. Propagation of Paging-Structure Changes to Multiple Processors</h2>
+<p>修改一个分页结构项的软件可能需要在修改一个分页结构项前 , 先无效源于被修改的分页结构项的 TLB 和分页结构项高速缓存项 . 在多于一个逻辑处理器的系统 , 软件必须考虑除修改分页结构项外的其他逻辑处理器的 TLB 和分页结构高速缓存中也存在对应的项 .<br>
+一个分页结构项的改变导致其他处理器也需要无效 TLB 和分页结构项的传播过程 , 称作 &ldquo;TLB shootdown&rdquo; .</p>
+<p>TLB shootdown 可以通过基于内存的信号量或 / 和处理器间的中断 ( interprocessor interrupts , IPI ) 完成 .</p>
+<p>TLB shootdown 必须满足下列条件 :</p>
+<ul>
+<li>使用被修改的分页结构的所有逻辑处理器必须在修改后执行正确的无效操作 .</li>
+<li>如果对于分页结构项的修改在 barrier 之前进行 , 或者没有 barrier , 操作系统必须保证以下条件之一成立 :
+<ol>
+<li>受影响的线性地址范围在修改和无效之间没有被使用 .</li>
+<li>已经准备好应对修改期间被使用的受影响的线性地址导致的后果 .</li>
+</ol>
+</li>
+<li>软件必须准备好处理由于投机执行导致的 , 真实代码路径中不会发生的对于受影响的线性地址空间的读 , 取指 , 预取请求 .</li>
+</ul>
+<h1 id="5-interactions-with-vmx">5. Interactions with VMX</h1>
+<p>VMX transition 可以同时修改 CR0 , CR4 和 IA32_EFER MSR , 因此可以实现在正常情况下无法完成的分页模式转化 .</p>
+<p>VMX 提供了 virtual-processor identifiers ( VPIDs ) 和 extended page table ( EPT ) 机制支持地址转换过程 .<br>
+VPID 供软件用来向处理器表示不同虚拟处理器的地址空间 , 处理器根据这个信息维护多个地址空间的 TLB 和分页结构高速缓存 .<br>
+使用 EPT 时 , 分页结构中的地址作为 guest-physical 地址使用 , 通过一组 EPT 分页结构项生成物理地址 . EPT 还可以指定自己的访问权限和内存类型 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-13
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/pcid/">PCID</a>
+          <a href="/tags/tlb/">TLB</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/1_chap3-basic_execution_environment/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">1_chap3-basic_execution_environment</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/">
+            <span class="next-text nav-default">3A_chap12-Intel_MMX_technology_system_programming</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

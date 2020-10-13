@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap8-multi-processor_management - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap8-multi-processor_management/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap8-multi-processor_management" />
+<meta property="og:description" content="1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap8-multi-processor_management/" />
+<meta property="article:published_time" content="2020-09-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-25T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap8-multi-processor_management">
+<meta itemprop="description" content="1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器">
+<meta itemprop="datePublished" content="2020-09-25T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-25T00:00:00+00:00" />
+<meta itemprop="wordCount" content="5121">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,LOCK,memory-ordering,BSP,AP," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap8-multi-processor_management"/>
+<meta name="twitter:description" content="1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap8-multi-processor_management</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-25 </span>
+        
+          <span class="more-meta"> 5121 words </span>
+          <span class="more-meta"> 11 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-locked-atomic-operations">2. Locked Atomic Operations</a>
+      <ul>
+        <li><a href="#21-保证的原子操作">2.1. 保证的原子操作</a></li>
+        <li><a href="#22-总线锁">2.2. 总线锁</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-内存次序">3. 内存次序</a>
+      <ul>
+        <li><a href="#31-pentium-和-486-处理器">3.1. Pentium 和 486 处理器</a></li>
+        <li><a href="#32-p6-和更新的处理器">3.2. P6 和更新的处理器</a></li>
+        <li><a href="#33-增强或减弱内存次序">3.3. 增强或减弱内存次序</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-multiple-processor--mp--initialization">4. Multiple-Processor ( MP ) Initialization</a>
+      <ul>
+        <li><a href="#41-mp-初始化协议算法">4.1. MP 初始化协议算法</a>
+          <ul>
+            <li><a href="#411-典型的-bsp-初始化序列">4.1.1. 典型的 BSP 初始化序列</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#5-intel-超线程技术">5. Intel 超线程技术</a></li>
+    <li><a href="#6-编程支持多线程的处理器需要考虑的事">6. 编程支持多线程的处理器需要考虑的事</a>
+      <ul>
+        <li><a href="#61-共享资源的分级映射">6.1. 共享资源的分级映射</a></li>
+      </ul>
+    </li>
+    <li><a href="#7-空闲和阻塞条件的管理">7. 空闲和阻塞条件的管理</a>
+      <ul>
+        <li><a href="#71-hlt-指令">7.1. <code>HLT</code> 指令</a></li>
+        <li><a href="#72-pause-指令">7.2. <code>PAUSE</code> 指令</a></li>
+        <li><a href="#73-通过-monitor--mwait-指令">7.3. 通过 <code>MONITOR</code> / <code>MWAIT</code> 指令</a></li>
+        <li><a href="#74-monitor--mwait-地址范围的确定">7.4. <code>MONITOR</code> / <code>MWAIT</code> 地址范围的确定</a></li>
+        <li><a href="#75-操作系统所需的支持">7.5. 操作系统所需的支持</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 :</p>
+<ul>
+<li>对系统内存执行原子操作所需的总线锁和 cache 一致性管理</li>
+<li>串行化的指令</li>
+<li>位于处理器芯片的 APIC</li>
+<li>L2 cache</li>
+<li>L3 cache</li>
+<li>Intel 超线程技术 , 单个处理器核心并发执行两个或多个线程</li>
+</ul>
+<p>Intel 提供的多处理器机制有以下特点 :</p>
+<ul>
+<li>维护系统内存的一致 ( coherency )</li>
+<li>维护 cache 一致性 ( consistency )</li>
+<li>允许按照预期的次序写入内存</li>
+<li>在一组处理器间分发中断处理</li>
+<li>开发当前操作系统和应用的多线程和多进程提升系统性能</li>
+</ul>
+<h1 id="2-locked-atomic-operations">2. Locked Atomic Operations</h1>
+<p>32 位 IA-32 处理器支持系统内存地址的带锁原子操作 , 通常用于管理共享的数据结构 ( 信号量 , 段描述符 , 系统段 , 页表 ) . 处理器采用三个独立的机制实现带锁的原子操作 :</p>
+<ul>
+<li>保证的原子操作</li>
+<li>总线锁 , 使用 LOCK# 信号和 LOCK 指令前缀</li>
+<li>确保可以再缓存的数据结构上执行原子操作的 cache 一致性协议 ( cache 锁 )</li>
+</ul>
+<p>软件需要保证访问锁的公平性 , 防止锁饿死 .</p>
+<h2 id="21-保证的原子操作">2.1. 保证的原子操作</h2>
+<p>下列基本内存操作会被原子的执行 :</p>
+<ul>
+<li>读写一个字节</li>
+<li>读写一个对齐到 16-bit 的字</li>
+<li>读写一个对齐到 32-bit 的双字</li>
+<li>读写一个对齐到 64-bit 的四字</li>
+<li>32 位数据总线对于 uncached 内存地址的 16-bit 访问</li>
+<li>对于一个 cache line 内的已缓存内存的未对齐的 16-bit , 32-bit , 64-bit 访问</li>
+</ul>
+<h2 id="22-总线锁">2.2. 总线锁</h2>
+<p>LOCK# 信号在某些临界内存操作时自动使能 , 锁住系统总线或者等价的连接 . 这个输出信号使能时 , 其他处理器或者总线 agent 控制总线的请求会被阻塞 . 软件可以添加 LOCK 前缀到一条指令来指明其他需要遵守 LOCK 语义的场景 .</p>
+<p>在 P6 以后的处理器中 , 如果访问的内存区域缓存在处理器内部 , 通常不会使能 LOCK# 信号 ; 锁只适用于处理器的 cache .</p>
+<hr>
+<p>处理器自动遵守 LOCK 语义的操作如下 :</p>
+<ul>
+<li>执行引用内存的 <code>XCHG</code> 指令</li>
+<li>设置 TSS 描述符的忙标志 , 防止两个处理器切换到相同的任务</li>
+<li>更新段描述符</li>
+<li>更新页目录和页表中的项</li>
+<li>响应中断</li>
+</ul>
+<hr>
+<p>下列命令可以添加 LOCK 前缀 , 显式强制进行 LOCK 语义 . 其他指令使用 LOCK 前缀 , 或者没有写入内存 ( 指令的目的操作数是一个寄存器 ) 的操作都会产生 #UD :</p>
+<ul>
+<li>位测试和修改指令 ( <code>BTS</code> , <code>BTR</code> , <code>BTC</code> )</li>
+<li>交换指令 ( <code>XADD</code> , <code>CMPXCHG</code> , <code>CMPXCHG8B</code> )</li>
+<li>自动假设 <code>XCHG</code> 指令带有 LOCK 前缀</li>
+<li>下列单操作数的数学和逻辑指令 : <code>INC</code> , <code>DEC</code> , <code>NOT</code> , <code>NEG</code></li>
+<li>下列双操作数的数学和逻辑指令 : <code>ADD</code> , <code>ADC</code> , <code>SUB</code> , <code>SBB</code> , <code>AND</code> , <code>OR</code> , <code>XOR</code></li>
+</ul>
+<p>有锁的操作对于所有的内存操作和外部可见的事件都是原子的 , 只有取指和页表访问可以通过带锁的指令 .</p>
+<p>如果 LOCK 操作中访问的内存区域作为写回内存被缓存到执行锁操作的处理器中 , 而且完全包含在一个 cache 行中 , 处理器可能不会使能总线上的 LOCK# 信号 .<br>
+相反 , 处理器会修改内部的内存 , 使用 cache 一致性机制保证操作被原子的执行 .</p>
+<h1 id="3-内存次序">3. 内存次序</h1>
+<p>memory ordering 指处理器通过系统总线向系统内存发出读写指令的次序 , 不同的 Intel 架构支持不同的内存次序模型 .</p>
+<p>Intel 386 处理器使用 program ordering ( 也叫作 strong ordering ) , 所有情况下系统总线发出读写操作的次序和指令流中的次序相同 .</p>
+<p>IA-32 架构引入了 processor ordering , 允许提升性能的操作 , 例如读操作在带有缓冲的写操作前执行 , 从而在维持内存一致性的前提下提升指令的执行速度 .</p>
+<h2 id="31-pentium-和-486-处理器">3.1. Pentium 和 486 处理器</h2>
+<p>Pentium 和 486 处理器使用 processor ordering 内存模型 , 但是大多数情况下的操作和 strong ordering 模型一样 . 读和写总是按照编程模型出现在系统总线 , 除了下列展示出 processor ordering 的情形 :<br>
+所有的带缓冲的写操作都 cache 命中时 , 系统总线上的读 miss 可以超过带缓冲的写 , 因为后者不会指向和读 miss 操作访问的相同地址 .</p>
+<p>IO 操作中 , 读和写总是按照编程次序出现 .</p>
+<h2 id="32-p6-和更新的处理器">3.2. P6 和更新的处理器</h2>
+<p>更新的处理器也采用 processor ordering 内存模型 , 可以被定义为 write ordered with store-buffer forwarding .</p>
+<p>内存区域定义为 write-back cacheable 的单处理器系统中 , 内存模型遵守一系列的原则 .</p>
+<p>多处理器系统的单个处理器需要遵守单处理器的内存模型原则 , 还需要额外的规则 .</p>
+<ul>
+<li>load 和 store 都无法和同类型的操作重新排序</li>
+<li>store 和更早的 load 无法重新排序</li>
+<li>load 和更早的不同内存地址的 store 可以重新排序</li>
+<li>两个处理器都觉得自己的 store 发生在另一个处理器的 store 之前 , 允许处理器内的前递</li>
+<li>两个处理器的 store 次序 , 在其他的处理器看来是一致的</li>
+<li>带锁的指令只有一个执行次序</li>
+<li>load 和 store 不能和带锁的指令重新排序</li>
+</ul>
+<hr>
+<p>字符串操作指令的内存次序遵守以下规则 :</p>
+<ul>
+<li>一个字符串操作内的 store 可以重新排序</li>
+<li>字符串操作间的 store 无法重新排序</li>
+<li>字符串操作无法和后续的 store 重新排序</li>
+</ul>
+<h2 id="33-增强或减弱内存次序">3.3. 增强或减弱内存次序</h2>
+<p>下列机制可以用于增强或者减弱内存次序 :</p>
+<ul>
+<li>IO 指令 , 锁指令 , LOCK 前缀和序列化指令可以用于增强内存次序</li>
+<li><code>SFENCE</code> , <code>LFENCE</code> , <code>MFENCE</code> 可以序列化特定类型的内存操作</li>
+<li>内存类型范围寄存器 ( MTRR ) 可以用于加强或减弱特定物理内存区域的内存次序</li>
+<li>页属性表 ( PAT ) 可以用于加强特定页或一组页的内存次序</li>
+</ul>
+<p>FENCE 指令提供了保证产生弱次序结果的例程和使用这个结果的例程间 load 和 store 内存次序的高效方式 , 这些指令的功能如下 :</p>
+<ul>
+<li><code>SFENCE</code><br>
+序列化所有发生在 <code>SFENCE</code> 指令之前的 store 操作 , 不影响 load 操作 .</li>
+<li><code>LFENCE</code><br>
+序列化所有发生在 <code>LFENCE</code> 指令之前的 load 操作 , 不影响 store 操作 .</li>
+<li><code>MFENCE</code><br>
+序列化所有发生在 <code>MFENCE</code> 指令之前的 store 和 load 操作 .</li>
+</ul>
+<p>FENCE 指令比 CPUID 指令控制内存次序的效率更高 .</p>
+<h1 id="4-multiple-processor--mp--initialization">4. Multiple-Processor ( MP ) Initialization</h1>
+<p>多处理器初始化协议有专门的 specification , 定义了两种处理器 : bootstrap processor ( BSP ) 和 application processor ( AP ) .<br>
+系统上电或重启后 , 系统硬件动态选择系统总线上的一个处理器作为 BSP , 其余的处理器作为 AP .<br>
+BSP 的 IA32_APIC_BASE MSR 的 BSP 标志会置位 , 指明自己是一个 BSP , 其他处理器的这个标志都会清除 .</p>
+<p>BSP 执行 BIOS 的 bootstrap 代码 , 配置 APIC 环境 , 建立系统范围的数据结构 , 开始初始化 AP . BSP 和 AP 初始化完成后 , BSP 执行 OS 的初始化代码 .</p>
+<p>系统上电或重启后 , AP 完成最小化的自配置 , 然后等待 BSP 处理器的启动信号 ( 通过 SIPI 消息 ) ; 收到 SIPI 消息后 , AP 执行 BIOS AP 配置代码 , 完成后处于 halt 状态 .</p>
+<p>支持 Intel 超线程技术的处理器 , MP 初始化协议将系统总线上或 coherent link domain 的每个逻辑处理器作为一个单独的处理器 ( 有唯一的 APIC ID ) .</p>
+<p>MP 协议只有在上电或者 RESET 后才会执行 , 如果 MP 协议已经完成 , 选择了一个 BSP , 后续的 INIT 不会导致 MP 协议被重复 .<br>
+MP 初始化期间 , 系统中所有可以传递中断的设备必须被阻止发送中断给处理器 .</p>
+<h2 id="41-mp-初始化协议算法">4.1. MP 初始化协议算法</h2>
+<p>MP 系统执行初始化协议期间 , 会执行以下操作 :</p>
+<ol>
+<li>给每个逻辑处理器分配一个唯一的 APIC ID , 基于系统拓扑 . 支持 CPUID 叶子 0BH 的处理器 ID 为 32-bit , 否则是 8-bit .</li>
+<li>基于 APIC ID 给每个逻辑处理器分配一个唯一的仲裁优先级 .</li>
+<li>每个逻辑处理器同时执行 BIST .</li>
+<li>较新的处理器中 , 仲裁优先级最高的逻辑处理器成为 BSP .</li>
+<li>作为 bootstrap 代码的一部分 , BSP 创建 ACPI 表和 / 或 MP 表 , 添加初始 APIC ID 到表中 .</li>
+<li>bootstrap 结束处 , BSP 设置一个处理器的计数器为 1 , 广播一个 SIPI 消息到系统中所有 AP . SIPI 消息包含 BIOS AP 初始化代码的向量 .</li>
+<li>AP 初始化的第一个操作是针对一个 BIOS 初始化信号量创建一个竞争条件 , 获得信号量的第一个 AP 执行初始化代码 . 作为 AP 初始化过程的一部分 , AP 添加自己的 APIC ID 到 ACPI 和 / 或 MP 表 , 增加处理器计数 1 , 初始化完成后 , AP 执行 <code>CLI</code> 指令 , 停止自己 .</li>
+<li>每个 API 都访问过信号量 , 执行 AP 初始化代码后 , BSP 统计连接到系统总线的处理器的数量 , 完成 BIOS 的 bootstrap 代码 , 开始执行 OS 的 bootstrap 和启动代码 .</li>
+<li>BSP 执行 OS 的 bootstrap 和启动代码时 , AP 保持在停止状态 , 只会响应 INIT , NMI 和 SMI ; 也会响应 snoop 和 STPCLK# 的使能 .</li>
+</ol>
+<h3 id="411-典型的-bsp-初始化序列">4.1.1. 典型的 BSP 初始化序列</h3>
+<p>IA-32 架构 BSP 从地址 0xFFFFFFF0H 开始执行 BIOS 的 bootstrap 代码 , 通常执行以下操作 :</p>
+<ol>
+<li>初始化内存 .</li>
+<li>加载 microcode 的更新到处理器 .</li>
+<li>初始化 MTRR .</li>
+<li>开启 cache .</li>
+<li>EAX = 0H 时执行 CPUID 指令 , 然后读取 EBX , ECX 和 EDX 的值, 判断 BSP是否是 &ldquo;GenuineIntel&rdquo; .</li>
+<li>EAX = 1H 时执行 CPUID 指令 , 保存 EAX , ECX 和 EDX 寄存器的值到 RAM 中的系统配置空间 , 供以后使用 .</li>
+<li>加载 AP 要执行的启动代码到低 1MB 内存的一个 4KB 页 .</li>
+<li>切换到保护模式 , 保证 APIC 地址空间映射到一个 strong uncacheable 内存类型 .</li>
+<li>从本地 APIC ID 寄存器确定 BSP 的 APIC ID , 保存到 ACPI 和 / 或 MP 表 .</li>
+<li>将 AP 的启动代码所在的 4KB 页的基地址转化为 8-bit 向量 , 后者定义了 4KB 页在实地址模式下的地址 .</li>
+<li>设置 APIC spurious vector register 的 bit 8 , 开启本地 APIC .</li>
+<li>通过给 APIC 错误处理函数建立一个 8-bit 向量设置 LVT 错误处理项 .</li>
+<li>初始化 Lock 信号量变量 VACANT 为 00H , AP 使用这个信号量确定执行 BIOS AP 初始化代码的次序 .</li>
+<li>BSP 通过 COUNT 变量探测系统中的 AP .</li>
+<li>广播一个 INIT-SIPI-SIPI IPI 序列到 AP , 唤醒并初始化 AP .</li>
+<li>读取 COUNT 变量 , 建立一个处理器计数 .</li>
+<li>如果有必要 , 重新配置 APIC , 继续剩余的系统诊断 .</li>
+</ol>
+<hr>
+<p>AP 需要等待 BIOS 初始化 Lock 信号量 , 获取后继续初始化 . AP 不需要执行第 7 步 , 并且在增加 COUNT 变量后释放信号量 , 进入停止状态 , 等待 INIT IPI .</p>
+<p>支持 Intel 超线程技术的的处理器系统的初始化过程和传统的 MP 系统的初始化流程相同 .</p>
+<p>完成 OS 启动过程后 , BSP 执行 OS 代码 , 其他的逻辑处理器处于 halt 状态 . 要在停止的处理器执行代码 , OS 发送一个指向被挂起的逻辑处理器的 IPI ( 处理期间中断 ) . 作为回应 , 处理器唤醒 , 开始执行 IPI 中包含的向量指明的代码 .</p>
+<h1 id="5-intel-超线程技术">5. Intel 超线程技术</h1>
+<p>支持超线程技术的逻辑处理 , 一个物理处理器内的逻辑处理器共享 MTRR , 每个逻辑处理器都有自己的通用寄存器 , EFLAGS 等大多数寄存器 .</p>
+<p>一个处理器内的逻辑处理器共享下列信号 : STPCLK# 和 LINT0 , LINT1 .</p>
+<h1 id="6-编程支持多线程的处理器需要考虑的事">6. 编程支持多线程的处理器需要考虑的事</h1>
+<p>支持多线程的处理器硬件内 , 一些资源由处理器核心共有 , 其他的资源每个逻辑处理器都有 .</p>
+<p>从软件的角度看 , 处理器操作的控制转换以逻辑处理器的粒度进行管理 , 为了管理多线程环境下共享资源的拓扑 , 理解和管理由超过一个逻辑处理器共享的资源对于软件可能十分有用 .</p>
+<h2 id="61-共享资源的分级映射">6.1. 共享资源的分级映射</h2>
+<p>每个逻辑处理器的 APIC ID 由多个域组成 , 每个域对应硬件资源的拓扑学映射的分层等级 .</p>
+<p><img src="../images/0fdc4554c568415c2ce6f00a3fac900cd402ca5e7c5f8399d3f5b484557c8600.png" alt="picture 1"></p>
+<p>如果处理器支持 CPUID 叶子 0BH 和 1FH , 32-bit 的 APIC ID 可以代表 cluster 加上一些拓扑分级 .</p>
+<p>有效的 APIC ID 不需要在 package 或 core 边界保持连续 .</p>
+<h1 id="7-空闲和阻塞条件的管理">7. 空闲和阻塞条件的管理</h1>
+<p>MP 系统中的一个逻辑处理器空闲或者被阻塞时 , 可以通过 <code>HLT</code> , <code>PAUSE</code> , <code>MONITOR</code> / <code>MWAIT</code> 指令对执行引擎资源进行额外的管理 .</p>
+<h2 id="71-hlt-指令">7.1. <code>HLT</code> 指令</h2>
+<p>一个逻辑处理器被停止后 , 物理 package 内的其他逻辑处理器仍然能够访问共享的资源 , 更高效的执行指令 .<br>
+被停止的指令恢复执行后 , 共享的资源重新在所有的活跃处理器间共享 .</p>
+<h2 id="72-pause-指令">7.2. <code>PAUSE</code> 指令</h2>
+<p><code>PAUSE</code> 指令可以提高支持超线程技术的处理器在执行 &ldquo;spin-wait loop&rdquo; , 以及其他的一个线程在紧密的轮训中访问一个共享的锁或信号量时的性能 .</p>
+<p>执行 spin-wait loop 时 , 处理器在退出循环时性能会严重下降 , 因为处理器会探测到一个可能的违反内存次序 , flush 核内处理器的流水线 .<br>
+<code>PAUSE</code> 指令提示处理器代码序列是一个 spin-wait loop , 处理器通过这个提示避免违反内存次序 , 阻止流水线 flush . 此外 , <code>PAUSE</code> 指令 de-pipeline spin-wait loop , 防止其消耗额外的执行资源和不必要的电量 .</p>
+<h2 id="73-通过-monitor--mwait-指令">7.3. 通过 <code>MONITOR</code> / <code>MWAIT</code> 指令</h2>
+<p>Streaming SIMD Extensions 3 引入了两个指令 ( <code>MONITOR</code> 和 <code>MWAIT</code> ) 帮助多线程软件提升线程同步 .<br>
+最初的实现中 , 两条指令只有 ring 0 的软件可用 , 特权级高于 0 时有条件的可用 .</p>
+<p>OS 通常使用空闲的循环实现线程同步 , 典型的情况中 , 可能有一些 &ldquo;busy loops&rdquo; , 使用一些内存区域 . 受影响的处理器在一个循环中等待 , 轮训内存区域 , 确定是否有可用的任务需要处理 . 任务的发布通常是一个对内存的写 , 初始化一个任务请求并进行调度的时机和几个总线 cycle 的次序相同 .</p>
+<p>从资源共享的角度 , 在 OS 空闲循环使用 <code>HLT</code> 指令是可取的 , 但是会有不良影响 . 在空闲处理器执行 <code>HLT</code> 指令会将处理器至于不可执行的状态 , 需要另外一个处理器发送 IPI 唤醒 , 导致延迟 .</p>
+<p>在共享内存的配置中 , 从忙循环退出通常由于特定内存区域的状态改变 , 这种改变倾向于由另一个处理器对于内存的写触发 .</p>
+<p><code>MONITOR</code> / <code>MWAIT</code> 补足了 <code>HLT</code> 和 <code>PAUSE</code> 的使用 , 允许在共享物理资源的逻辑处理器间高效的划分和归并共享资源 .<br>
+<code>MONITOR</code> 建立一个有效的地址范围 , 用于监测写入内存的活动 ; <code>MWAIT</code> 将处理器置于最优状态 , 直到被监测的内存发生写入 .</p>
+<p>两条指令都依赖于处理器的监测硬件的状态 , 监测硬件可以通过 <code>MONITOR</code> 装备 , 也可以通过一些事件触发 .<br>
+执行 <code>MWAIT</code> 时 , 监测硬件处于被触发的状态 : <code>MWAIT</code> 和 NOP 行为类似 , 执行流的下一条指令继续执行 . 监测硬件的状态不可见 , 只能通过 <code>MWAIT</code> 的行为体现 .</p>
+<p>除了写入监测的地址范围 , 多个事件可以唤醒执行过的 <code>MWAIT</code> , 包括可能导致自愿或者非自愿的上下文切换的事件 :</p>
+<ul>
+<li>外部中断 , 包括 NMI , SMI , INIT , BINIT , MCERR , A20M#</li>
+<li>fault , abort ( 包括机器检查 )</li>
+<li>TLB 无效 , 包括写入 CR0 , CR3 , CR4 和一些 MSR ; <code>LMSW</code> 的执行</li>
+<li>快速的系统调用和远调用导致的自愿 transition</li>
+</ul>
+<p>电源管理相关的事件和 fualt 不会导致监控事件挂起标志被清除 .</p>
+<p>软件不应该允许指令流中的 <code>MONITOR</code> / <code>MWAIT</code> 之间的自愿上下文切换 , <code>MWAIT</code> 的执行不会重新装备监测硬件 , 这意味着 <code>MONITOR</code> / <code>MWAIT</code> 需要在一个循环内执行 .<br>
+此外 , 从 <code>MWAIT</code> 状态退出可能由于写入触发地址外的条件导致 , 软件应该显式检查触发数据位置确定是否发生了写 . 软件还应该在执行监测指令后检查触发地址的值 ( <code>MWAIT</code> 指令前 ) , 识别出 <code>MONITOR</code> 执行期间发生的针对触发地址的写 .</p>
+<p>提供给 <code>MONITOR</code> 指令的地址范围必须是写回的缓存类型 , 只有写回内存类型的 store 才会触发监测硬件 ; 否则地址监测硬件可能无法正确建立 , 监测硬件也无法装备 .</p>
+<h2 id="74-monitor--mwait-地址范围的确定">7.4. <code>MONITOR</code> / <code>MWAIT</code> 地址范围的确定</h2>
+<p>软件需要知道 <code>MONITOR</code> / <code>MWAIT</code> 指令监测的区域大小以使用两个指令 , 需要确定最小的和最大的监测行大小 :</p>
+<ul>
+<li>为了避免错过的唤醒 : 确保用于监测写的数据结构适用于最小的监测行大小 ; 否则 , 处理器可能在退出 <code>WMAIT</code> 的写之后没有被唤醒 .</li>
+<li>为了避免假的唤醒 : 使用最大的监测行大小 , 填补用于监测写的数据结构 , 软件必须保证 <code>MWAIT</code> 的触发区域不包含数据结构外的数据 .</li>
+</ul>
+<h2 id="75-操作系统所需的支持">7.5. 操作系统所需的支持</h2>
+<p>下列方法可以用于更好的利用共享执行资源的逻辑处理器 :</p>
+<ol>
+<li>在 spin-wait loops 中使用 <code>PAUSE</code> 指令</li>
+<li>在 C0 空闲循环中使用 <code>MONITOR</code> / <code>MWAIT</code></li>
+<li>停止空闲的逻辑处理器</li>
+<li>在 C1 空闲循环中使用 <code>MONITOR</code> / <code>MWAIT</code></li>
+<li>在共享执行资源的逻辑处理器间调度线程</li>
+<li>消除给予执行的时序循环 ( 不要基于处理器的执行速度测量时间 )</li>
+<li>将锁和信号量保存到对齐的 128 字节内存中</li>
+</ol>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-25
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/lock/">LOCK</a>
+          <a href="/tags/memory-ordering/">memory-ordering</a>
+          <a href="/tags/bsp/">BSP</a>
+          <a href="/tags/ap/">AP</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap9-processor_management_and_initialization/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap9-processor_management_and_initialization</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/">
+            <span class="next-text nav-default">3A_chap6-interrupt_and_exception_handling</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

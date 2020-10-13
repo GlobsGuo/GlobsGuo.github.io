@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap5-protection - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Protection Overview 使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 : 限" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap5-protection/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap5-protection" />
+<meta property="og:description" content="1. Protection Overview 使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 : 限" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap5-protection/" />
+<meta property="article:published_time" content="2020-09-21T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-21T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap5-protection">
+<meta itemprop="description" content="1. Protection Overview 使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 : 限">
+<meta itemprop="datePublished" content="2020-09-21T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-21T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2115">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,CPL,DPL,RPL," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap5-protection"/>
+<meta name="twitter:description" content="1. Protection Overview 使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 : 限"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap5-protection</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-21 </span>
+        
+          <span class="more-meta"> 2115 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-protection-overview">1. Protection Overview</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-protection-overview">1. Protection Overview</h1>
+<p>使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 :</p>
+<ul>
+<li>
+<p>限制检查<br>
+限制检查根据段描述符内的一些标志位和段限制完成 .<br>
+64 位模式 , 处理器不会对代码段和数据段执行运行时检查 .</p>
+</li>
+<li>
+<p>类型检查<br>
+处理器操作段选择器和段描述符时多次检查类型信息 :</p>
+<ul>
+<li>加载一个段选择器到段寄存器时 , 特定类型的段选择器只能加载到特定的段寄存器</li>
+<li>加载一个段选择器到 LDTR 或 TR</li>
+<li>指令访问描述符已经加载到段寄存器中的段</li>
+<li>指令的操作数包含一个段选择器 , 这些指令只能访问特定类型的段或门</li>
+<li>某些内部操作期间</li>
+</ul>
+</li>
+<li>
+<p>特权级检查<br>
+处理器的段保护机制识别 4 个特权级 , 0-3 , 用于阻止较低特权级的程序访问较高特权级中的段 . 处理器支持三种类型的特权级 :</p>
+<ol>
+<li>current privilege level ( CPL ) , 当前执行程序的特权级 , 保存在 CS 和 SS 段寄存器的 bit 0 和 1 .</li>
+<li>descriptor privilege level ( DPL ) , 段或门的特权级 , 保存在段或门描述符的 DPL 域 . 当前执行的代码访问一个段或门时 , 当前代码的段或门的 DPL 和要访问的段或门的选择器的 CPL , RPL 比较 , 使用方法取决于被访问的段或门的类型 .</li>
+<li>requested privilege level ( RPL ) , 如果段选择器的 RPL 高于 CPL , RPL 会覆盖 CPL ; 反之亦然 .</li>
+</ol>
+<p>加载一个段描述符的段选择器到段寄存器时检查特权级 , 数据访问执行的检查和程序控制导致的代码段切换执行的检查是不同的 .</p>
+<p>下列情况都会检查特权级 :</p>
+<ol>
+<li>
+<p>访问数据段时<br>
+CPL 影响程序可以访问的数据段特权级 , 段选择器的 RPL 可以覆盖程序的 CPL , 进而重载程序可以访问的数据段特权级 .<br>
+段选择器的 RPL 可以由软件设置 , CPL 为 3 的应用程序可以设置一个段选择器的 RPL 为 0 .</p>
+<p>要访问代码段中的数据 , 可以将代码段的段选择器加载到数据段寄存器 , 或者使用 CS 覆盖前缀读取已经加载到 CS 寄存器的代码段 .</p>
+</li>
+<li>
+<p>加载 SS 寄存器时<br>
+和栈段相关的特权级必须和 CPL 匹配 , 即程序的 CPL , 栈段选择器的 RPL , 栈段描述符的 DPL 必须相同 , 否则产生 #GP 异常 .</p>
+</li>
+<li>
+<p>在代码段之间切换程序控制时<br>
+要从一个代码段切换到另一个 , 必须加载目的代码段的段选择器到 CS , 加载过程的一部分就是特权级检查 . 检查成功加载 CS , 切换到新的代码段 , 执行 EIP 指向的指令 .</p>
+<p>代码段的切换通过 <code>JMP</code> , <code>CALL</code> , <code>RET</code> , <code>SYSENTER</code> , <code>SYSCALL</code> , <code>SYSRET</code> , <code>INT n</code> , <code>IRET</code> 指令 , 以及异常和中断机制完成 .</p>
+<ol>
+<li>
+<p>近的 <code>JMP</code> , <code>CALL</code> 和 <code>RET</code> 指令在当前的代码段跳转 , 不执行特权级检查 . 远的形式跳转到其他特权级 , 执行特权级检查 .</p>
+<ol>
+<li>访问 nonconforming 代码段时 , 调用程序的 CPL 必须等于目标代码段的 DPL ; 否则产生 #GP .<br>
+指向 nonconforming 代码段的段选择器的 RPL 对特权级检查的影响有限 , 要成功进行代码跳转 , RPL 的值必须小于等于调用程序的 CPL .</li>
+<li>访问 conforming 代码段时 , 调用程序的 CPL 必须大于等于目标代码段的 DPL , 否则产生 #GP .<br>
+对于代码段而言 , DPL 代表调用程序成功调用代码段必须具有的最低特权级 .</li>
+</ol>
+</li>
+<li>
+<p>调用门用于在不同的特权级之间切换 , 包含下列功能 :</p>
+<ul>
+<li>指明要访问的代码段</li>
+<li>定义代码段中的程序入口点</li>
+<li>指明调用者访问程序所需的特权级</li>
+<li>若发生栈切换 , 指明在栈之间需要拷贝的参数个数</li>
+<li>定义压入目标栈的值的大小 : 16-bit 门强制进行 16-bit 压栈 ; 32-bit 门进行 32-bit 压栈</li>
+<li>指明调用门描述符是否有效</li>
+</ul>
+<p>通过调用门访问代码段时 , 特权级检查规则根据代码跳转是由 <code>CALL</code> 还是 <code>JMP</code> 触发有所不同 .</p>
+</li>
+<li>
+<p>通过 <code>RET</code> 指令从被调用程序返回<br>
+只有 <code>CALL</code> 指令调用的程序可以通过 <code>RET</code> 指令返回 , 因为 <code>JMP</code> 指令不会保存返回指令的指针到栈 .<br>
+处理器使用调用程序保存的 CS 寄存器的值的 RPL 域的值大于 ( 特权级小于 ) CPL , 就发生了特权级间的返回 .</p>
+</li>
+<li>
+<p><code>SYSENTER</code> 供特权级 3 的用户代码访问特权级 0 的 OS . <code>SYSEXIT</code> 供 OS 快速返回到用户代码 . 前者可以从特权级 3 , 2 , 1 或 0 执行 ; 后者只能从特权级 0 执行 .<br>
+和 <code>CALL</code> / <code>RET</code> 不同 , <code>SYSENTER</code> 不会保存任何供 <code>SYSEXIT</code> 使用的状态信息 .<br>
+<code>SYSENTER</code> 和 <code>SYSEXIT</code> 指令使用的栈指针都预先定义在 MSR 和通用寄存器 , 因此能够实现快速的调用和返回操作 .</p>
+</li>
+<li>
+<p>64 位模式下的 <code>SYSCALL</code> 和 <code>SYSRET</code> 功能类似 , 但是不会通过 MSR 指明栈指针 .<br>
+<code>SYSCALL</code> 不会保存栈指针 , <code>SYSRET</code> 也不会恢复 , 更可能的是 OS 的系统调用处理函数将栈指针从用户栈切换到 OS 栈 . 而且由于 <code>SYSRET</code> 不会修改栈指针 , 软件需要切换回用户栈 .</p>
+</li>
+</ol>
+</li>
+<li>
+<p>执行一些特权指令<br>
+一些特权指令只有 CPL 为 0 时才可以执行 , 通常控制系统的功能 .</p>
+</li>
+</ol>
+</li>
+<li>
+<p>可寻址域限制<br>
+工作在保护模式下 , 处理器检查所有的指针加长段之间的保护和特权级之间的隔离 , 包括下列检查 :</p>
+<ol>
+<li>检查访问权限 , 确定段类型和使用方式兼容 .</li>
+<li>检查读写权限 .</li>
+<li>检查指针的偏移是否超出段限制 .</li>
+<li>检查指针的提供者是否被允许访问段 .</li>
+<li>检查偏移的对齐 .</li>
+</ol>
+<p>处理器在执行指令时自动检查前三项 , 软件必须通过 <code>ARPL</code> 指令执行第四项检查 , 第五项在特权级 3 下开启对齐检查时自动进行 .</p>
+<p><code>ARPL</code> 指令用于保证调用者提供的 RPL 和其 CPL 相同 , 防止应用自行修改 RPL 访问特权级更高的段 .</p>
+</li>
+<li>
+<p>程序入口点限制</p>
+</li>
+<li>
+<p>指令集限制</p>
+</li>
+</ul>
+<p>保护模式下设置所有段选择器和描述符的特权级为 0 可以关闭基于特权级的段保护机制 .<br>
+保护模式下分页的保护机制可以通过清除 CR0.WP 标志 , 设置每一个页目录项和页表项的 R / W 和 U / S 标志关闭 &mdash;- 每个页都是一个可写的用户页 .</p>
+<p>基于分段的保护在基于分页的保护之前生效 ; 页级的保护无法覆盖段级的保护 .</p>
+<p>PAE 分页 , 4 级分页 , 5 级分页提供的执行关闭位为数据页提供了额外的保护 , XD 缺页可能发生在所有特权级 , 任何取指操作 .</p>
+<p>64 位模式代码段仍然存在 , 虽然基地址在进行地址计算时当做 0 处理 . 代码段描述符中的一些域 ( 基地址和段限制 ) 被忽略 , 其余的域正常工作 ( 除了类型域内的可读 bit ) .</p>
+<p>IA-32e 模式使用了 CS 描述符中的 bit 53 , 选择工作在 64 位模式还是兼容模式 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-21
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/cpl/">CPL</a>
+          <a href="/tags/dpl/">DPL</a>
+          <a href="/tags/rpl/">RPL</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap7-task_management/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap7-task_management</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/">
+            <span class="next-text nav-default">1_chap6-procedure_calls,interrupts,exceptions</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

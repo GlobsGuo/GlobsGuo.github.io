@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IPI on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/ipi/</link>
+    <description>Recent content in IPI on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 30 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/ipi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap10-APIC</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/</guid>
+      <description>1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断</description>
+    </item>
+    
+  </channel>
+</rss>

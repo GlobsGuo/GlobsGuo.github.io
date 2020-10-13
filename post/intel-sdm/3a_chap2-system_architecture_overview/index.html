@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap2-system_architecture_overview - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ," />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap2-system_architecture_overview" />
+<meta property="og:description" content="1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ," />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/" />
+<meta property="article:published_time" content="2020-10-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap2-system_architecture_overview">
+<meta itemprop="description" content="1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ,">
+<meta itemprop="datePublished" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2146">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,IA32_EFER,GDTR,LDTR,IDTR,CR," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap2-system_architecture_overview"/>
+<meta name="twitter:description" content="1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ,"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap2-system_architecture_overview</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-10 </span>
+        
+          <span class="more-meta"> 2146 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-overview-of-the-system-level-architecture">1. Overview Of the System-Level Architecture</a></li>
+    <li><a href="#2-memory-management-registers">2. Memory-Management Registers</a>
+      <ul>
+        <li><a href="#21-global-descriptor-table-register">2.1. Global Descriptor Table Register</a></li>
+        <li><a href="#22-local-descriptor-table-register">2.2. Local Descriptor Table Register</a></li>
+        <li><a href="#23-interrupt-descriptor-table-register">2.3. Interrupt Descriptor Table Register</a></li>
+        <li><a href="#24-task-register">2.4. Task Register</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-control-registers">3. Control Registers</a></li>
+    <li><a href="#4-总结">4. 总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-overview-of-the-system-level-architecture">1. Overview Of the System-Level Architecture</h1>
+<p>每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 , 因此段选择器的范围确定 GDT 和 LDT 包含的段描述符数 .<br>
+段描述符提供段的基地址 , 访问权限 , 类型和使用信息 .<br>
+访问段内的一个字节 , 不但需要段选择器确定段 , 还需要段内的偏移 .</p>
+<p>TSS 定义了一个进程的执行环境状态 , 包括 : 通用寄存器 , 段寄存器 , EFLAGS 寄存器 , EIP 寄存器 , 三个带有段指针的堆栈段 ( 每个特权级有一个栈 ) 的段选择器的状态 . TSS 还包含与进程相关的 LDT 的段选择器和分页层次结构的基地址 .<br>
+当前进程的 TSS 的段选择器保存在进程寄存器 ( task register , TR ) , 切换到一个进程的最简单方式是调用或者挑战到新进程 &mdash;- 提供新进程的 TSS 的段选择器给 <code>CALL</code> 或 <code>JMP</code> 指令 .</p>
+<p>IA32_EFER MSR 包含开启和操作 IA-32e 模式的相关域，还提供了和修改页访问权限相关的域 :</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">             63                         12  11  10  9   8  7   1   0
+            +----------------------------+---+---+---+---+-----+---+
+IA32_EFER   |                            |   |   |   |   |     |   |    
+            --------------------------------------------------------
+                                           |   |       |         |  
+Execute Disable Bit Enable ----------------+   |       |         |
+                                               |       |         |
+IA-32e Mode Active ----------------------------+       |         |
+                                                       |         |
+IA-32e Mode Enable ------------------------------------+         |
+                                                                 |
+SYSCALL Enable --------------------------------------------------+
+</code></pre></td></tr></table>
+</div>
+</div><p>每个 bit 的说明如下 :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Bit</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">SYSCALL Enable : IA32_EFER.SCE ( R / W ) <!-- raw HTML omitted --> 在 64 位模式开启 <code>SYSCALL</code> / <code>SYSRET</code> 指令</td>
+</tr>
+<tr>
+<td style="text-align:left">7:1</td>
+<td style="text-align:left">保留</td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">IA-32e Mode Enable : IA32_EFER.LME ( R / W )<!-- raw HTML omitted --> 开启 IA-32e 模式</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">保留</td>
+</tr>
+<tr>
+<td style="text-align:left">10</td>
+<td style="text-align:left">IA-32e Mode Active : IA32_EFER.LMA ( R ) <!-- raw HTML omitted -->设置表明 IA-32e 模式开启</td>
+</tr>
+<tr>
+<td style="text-align:left">11</td>
+<td style="text-align:left">Execute Disable Bit Enable : IA32_EFER.NXE ( R / W ) <!-- raw HTML omitted --> 开启通过阻止执行从设置了 XD 位的 PAE 页中取回的指令进行的页面访问限制</td>
+</tr>
+<tr>
+<td style="text-align:left">63:12</td>
+<td style="text-align:left">保留</td>
+</tr>
+</tbody>
+</table>
+<h1 id="2-memory-management-registers">2. Memory-Management Registers</h1>
+<p>处理器提供了 4 个内存管理寄存器 ( GDTR , LDTR , IDTR , TR ) 指明控制分段内存管理的数据结构所在位置，用特殊的指令加载和保存这些寄存器 .</p>
+<h2 id="21-global-descriptor-table-register">2.1. Global Descriptor Table Register</h2>
+<p>GDTR 保存基地址 ( 保护模式下 32 位 ; IA-32e 模式 64位 ) 和 16 位的 GDT 表大小限制 . 基地址是 GDT 字节 0 的线性地址 ; 表大小限制是表中的字节数 .</p>
+<p><code>LGDT</code> 和 <code>SGDT</code> 指令加载和保存 GDTR . 处理器上电或者重启后，基地址默认设置为 0 ，大小限制默认设置为 0FFFFH . 处理器初始化时必须加载一个新的基地址到 GDTR .</p>
+<h2 id="22-local-descriptor-table-register">2.2. Local Descriptor Table Register</h2>
+<p>LDTR 保存 16 位段选择器、基地址 ( 保护模式下 32 位 ; IA-32e 模式 64 位 )、段限制和描述符属性 . 基地址是 LDT 段 0 字节的线性地址 ; 段限制是段中的字节数 .</p>
+<p><code>LLDT</code> 和 <code>SLDT</code> 指令加载和保存 LDTR 的段选择器部分 . 包含 LDT 的段必须在 GDT 中有一个段描述符 . LLDT 指令加载 LDTR 中的段选择器时，基地址、限制、描述符属性会自动加载到 LDTR .</p>
+<p>进程切换时，自动加载新进程 LDT 中的段选择器和描述符到 LDTR , LDTR 的内容不会在写入新的 LDT 信息到寄存器之前自动保存 .</p>
+<p>处理器上电或者重启后，段选择器和基地址设置为默认值 0 ，限制设置为 0FFFFH .</p>
+<h2 id="23-interrupt-descriptor-table-register">2.3. Interrupt Descriptor Table Register</h2>
+<p>IDTR 保存基地址和 16 位表限制 . 基地址是 IDT 字节 0 的线性地址 ; 表限制是表中的字节数 . <code>LIDT</code> 和 <code>SIDT</code> 指令加载和保存 IDTR . 处理器上电或者重启后，基地址设为默认值 0 ，限制设置为 0FFFFH . 基地址和限制在处理器初始化时设置 .</p>
+<h2 id="24-task-register">2.4. Task Register</h2>
+<p>TR 保存当前进程 TSS 的 16 位段选择器、基地址、段限制、描述符属性 . 选择器引用 GDT 中 TSS 描述符，基地址是 TSS 字节 0 的线性地址，段限制为 TSS 中的字节数 .</p>
+<p><code>LTR</code> 和 <code>STR</code> 指令加载和保存 TR 的段选择器部分 . <code>LTR</code> 指令加载段选择器到 TR 时，基地址、限制、描述符属性自动加载到 TR . 处理器上电或者重启后，基地址设置为默认值 0 ，限制设置为 0FFFFH .</p>
+<p>切换进程时，自动加载新进程 TSS 的段选择器和描述符到 TR ，写入新的 TSS 信息到寄存器值前不会自动保存 TR 的内容 .</p>
+<h1 id="3-control-registers">3. Control Registers</h1>
+<p>控制寄存器 ( CR0 , CR1 , CR2 , CR3 , CR4 ) 确定处理器的工作模式和当前正在执行进程的特性，这些寄存器在所有的 32 位和兼容模式下都是 32 位 .</p>
+<p>64 位模式下，控制寄存器扩展为 64 位， <code>MOV CRn</code> 指令用于操作寄存器，这些指令的操作数大小前缀被忽略，存在下列事实 :</p>
+<ul>
+<li>控制寄存器可以通过 <code>MOV</code> 指令的 “move to/from cr” 形式读取或者加载 . 保护模式下 <code>MOV</code> 指令允许读取或加载 ( 只有特权级 0 ) 控制寄存器，这种限制意味着应用程序或者操作系统程序 ( 运行在特权级 1 2 3 ) 不能读取或者加载控制寄存器 .</li>
+<li>CR0 和 CR4 的 bit 63:32 保留，必须写为 0 ，向高 32 位写入任何非零数都会导致一个 general-protection 异常 ( #GP(0) ) .</li>
+<li>CR2 的所有 64 位都可以由软件写 .</li>
+<li>超出处理器物理寻址宽度的 CR3 bit 51:12 保留，必须为 0 .</li>
+<li><code>MOV CR2</code> 指令不会检查写入 CR2 的地址是合法的 .</li>
+<li>64 位模式才有 CR8 寄存器 .</li>
+</ul>
+<p>控制寄存器总结如下，每个寄存器的控制域单独介绍 .</p>
+<ul>
+<li>
+<p>CR0<br>
+控制操作模式和处理器状态 .</p>
+</li>
+<li>
+<p>CR1<br>
+保留 .</p>
+</li>
+<li>
+<p>CR2<br>
+包含缺页的线性地址 .</p>
+</li>
+<li>
+<p>CR3<br>
+包含分页层次结构的物理基地址和两个标志 ( PCD 和 PWT ) ，只指明了基地址的高位 ( 高于低 12 位 ) ，低 12 位假定为 0 . 因此第一个分页结构必须对齐到一个页 ( 4KB ) . PCD 和 PWT 标志控制处理器内部 cache 的分页结构 ( 不控制 TLB 中的页目录信息 ) .</p>
+<p>使用物理地址扩展时 ( PAE ) , CR3 寄存器包含页目录指针表的基地址 ; 4 级和 5 级分页， CR3 寄存器包含 PML4 表和 PML5 表的基地址 . 如果开启 PCID , CR3 和下图中的形式不同 .</p>
+</li>
+<li>
+<p>CR4<br>
+包含的标志开启一些架构扩展，指明操作系统或者可执行文件对于特定处理器特性的支持 .</p>
+</li>
+<li>
+<p>CR8<br>
+提供对进程优先级寄存器 ( Task Priority Register , TPR ) 的读写，指明操作系统控制可以中断处理器的外部中断优先级阈值，只有 64 位模式可用，但是兼容模式下中断过滤仍然生效 .</p>
+</li>
+</ul>
+<p>几个控制寄存器中包含的控制位如下图所示 :</p>
+<p><img src="../images/6c7c7cb4b31cfe9e22265cbef8e1c7149aa685778bc680484c29bcab4bad2ec0.png" alt="picture 2"></p>
+<h1 id="4-总结">4. 总结</h1>
+<p>系统架构部分的寄存器可以分为以下几类 :</p>
+<ul>
+<li>指明处理器的特性的寄存器，包括工作模式，浮点运算，保护机制等</li>
+<li>内存管理相关的寄存器，分页，分段和进程切换，这些寄存器为了保证正确访问到执行指令所需的内存</li>
+<li>中断和异常相关的寄存器</li>
+<li>计数器，包括性能监视计数器和时间戳计数器</li>
+</ul>
+<p>和通用的寄存器不同，系统架构相关的寄存器都有专用的指令进行读写，这些寄存器严重影响计算机系统的正常运转，因此一些指令需要较高的特权级才能执行 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-10
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/ia32_efer/">IA32_EFER</a>
+          <a href="/tags/gdtr/">GDTR</a>
+          <a href="/tags/ldtr/">LDTR</a>
+          <a href="/tags/idtr/">IDTR</a>
+          <a href="/tags/cr/">CR</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap11-memory_cache_control/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap11-memory_cache_control</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap3-protected_mode_memory_management/">
+            <span class="next-text nav-default">3A_chap3-protected_mode_memory_management</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

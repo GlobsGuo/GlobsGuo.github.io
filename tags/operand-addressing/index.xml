@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>operand-addressing on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/operand-addressing/</link>
+    <description>Recent content in operand-addressing on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/operand-addressing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>1_chap3-basic_execution_environment</title>
+      <link>https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/</guid>
+      <description>1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包</description>
+    </item>
+    
+  </channel>
+</rss>

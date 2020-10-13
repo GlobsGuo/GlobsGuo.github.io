@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap10-APIC - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap10-APIC" />
+<meta property="og:description" content="1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/" />
+<meta property="article:published_time" content="2020-09-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-30T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap10-APIC">
+<meta itemprop="description" content="1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断">
+<meta itemprop="datePublished" content="2020-09-30T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-30T00:00:00+00:00" />
+<meta itemprop="wordCount" content="6523">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,local-APIC,IO-APIC,LVT,IPI,x2APIC," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap10-APIC"/>
+<meta name="twitter:description" content="1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap10-APIC</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-30 </span>
+        
+          <span class="more-meta"> 6523 words </span>
+          <span class="more-meta"> 14 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-local-apic">2. Local APIC</a>
+      <ul>
+        <li><a href="#21-关闭-local-apic">2.1. 关闭 local APIC</a></li>
+        <li><a href="#22-local-apic-的状态和位置">2.2. local APIC 的状态和位置</a></li>
+        <li><a href="#23-local-apic-id">2.3. local APIC ID</a></li>
+        <li><a href="#24-local-apic-状态">2.4. local APIC 状态</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-处理本地中断">3. 处理本地中断</a>
+      <ul>
+        <li><a href="#31-lvt">3.1. LVT</a></li>
+        <li><a href="#32-有效的中断向量">3.2. 有效的中断向量</a></li>
+        <li><a href="#33-apic-计时器">3.3. APIC 计时器</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-发出-ipi">4. 发出 IPI</a>
+      <ul>
+        <li><a href="#41-确定-ipi-目的地">4.1. 确定 IPI 目的地</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-处理中断">5. 处理中断</a>
+      <ul>
+        <li><a href="#51-中断--任务和处理器的优先级">5.1. 中断 , 任务和处理器的优先级</a></li>
+        <li><a href="#52-接收固定的中断">5.2. 接收固定的中断</a></li>
+        <li><a href="#53-发送中断服务完成的信号">5.3. 发送中断服务完成的信号</a></li>
+        <li><a href="#54-ia-32e-模式下的任务特权级">5.4. IA-32e 模式下的任务特权级</a></li>
+      </ul>
+    </li>
+    <li><a href="#6-伪中断">6. 伪中断</a></li>
+    <li><a href="#7-消息信号中断--message-signalled-interrupt-">7. 消息信号中断 ( message signalled interrupt )</a></li>
+    <li><a href="#8-extended-xapic--x2apic-">8. Extended xAPIC ( x2APIC )</a>
+      <ul>
+        <li><a href="#81-访问-x2apic-寄存器">8.1. 访问 x2APIC 寄存器</a></li>
+        <li><a href="#82-x2apic-状态切换">8.2. x2APIC 状态切换</a></li>
+        <li><a href="#83-x2apic-确定-ipi-目的地">8.3. x2APIC 确定 IPI 目的地</a></li>
+        <li><a href="#84-self-ipi-寄存器">8.4. self IPI 寄存器</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 :</p>
+<ul>
+<li>从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断 , 将这些中断发送到处理器 .</li>
+<li>多处理器系统中 , 发送和接收处理器间中断 ( IPI ) 消息到系统总线上的其他逻辑处理器 . IPI 消息可以用于在处理器间分发中断 , 或者执行系统范围的功能 ( 比如启动处理器 , 在一组处理器间分发任务 ) .</li>
+</ul>
+<p>外部的 IO APIC 是 Intel 系统芯片组的一部分 , 基本功能是接收系统中以及和系统相关的 IO 设备的外部中断事件 , 作为中断消息转发给 local APIC .<br>
+多处理器系统中 , IO APIC 也提供了分发外部中断到选定的处理器或者系统总线上的一组处理器的 local APIC 的一种机制 .</p>
+<p>每个 local APIC 的组成部分包括 : 一组 APIC 寄存器 , 控制中断传递到处理器核心和 IPI 消息生成的硬件 . APIC 寄存器映射到内存 , 可以用 <code>MOV</code> 指令进行读写 .</p>
+<p>local APIC 可以从以下源接收中断 :</p>
+<ol>
+<li>本地连接的 IO 设备 : IO 设备直接连接到处理器的本地中断引脚 ( LINT0 和 LINT 1 )</li>
+<li>外部连接的 IO 设备 : IO 设备连接到 IO APIC 的中断输入引脚</li>
+<li>处理器间中断 : 一个处理器可以使用 IPI 中断系统总线上的其他处理器</li>
+<li>APIC 计时器产生的中断 : 达到设定的计数时发送中断给相关处理器</li>
+<li>性能监视计数器中断 : 性能监视计数器溢出时发送中断给相关的处理器</li>
+<li>热量传感器中断 : 处理器内部热量传感器 trip 时发送中断给自己</li>
+<li>APIC 内部错误中断 : local APIC 内发生错误时发送中断给相关处理器</li>
+</ol>
+<p>上述中断源中 , 1 , 4 , 5 , 6 , 7 称作本地中断源 , 从本地中断源收到中断后 , local APIC 使用通过一组 APIC 寄存器 ( 称作 local vector table , LVT ) 建立的中断传递协议将中断递交给处理器 .<br>
+每个本地中断源在 LVT 中都有项对应 , 允许给每个中断源建立一个特定的中断递交协议 .</p>
+<p>local APIC 通过 IPI 消息处理工具处理另外两个中断源 ( 2 和 3 ) 的中断 .</p>
+<hr>
+<p>处理器编程 local APIC 内的中断命令寄存器 ( ICR ) 可以产生 IPI , 发送到系统总线或 APIC 总线 . local APIC 收到 IPI 后 , 自动处理消息 .<br>
+local APIC 还可以通过 IO APIC 从外部连接的设备接收中断 , IO APIC 负责接收系统硬件和 IO 设备生成的中断 , 并且以中断消息的形式递交给 local APIC .</p>
+<p>IO APIC 有 virtual wire mode , 可以和标准的 8259A 外部中断控制器通信 .</p>
+<p>IPI 机制通常用于多处理器系统在系统总线发送固定的和特定用途的中断 , 比如一个 local APIC 可以使用 IPI 发送一个固定的中断到另一个处理器处理 .</p>
+<h1 id="2-local-apic">2. Local APIC</h1>
+<p>软件通过读写 local APIC 的寄存器进行交互 , 寄存器映射到处理器物理地址空间的一个 4KB 区域 , 初始的起始地址为 FEE00000H , 这个地址空间必须映射到一个 strong uncachable 类型的内存区域 .</p>
+<p>MP 系统中 , 系统总线上的处理器初始映射到物理地址空间的相同的 4KB 区域 , 软件可以选择改变所有 local APIC 的映射 , 或者映射每个 local APIC 的寄存器到自己的 4KB 区域 .</p>
+<p>APIC 的寄存器是 32-bit , 64-bit 或 256-bit , 都对齐到 128-bit . 任何修改寄存器的 4-15 字节的访问都会导致未定义的行为 .</p>
+<h2 id="21-关闭-local-apic">2.1. 关闭 local APIC</h2>
+<p>local APIC 可以通过两种方式关闭 :</p>
+<ol>
+<li>使用 IA32_APIC_BASE MSR 中的 APIC 全局开启 / 关闭标志</li>
+<li>使用 spurious-interrupt 中断向量寄存器中的 APIC 软件开启 / 关闭标志</li>
+</ol>
+<h2 id="22-local-apic-的状态和位置">2.2. local APIC 的状态和位置</h2>
+<p>状态和位置信息包含在 IA32_APIC_BASE MSR , 其中的位功能如下 :</p>
+<ul>
+<li>
+<p>BSP 标志<br>
+指明是否是 BSP</p>
+</li>
+<li>
+<p>APIC Global Enable flag<br>
+开启或关闭 local APIC</p>
+</li>
+<li>
+<p>APIC Base field<br>
+指明 APIC 寄存器的基地址 , 修改以重新定位基地址</p>
+</li>
+</ul>
+<h2 id="23-local-apic-id">2.3. local APIC ID</h2>
+<p>上电后 , 系统硬件基于系统的拓扑结构分配一个唯一的 APIC ID 为每个 local APIC ; MP 系统中 local APIC ID 也被 BIOS 和 OS 作为处理器的 ID 使用 , 一些处理器允许软件修改 APIC ID .</p>
+<p>处理器通过取样 A11# 和 A12# , BR0# - BR3# 引脚接收硬件分配的 APIC ID , 然后保存到 local APIC ID 寄存器的 APIC ID 域 .</p>
+<p>xAPIC 规范 APIC ID 域为 8 bit , 支持最多 255 个处理器 .</p>
+<h2 id="24-local-apic-状态">2.4. local APIC 状态</h2>
+<p>系统上电或重启后 , local APIC 和寄存器的状态如下 :</p>
+<ul>
+<li>下列寄存器重置为 0 :
+<ul>
+<li>IRR , ISR , TMR , ICR , LDR 和 TPR</li>
+<li>计时器初始计数和计时器当前计数寄存器</li>
+<li>divide configuration 寄存器</li>
+</ul>
+</li>
+<li>DFR 都设置为 1</li>
+<li>LVT 除了屏蔽位设置为 0 , 屏蔽位设置为 1</li>
+<li>local APIC 版本寄存器没有影响 xAPIC</li>
+<li>IRR 和 ISR 中挂起的中断继续保持 , 需要 CPU 的屏蔽或者处理</li>
+<li>local APIC 还可以产生 IPI</li>
+<li>正在处理过程中的中断和 IPI 在进入软件关闭的状态前完成</li>
+<li>设置所有 LVT 项的屏蔽位 , 试图重置这些位会被忽视</li>
+</ul>
+<hr>
+<p>可以通过下列两种方式重置 INIT :</p>
+<ul>
+<li>使能处理器的 INIT# 引脚</li>
+<li>发送给处理器一个 INIT IPI</li>
+</ul>
+<p>收到 INIT 后 , 处理器初始化处理器核心和 local APIC , 状态和上电或硬件重置后一样 , 除了 APIC ID 和仲裁 ID 寄存器也不会受影响 .</p>
+<hr>
+<p>local APIC 包含一个硬件的版本寄存器 , 以及 LVT 的项数 .</p>
+<h1 id="3-处理本地中断">3. 处理本地中断</h1>
+<p>处理本地中断的组件包括 LVT , 错误状态寄存器 ( ESR ) , divide configuration 寄存器 ( DCR ) , 初始计数和当前计数寄存器 .</p>
+<h2 id="31-lvt">3.1. LVT</h2>
+<p>LVT 供软件指明本地终端传递给处理器核心的方式 , 每个本地中断都有一个寄存器指明其传递方式 , 包括 :</p>
+<ul>
+<li>LVT CMCI 寄存器</li>
+<li>LVT timer 寄存器</li>
+<li>LVT thermal monitor 寄存器</li>
+<li>LVT performance counter 寄存器</li>
+<li>LVT LINT0 寄存器</li>
+<li>LVT LINT1 寄存器</li>
+<li>LVT error 寄存器</li>
+</ul>
+<p>每个寄存器包括以下域 :</p>
+<ul>
+<li>向量 : 中断向量号</li>
+<li>传递模式</li>
+<li>传递状态</li>
+<li>中断输入引脚极性</li>
+<li>远程 IRR 标志</li>
+<li>触发方式 : 只针对 LINT0 和 LINT1 引脚</li>
+<li>中断屏蔽</li>
+<li>计时器模式</li>
+</ul>
+<h2 id="32-有效的中断向量">3.2. 有效的中断向量</h2>
+<p>Intel 定义了 256 个中断向量号 , 0-255 , local 和 IO APIC 支持其中的 240 个 .</p>
+<p>一个 0-15 的中断向量通过 local APIC 发送或接收时 , APIC 在 ESR 指明一个非法的向量 .<br>
+Intel 保留 16-31 号向量给预定义的中断 , 异常和 Intel 保留的编码 , 但是不会将其视为非法的向量 .</p>
+<p>local APIC 将处理中断期间检测到的错误保存到 ESR 寄存器 , 寄存器可读可写 . 软件读取寄存器前应该先写入 , 清除之前记载的错误 , 将写操作后检测到的错误更新到 ESR .</p>
+<p>LVT 错误寄存器允许检测到 APIC 错误时传递中断向量到处理器核心 , 提供了屏蔽 APIC 错误中断的机制 .</p>
+<h2 id="33-apic-计时器">3.3. APIC 计时器</h2>
+<p>local APIC 包含一个软件可用的 32-bit 的可编程计时器 , 通过编程 4 个寄存器建立 : divide configuration 寄存器 , 初始计数和当前计数寄存器 , LVT 计时器寄存器 .</p>
+<p>如果 <code>CPUID.06H:EAX.ARAT[bit 2] = 1</code> , 处理器的 APIC 计时器运行在固定的速率 , 不管 P-state 和深度 C-state .<br>
+如果 <code>CPUID.06H:EAX.ARAT[bit 2] = 0</code> , 或者不支持 CPUID 06H , 处理器处于深度 C-state 时 , APIC 计时器可能会暂时停止 .</p>
+<p>APIC 计时器的频率是处理器的总线时钟或者核心的水晶时钟频率除以除配置寄存器中的值 .</p>
+<p>计时器可以通过计时器 LVT 项配置为 one-shot 或 periodic 操作 .<br>
+one-shot 模式通过编程初始计数寄存器启动计时器 , 初始计数值拷贝到当前计数寄存器 , 然后开始向下计数 , 达到 0 时产生一个计时器中断 .<br>
+periodic 模式当前计数寄存器到达 0 时生成中断 , 自动从初始计数寄存器加载计数 , 重复向下计数 .</p>
+<p>向初始计数寄存器写入 0 停止 local APIC 计数器 , 两种模式下都是 .</p>
+<p>LVT 计时器寄存器决定产生计时器中断时发送给处理器的向量号 , 也可以用于屏蔽计时器中断 .</p>
+<hr>
+<p>local APIC 计时器还可以工作在 TSC-deadline 模式 , 供软件使用 local APIC 计时器在一个绝对时间产生一个中断 .<br>
+这种模式下写入初始计数寄存器的操作会被忽略 , 当前计数寄存器的读数总是 0 , 计时器的行为通过 IA32_TSC_DEADLINE MSR 控制 .</p>
+<p>每个逻辑处理器都有自己的 IA32_TSC_DEADLINE MSR , 写入一个非零值就会装备计时器 , 逻辑处理器的时间戳计数器等于或者大于寄存器中的值就会产生中断 , 自动解除 , 清除 MSR .</p>
+<p>TSC-deadline 模式下 , 写入 0 到 IA32_TSC_DEADLINE MSR 就会解除计时器 , 和其他模式相互切换时也会解除计时器 .</p>
+<p>装备一个计时器时 , 向 MSR 写入新值可以改变 deadline .</p>
+<h1 id="4-发出-ipi">4. 发出 IPI</h1>
+<p>发送 IPI 的基本 local APIC 组件是中断命令寄存器 ( ICR ) , ICR 可以用于以下功能 :</p>
+<ul>
+<li>发送一个中断到另一个处理器</li>
+<li>一个处理器将自己收到的但没有处理的中断传递给另一个处理器处理</li>
+<li>使得处理器中断自己</li>
+<li>传递特殊的 IPI , 比如 startup IPI 消息到其他处理器</li>
+</ul>
+<p>ICR 包括以下域 :</p>
+<ul>
+<li>vector : 发送的中断的向量号</li>
+<li>delivery mode : 发送的 IPI 消息类型</li>
+<li>destination mode : 物理或者逻辑目的模式</li>
+<li>delivery status : IPI 传递状态</li>
+<li>level</li>
+<li>trigger mode</li>
+<li>destination shorthand : 中断目的地的指明方式</li>
+<li>destination</li>
+</ul>
+<h2 id="41-确定-ipi-目的地">4.1. 确定 IPI 目的地</h2>
+<p>IPI 的目的地可以是系统总线上的一个 , 所有 , 或者一组处理器 , 发送者通过下列 APIC 寄存器指明 IPI 的目的地 :</p>
+<ul>
+<li>ICR 寄存器
+<ul>
+<li>destination mode , 选择两种目的地模式 ( 物理或逻辑 ) 之一</li>
+<li>destination filed , 物理目的地模式 , 用于指明目标处理器的 APIC ID ; 逻辑目的地模式 , 指明可以用于选择 cluster 中特定处理器的 message destination address ( MDA )</li>
+<li>destination shorthand , 指明所有处理器 , 自身 , 不包括自身的所有处理器作为目的地的快速方式</li>
+<li>delivery mode , lowest priority , 使用最低优先级的仲裁机制选择处理器</li>
+</ul>
+</li>
+<li>local destination register ( LDR ) , 搭配逻辑目的地址模式和 MDA 使用</li>
+<li>destination format register ( DFR ) , 搭配逻辑目的地址模式和 MDA 使用</li>
+</ul>
+<p>物理目的地址模式 , 目的处理器通过 local APIC ID 指明 .</p>
+<p>逻辑目的地址模式 , IPI 目的地通过 8-bit MDA 指明 ; local APIC 收到使用逻辑目的地模式的 IPI 消息时 , 将消息的 MDA 和 LDR , DFR 中的值比较 , 判断是否应该接收和处理 IPI .</p>
+<p>最低优先级模式的 IPI 只能通过逻辑或 shorthand 目的机制发送 , 被选择的处理器和其他处理器进行仲裁 , 优先级最低的处理器接收 IPI .</p>
+<hr>
+<p>向 ICR 的低双字写入数据时 , local APIC 根据 ICR 中的信息创建一个 IPI 消息 , 发送到系统总线 .</p>
+<p>系统总线上的多个 local APIC 和 IO APIC 发送 IPI 消息时 , 消息发送和处理的次序通过总线仲裁确定 .</p>
+<h1 id="5-处理中断">5. 处理中断</h1>
+<p>Pentium 4 和 Xeon 处理器的 local APIC 按照下列方式处理本地中断 , 中断消息和 IPI :</p>
+<ol>
+<li>确定自己是否是目的地 , 如果是 , 接收消息 ; 否则丢弃消息 .</li>
+<li>如果 local APIC 确定自己是目的地 , 并且中断请求是一个 NMI , SMI , INIT , ExtINT 或 SIPI , 中断直接发送到处理器处理 .</li>
+<li>如果 local APIC 确定自己是目的地 , 但是中断请求不是步骤 2 中的一个 , local APIC 设定 IRR 中的对应位 .</li>
+<li>IRR 寄存器中挂起中断时 , local APIC 一次分派一个中断到处理器 , 基于中断的优先级和 PPR 中当前的处理器优先级 .</li>
+<li>分派一个固定的中断给处理器时 , 处理函数的完成通过写入 local APIC 的 end-of-interrupt 寄存器指明 . 写入EOI 寄存器会使 local APIC 从 ISR 中删除中断 , 发送一个消息到总线 , 表明中断处理已经完成 ( NMI , SMI , INIT , ExtINT 和 SIPI 的处理函数不能包含写入 EOI 寄存器的操作 ) .</li>
+</ol>
+<h2 id="51-中断--任务和处理器的优先级">5.1. 中断 , 任务和处理器的优先级</h2>
+<p>每个通过 local APIC 发送到处理器的中断有一个基于向量号的优先级 , local APIC 使用这个优先级确定相对于处理器的其他活动 , 包括服务其他中断 , 何时服务中断 .</p>
+<p>每个中断向量都是 8-bit , 中断优先级通过 bit 7:4 指明 , 最低是 1 , 最高是 15 . 范围 0-15 的向量 ( 优先级是 0 ) 是非法的 , 不会被传递 .<br>
+由于中断 0-31 由 Intel 64 和 IA-32 架构保留使用 , 软件应该配置中断向量使用优先级 2-15 .</p>
+<p>每个中断优先级包括 16 个向量 , 一个优先级内的中断向量通过 bit 3:0 确定相对优先级 ; 值越大优先级越高 .</p>
+<hr>
+<p>local APIC 通过寄存器 task-priority register ( TPR ) bit 7:4 定义任务的优先级 , 软件可写 , 设置一个中断处理器的优先级阈值 .<br>
+OS 可以使用这个机制暂时屏蔽低优先级的中断 , 防止打断高优先级的工作 .</p>
+<p>local APIC 通过寄存器 processor-priority register ( PPR ) bit 7:4 定义处理器优先级 , 范围0-15 , 只读 , 代表当前处理器执行的优先级 .</p>
+<p>PPR 的值基于 TPR 和 ISRV 的值 , ISRV 是 ISR 中设置的最高优先级 bit 的向量号 , 如果 ISR 没有设置 bit , 就是 00H .</p>
+<p>PPR 的值确定方法如下 :</p>
+<ul>
+<li>PPR[7:4] 是 TPR[7:4] 和 ISRV[4:4] 的最大值</li>
+<li>PPR[3:0] 确定方法如下 :
+<ul>
+<li>如果 TPR[7:4] &gt; ISRV[7:4] , PPR[3:0] 是 TPR[3:0]</li>
+<li>如果 TPR[7:4] &lt; ISRV[7:4] , PPR[3:0] 是 0</li>
+<li>如果 TPR[7:4] = ISRV[7:4] , PPR[3:0] 可能是 TPR[3:0] 或 0</li>
+</ul>
+</li>
+</ul>
+<p>处理器优先级确定了中断处理器的优先级阈值 , 处理器传递优先级高于处理器优先级的中断 . 如果处理器优先级是 0 , PPR 不会阻挡任何中断的传递 ; 如果是 15 , 处理器阻挡所有中断 ( 处理器优先级机制不会影响 NMI , SMI , INIT , ExtINT , INIT-deassert 和 start-up delivery 传递模式 ) .</p>
+<h2 id="52-接收固定的中断">5.2. 接收固定的中断</h2>
+<p>local APIC 将接受的固定中断排列到两个中断挂起寄存器之一 : 中断请求寄存器 ( IRR ) 或 服务中寄存器 ( in-service register , ISR ) .<br>
+两个只读的 256-bit 寄存器代表 256 个可能的中断向量 , 向量 0-15 由 APIC 保留 .</p>
+<p>NMI , SMI , INIT , ExtINT , INIT-deassert 绕过 IRR 和 ISR 寄存器 , 直接发送到处理器 .</p>
+<p>IRR 包含收到了中断请求 , 但是还没有分派到处理器进行服务的中断 . 处理器收到一个中断时 , 设置 IRR 中的对应位 ; 处理器准备好服务下一个中断时 , local APIC 清除 IRR 中设置的最高优先级 bit , 设置对应的 ISR bit . ISR 中设置的优先级最高 bit 的向量分派给处理器进行服务 .</p>
+<p>同一个中断向量号产生多个中断时 , local APIC 可以设置 IRR 和 ISR 中的对应位 . 这意味着对于 Pentium 4 和 Xeon 处理器 , IRR 和 ISR 可以给每个中断向量排队 2 个中断 . 其他的额外中断都会隐没到 IRR 中的 bit .</p>
+<p>如果 local APIC 收到一个中断的优先级高于正在服务的中断 , 并且处理器开启了中断 , local APIC 立即分派更高优先级的中断到处理器 ( 不会等待一个写入 EOI 寄存器的操作 ) . 然后中断当前正在执行的中断处理函数 , 以便高优先级的中断可以被处理 ; 处理完成后 , 恢复执行被中断的中断处理函数 .</p>
+<p>触发模式寄存器 ( TMR ) 指明中断的触发模式 , 一收到一个中断到 IRR , 边沿触发中断的对应 TMR 位会被清除 , 电平触发中断的 TMR 位会被设置 .<br>
+如果中断向量产生 EOI cycle 时设置了 TMR 位 , 发送一个 EOI 消息到所有的 IO APIC .</p>
+<h2 id="53-发送中断服务完成的信号">5.3. 发送中断服务完成的信号</h2>
+<p>除了通过 NMI , SMI , INIT , ExtINT , INIT-deassert 和 start-up delivery 传递模式传递的中断 , 其他的中断的处理函数必须包含一个写入 EOI 寄存器的操作 , 发生在处理函数的结尾 , 有时在 <code>IRET</code> 指令前 , 指明当前中断的服务完成 , local APIC 可以从 ISR 发送下一个中断 .</p>
+<p>一收到 EOI , APIC 清除 ISR 中最高优先级的位 , 分派下一个优先级最高的中断给处理器 . 如果终结的中断是一个电平触发 , local APIC 还会发送一个 EOI 消息给所有的 IO APIC .</p>
+<p>系统软件可能更倾向于发送 EOI 到特定的 IO APIC , 而不是所有的 IO APIC . 软件可以设置 spurious interrupt vector register 的 bit 12 阻止 EOI 的广播 .<br>
+设置时 , 即使关联的 TMR 表明当前的中断是电平触发 , 也不会产生广播的 EOI 消息 . 默认值是 0 , 会执行 EOI 消息的广播 .</p>
+<h2 id="54-ia-32e-模式下的任务特权级">5.4. IA-32e 模式下的任务特权级</h2>
+<p>IA-32e 模式 OS 可以显式使用任务优先级寄存器 ( TPR ) 管理 16 个中断优先级 , 操作系统可以使用 TPR 暂时屏蔽特定的终端 , 防止中断高优先级的任务 .</p>
+<p>64 位模式 , 软件可以通过 <code>MOV CR8</code> 指令读写 TPR , 指令执行完成后建立新的任务优先级 .</p>
+<p>使用 <code>MOV CRn</code> 指令需要特权级 0 .<br>
+TPR 从中断控制器 ( IC ) 抽取 , IC 区分外部中断的优先级 , 递给处理器 . IC 可以是一个外部设备 , 比如 APIC 或 8259 .</p>
+<h1 id="6-伪中断">6. 伪中断</h1>
+<p>一种特殊的情况 : 一个处理提升自己的任务优先级 , 使得其大于或等于处理器正在使能 INTR 信号的中断 , 如果此时 INTA cycle 已经发出 , 而要分配的中断变成了被屏蔽中断 , local APIC 就会传递一个伪中断向量 .<br>
+分配一个伪中断向量不影响 ISR , 因此这个中断的处理函数应该在没有 EOI 的情况下返回 .</p>
+<p>伪中断向量的中断号通过伪中断向量寄存器 ( SVR ) 指明 , 包括以下域 :</p>
+<ul>
+<li>spurious vector  : 决定 local APIC 产生一个伪中断时传递的向量号</li>
+<li>APIC software enable / disable : 供软件临时打开和关闭 local APIC</li>
+<li>focus processor checking</li>
+<li>suppress EOI broadcasts</li>
+</ul>
+<p>说明 : 不要用伪向量编程一个 LVT 或者 IOAPIC RTE , 即使设置了屏蔽位 . 伪向量的 ISR 不会执行 EOI , 如果由于某种原因 LVT 或 RTE 项产生了中断 , ISR 中伪向量的对应位就会设置 , 屏蔽所有的相同优先级或者优先级更高的中断 .</p>
+<h1 id="7-消息信号中断--message-signalled-interrupt-">7. 消息信号中断 ( message signalled interrupt )</h1>
+<p>MSI 是 PCI Local Bus Specification 引入的概念 , 说明如下 :</p>
+<blockquote>
+<p>MSI 是可选的特性 , PCI 设备可以向系统指明的地址写入一个系统指明的消息 ( PCI DWORD 内存写 transaction ) 来请求服务 . transaction 的地址指明了消息的目的地 , 数据指明了消息 .</p>
+<p>系统软件需要在设备配置时初始化消息的目的地和消息 , 给每一个具备 MSI 功能的 function 分配一个或多个非共享的消息 .</p>
+</blockquote>
+<p>PCI Local Bus Specification 提供的能力机制用于标识和配置具备 MSI 功能的 PCI 设备 . 和其他域相比 , 这个结构体包含了一个 message data register 和一个 message address register . 为了请求服务 , PCI 设备 function 写入 MDR 的内容到 MAR 包含的地址 .</p>
+<h1 id="8-extended-xapic--x2apic-">8. Extended xAPIC ( x2APIC )</h1>
+<p>x2APIC 架构具有以下功能 :</p>
+<ul>
+<li>兼容所有 xAPIC 架构的关键元素 , 包括 :
+<ul>
+<li>传递模式</li>
+<li>中断和处理器优先级</li>
+<li>中断源</li>
+<li>中断目的地类型</li>
+</ul>
+</li>
+<li>扩展了处理器在逻辑和物理目的地模式下的寻址能力</li>
+<li>添加了新的特性 , 提升中断传递的性能</li>
+<li>降低基于链接的平台架构上逻辑目的地模式下中断传递的复杂性</li>
+<li>使用 MSR 编程接口访问 APIC 寄存器 , 而不是内存映射接口 ; 后者在 xAPIC 模式下支持</li>
+</ul>
+<p>系统软件设置 x2APIC 模式使能位 ( IA32_APIC_BASE MSR bit 10 ) 设置 local APIC 工作在 x2APIC 模式 .</p>
+<h2 id="81-访问-x2apic-寄存器">8.1. 访问 x2APIC 寄存器</h2>
+<p>x2APIC 模式下 , 系统软件使用 <code>RDMSR</code> 和 <code>WRMSR</code> 访问 APIC 寄存器 , 寄存器的地址通过 ECX 指明 , 结果的 bit 0:31 保存到 EAX , bit 32:63 保存到 EDX .</p>
+<p>MSR 地址范围 800H - 8FFH 通常保留用于在 x2APIC 模式访问 APIC 寄存器 .</p>
+<p>x2APIC 模式 , local APIC ID 寄存器扩展为 32 bit , 对于系统软件是只读的 , 由硬件初始化 .</p>
+<p>x2APIC MSR 无法在 VMX transition 中加载和保存 .</p>
+<h2 id="82-x2apic-状态切换">8.2. x2APIC 状态切换</h2>
+<p>x2APIC 模式通过 IA32_APIC_BASE 只能切换到 x2APIC 被关闭的状态 , 即设置 EN 和 EXTD 位为 0 . 切换过程中 x2APIC ID 和传统的 local XAPIC ID 保持不变 .<br>
+从 x2APIC 模式切换到 XAPIC 模式是无效的 , 对应的 <code>WRMSR</code> 指令会产生通用保护异常 .</p>
+<p>x2APIC 模式下 , 重置会进入 xAPIC 模式 , 所有的 APIC 寄存器都会初始化 .</p>
+<p>INIT 仍然会保留在 x2APIC 模式 , local APIC ID 寄存器的状态保持不变 , 所有其他的 APIC 寄存器初始化 .</p>
+<hr>
+<p>关闭 APIC 的状态下 , 使用 IA32_APIC_BASE 的唯一有效的 x2APIC 转化是变成 xAPIC 模式 , 因此 , 从 x2APIC 变成 xAPIC 的唯一方式是一个两步的过程 :</p>
+<ul>
+<li>首先从 x2APIC 模式切换到关闭 local APIC 的模式</li>
+<li>然后从关闭的模式切换到 xAPIC 模式</li>
+</ul>
+<h2 id="83-x2apic-确定-ipi-目的地">8.3. x2APIC 确定 IPI 目的地</h2>
+<p>xAPIC 模式 destination format register ( DFR ) 确定是平坦的逻辑模式还是聚集的逻辑模式 . x2APIC 不支持平坦的逻辑模式 , 因此移除了 DFR .</p>
+<p>LDR 的 32-bit 的逻辑 x2APIC ID 域分成两部分 : cluster ID ( bit 31:16 ) 和 logical ID ( bit 15:0 ) .</p>
+<p>x2APIC 模式的 32-bit 逻辑 x2APIC ID 派生自 32-bit local x2APIC ID . 特别的 , 16-bit logical ID 由 1 左移 x2APIC ID 的低 4 位指明的值得到 : <code>logical ID = 1 &lt;&lt; x2APIC ID[3:0]</code> , x2APIC ID 的其余位组成 logical x2APIC ID 的 cluster ID :<br>
+<code>logical x2APIC ID = [(x2APIC ID[19:4] &lt;&lt; 16 ) | (1 &lt;&lt; x2APIC ID[3:0] )]</code> .</p>
+<h2 id="84-self-ipi-寄存器">8.4. self IPI 寄存器</h2>
+<p>发送给自己的 IPI 被一些系统软件广泛使用 , x2APIC 架构引入了一个新的寄存器接口 , 专用于发送给自己的 IPI , 旨在提供更优的发送 self-IPI 的路径 .</p>
+<p>self IPI 寄存器是只写的 , 试图读取会产生 #GP 异常 .</p>
+<p>通过 self IPI 寄存器发送的 self-IPI 的处理和优先级和通过传统的 xAPIC 的 ICR 发送的 IPI 相同 .<br>
+特别的 , 中断的状态会通过 IRR , ISR 和 TMR 寄存器追踪 , 就像从系统总线收到的中断一样 . 通过 self IPI 寄存器发送的 IPI 保证中断会被传递给处理器核心 . 写入 self IPI 寄存器的 <code>WRMSR</code> 指令的完成意味着中断已经记录到 IRR .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-30
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/local-apic/">local-APIC</a>
+          <a href="/tags/io-apic/">IO-APIC</a>
+          <a href="/tags/lvt/">LVT</a>
+          <a href="/tags/ipi/">IPI</a>
+          <a href="/tags/x2apic/">x2APIC</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap3-protected_mode_memory_management/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap3-protected_mode_memory_management</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap9-processor_management_and_initialization/">
+            <span class="next-text nav-default">3A_chap9-processor_management_and_initialization</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>segmentation on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/segmentation/</link>
+    <description>Recent content in segmentation on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/segmentation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap3-protected_mode_memory_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/</guid>
+      <description>1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &amp;mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化</description>
+    </item>
+    
+  </channel>
+</rss>

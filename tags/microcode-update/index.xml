@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>microcode-update on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/microcode-update/</link>
+    <description>Recent content in microcode-update on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 28 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/microcode-update/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap9-processor_management_and_initialization</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/</link>
+      <pubDate>Mon, 28 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/</guid>
+      <description>1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (</description>
+    </item>
+    
+  </channel>
+</rss>

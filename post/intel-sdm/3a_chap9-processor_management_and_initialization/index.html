@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap9-processor_management_and_initialization - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap9-processor_management_and_initialization" />
+<meta property="og:description" content="1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/" />
+<meta property="article:published_time" content="2020-09-28T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-28T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap9-processor_management_and_initialization">
+<meta itemprop="description" content="1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (">
+<meta itemprop="datePublished" content="2020-09-28T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-28T00:00:00+00:00" />
+<meta itemprop="wordCount" content="3417">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,0xFFFFFFF0H,microcode-update," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap9-processor_management_and_initialization"/>
+<meta name="twitter:description" content="1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer ("/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap9-processor_management_and_initialization</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-28 </span>
+        
+          <span class="more-meta"> 3417 words </span>
+          <span class="more-meta"> 7 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-x87-fpu-初始化">2. x87 FPU 初始化</a></li>
+    <li><a href="#3-实地址模式软件初始化">3. 实地址模式软件初始化</a></li>
+    <li><a href="#4-保护模式软件初始化">4. 保护模式软件初始化</a>
+      <ul>
+        <li><a href="#41-初始化-ia-32e-模式">4.1. 初始化 IA-32e 模式</a>
+          <ul>
+            <li><a href="#411-64-位模式和兼容模式">4.1.1. 64 位模式和兼容模式</a></li>
+            <li><a href="#412-切换出-ia-32e-模式">4.1.2. 切换出 IA-32e 模式</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#5-微代码更新工具">5. 微代码更新工具</a>
+      <ul>
+        <li><a href="#51-可选的处理器微代码更新规范">5.1. 可选的处理器微代码更新规范</a>
+          <ul>
+            <li><a href="#511-bios-的职责">5.1.1. BIOS 的职责</a></li>
+            <li><a href="#512-调用程序的职责">5.1.2. 调用程序的职责</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer ( BTB ) .<br>
+然后 , 系统总线上的所有处理器执行 MP 初始化协议 , BSP 执行 EIP 指明的当前代码段中的软件初始化代码 , AP 在 BSP 执行初始化代码时进入 wait for Startup IPI ( SIPI ) 状态 .<br>
+此时 , MP 系统中 BSP 唤醒每个 AP , 使其执行自配置代码 . 所有的处理器初始化 , 配置 , 同步后 , BSP 开始执行初始的 OS 或者可执行程序 .</p>
+<p>使能处理器的 INIT# 引脚的效果和硬件初始化类似 , 主要区别是 INIT 期间 , 内部 cache , MSR , MTRR , x87 FPU 的状态不会改变 ( 尽管 TLB 和 BTB 会无效 ) . INIT 提供了一种维持内部 cache 内容不变的前提下从保护模式切换到实地址模式的方式 .</p>
+<p>处理器通过 BIST 后 , 清除 EAX 为 0 , BIST 的开销和处理器的型号相关 .</p>
+<p>硬件重置后 , EDX 包含处理器的型号信息和 stepping 信息 .</p>
+<p>硬件重置后执行的第一条指令位于物理地址 0xFFFFFFF0H , 即处理器的最高物理地址的 16 字节下 , 包含软件初始化代码的 EPROM 必须位于这个地址 .<br>
+实地址模式下 , 0xFFFFFFF0H 超过了处理器的 1MB 可寻址范围 , 处理器通过下面的方式初始化为这个开始地址 :<br>
+CS 包含两部分 , 可见的段选择器部分和隐藏的基地址部分 . 实地址模式下 , 基地址通过左移段选择器 4 位得到 . 硬件重置时 , CS 寄存器中的段选择器加载为 0xF000H , 基地址加载为 0xFFFF0000H , 起始地址通过基地址加上 EIP 中的值得到 ( F000H &laquo; 4 + FFF0H = FFFFFFF0H ) .</p>
+<h1 id="2-x87-fpu-初始化">2. x87 FPU 初始化</h1>
+<p>硬件重置后 x87 的状态和 <code>FINIT</code> 或 <code>FNINIT</code> 指令执行后 x87 的状态不同 , 要使用 x87 FPU , 软件初始化代码应该在硬件重置后执行 <code>FINIT</code> 或 <code>FNINIT</code> 指令 .<br>
+处理器通过 INIT# 引脚重置后 , x87 FPU 的状态不会改变 .</p>
+<p>硬件重置后 , CR0 的 MP , EM , NE 标志会被清除 , 初始化代码必须加载合适的值到这些寄存器 .</p>
+<p>设置 EM 标志会使处理器在执行浮点指令时产生一个 #NM 异常 , 陷入一个软件异常处理函数 . 这样 , 可以在异常处理函数中实现一个浮点模拟器处理浮点指令 .</p>
+<h1 id="3-实地址模式软件初始化">3. 实地址模式软件初始化</h1>
+<p>硬件重置后 , 处理器进入实地址模式 , 从物理地址 0xFFFFFFF0H 执行软件初始化代码 , 后者必须建立基本的系统功能所需要的数据结构 , 比如实地址模式的 IDT , 用于处理中断和异常 .<br>
+如果处理器要停留在实地址模式 , 软件还要加载额外的操作系统或者可执行程序和数据结构 , 以便在实地址模式执行应用 .</p>
+<p>如果处理器要工作在保护模式 , 软件必须加载保护模式下运行所需必要的数据结构 , 然后切换到保护模式 .</p>
+<p>实地址模式下必须加载到内存中的系统数据结构是 IDT , 其默认基地址是 0H , 这个地址可以通过 <code>LIDT</code> 指令修改 . 中断或者异常处理函数的代码必须放在实地址模式可以寻址的 1MB 地址空间内 .</p>
+<p>NMI 总是开启的 , 如果 IDT 和 NMI 处理函数需要加载到 RAM , 硬件重置后就会有一段时间无法处理 NMI . 期间 NMI 可以通过下面两种方式处理 :</p>
+<ul>
+<li>通过 EPROM 提供一个简单的 IDT 和 NMI 处理函数 .</li>
+<li>系统硬件提供一种机制通过 IO 端口内的一个标志控制的与门传递的 NMI# 信号开启和关闭 NMI , 硬件可以在处理器重置后清除标志 , 软件可以再准备好处理 NMI 中断后设置标志 .</li>
+</ul>
+<h1 id="4-保护模式软件初始化">4. 保护模式软件初始化</h1>
+<p>处理器切换到保护模式前 , 软件初始化代码必须加载一些保护模式的数据结构和代码模块到内存 , 支持保护模式下的处理器操作 , 包括 :</p>
+<ul>
+<li>一个 IDT</li>
+<li>一个 GDT</li>
+<li>一个 TSS</li>
+<li>可选的一个 LDT</li>
+<li>如果要使用分页 , 至少一个页目录和一个页表</li>
+<li>一个包含处理器切换到保护模式时要执行的代码的代码段</li>
+<li>一个或多个包含必要的中断和异常处理函数的代码模块</li>
+</ul>
+<p>软件初始化代码在切换到保护模式前必须初始化下列系统寄存器 :</p>
+<ul>
+<li>GDTR</li>
+<li>可选的 IDTR , 可以在切换到保护模式后 , 开启中断前立即初始化</li>
+<li>CR1 - CR4</li>
+<li>MTRR</li>
+</ul>
+<p>软件初始化阶段加载到内存中的数据结构主要取决于保护模式下操作系统使用的内存管理模型 .</p>
+<p>如果要使用多任务机制 , 并且支持特权级之间的切换 , 需要加载一个 TSS 到内存 , 这是因为特权级 0 , 1 和 2 的栈段指针需要通过 TSS 获取 .</p>
+<h2 id="41-初始化-ia-32e-模式">4.1. 初始化 IA-32e 模式</h2>
+<p>Intel 64 处理器 , IA32_EFER MSR 在系统重置后清除 , 操作系统必须在保护模式下开启分页后才能初始化 IA-32e 模式 , IA-32e 模式操作还需要开启了 4 级或 5 级分页的物理地址扩展 ( PAE ) .<br>
+操作系统需要遵守下面的序列初始化 IA-32e 模式 :</p>
+<ol>
+<li>保护模式下 , 设置 CR0.PG = 0 关闭分页 , 使用 <code>MOV CR0</code> 指令 .</li>
+<li>设置 CR4.PAE = 1 开启 PAE , 失败时会产生 #GP fault .</li>
+<li>加载 PML4 或 PML5 的物理基地址到 CR3 .</li>
+<li>设置 IA32_EFER.LME = 1 开启 IA-32e 模式 .</li>
+<li>设置 CR0.PG = 1 开启分页 , 这会导致处理器设置 IA32_EFER.LMA = 1 . 开启分页的 <code>MOV CR0</code> 指令必须和后续的指令位于同一个映射页中 .</li>
+</ol>
+<p>激活 IA-32e 模式前 , 64 位模式的分页结构必须位于物理地址空间的前 4GB , 这是因为初始化页目录基地址的 <code>MOV CR3</code> 指令必须在激活 IA-32e 模式前在传统模式下执行 . 由于 <code>MOV CR3</code> 在保护模式下执行 , 只有寄存器的低 32 位被写入 , 限制页表在内存的低 4GB . 软件可以在激活 IA-32e 模式后将页表放到物理内存的任何位置 .</p>
+<p>任何时候软件试图修改直接影响激活 IA-32e 模式的使能位 ( IA32_EFER.LME , CR0.PG , CR4.PAE ) 时 , 处理器都会进行 64 位模式一致性检查 , 失败时产生 #GP , 保证处理器不会进入未定义的模式或状态 .</p>
+<p>下列情形中 64 位模式一致性检查会失败 :</p>
+<ul>
+<li>打开分页时试图开启或关闭 IA-32e 模式</li>
+<li>开启了 IA-32e 模式 , 试图在开启 PAE 前打打开分页</li>
+<li>IA-32e 已经激活 , 试图关闭 PAE</li>
+<li>激活 IA-32e 模式时当前的 CS 设置了 L 位</li>
+<li>激活 IA-32e 模式时当前的 TR 包含一个 16-bit 的 TSS</li>
+</ul>
+<p>激活 IA-32e 模式后 , 系统描述符表寄存器 ( GDTR , LDTR , IDTR , TR ) 引用的都是传统的保护模式下的描述符表 , 都保存在低 4GB 的线性地址空间中 . 激活 IA-32e 模式后 , 操作系统应该使用 <code>LGDT</code> , <code>LLDT</code> , <code>LIDT</code> , <code>LTR</code> 加载 64 位描述符表的引用 .</p>
+<p>激活 IA-32e 模式和更新 64 位 IDT 之间 , 软件不能允许中断或异常的发生 .</p>
+<h3 id="411-64-位模式和兼容模式">4.1.1. 64 位模式和兼容模式</h3>
+<p>IA-32e 模式下 , 两个代码段描述符中的位 ( CS.L 和 CS.D ) 控制初始化后的操作模式 ( 64 位模式或兼容模式 ) . 因此 , 兼容模式的执行基于代码段 , 从而允许传统的应用和 64 位应用在 64 位模式下共存 .</p>
+<p>兼容模式下以下系统层机制仍然使用 IA-32e 模式的架构语义 :</p>
+<ul>
+<li>线性地址到物理地址的转化使用 64 位模式扩展的页转化机制</li>
+<li>中断和异常使用 64 位模式的机制处理</li>
+<li>系统调用使用 IA-32e 模式的机制处理</li>
+</ul>
+<h3 id="412-切换出-ia-32e-模式">4.1.2. 切换出 IA-32e 模式</h3>
+<p>要从 IA-32e 模式返回分页的保护模式 , 操作系统必须使用下面的序列 :</p>
+<ol>
+<li>切换到兼容模式</li>
+<li>清除 CR0.PG = 0 , 关闭 IA-32e 模式 , 导致处理器设置 IA32_EFER.LMA = 0 . 用于关闭分页的 <code>MOV CR0</code> 指令必须和后续的指令位于同一个映射页</li>
+<li>加载传统的页表目录的基地址的物理基地址到 CR3</li>
+<li>设置 IA32_EFER.LME = 0 关闭 IA-32e 模式</li>
+<li>设置 CR0.PG = 1 开启传统的分页保护模式</li>
+<li>开启分页的 <code>MOV CR0</code> 指令必须后跟一个分支指令 , 两个指令必须位于同一个映射页</li>
+</ol>
+<h1 id="5-微代码更新工具">5. 微代码更新工具</h1>
+<p>P6 以后的处理器支持加载一个 Intel 提供的数据块到处理器 , 达到勘误的目的 . 这个数据块就称作微代码更新 , 由 BIOS 在系统初始化时提供 .</p>
+<p>微代码更新由一个 Intel 提供的二进制组成 , 后者包含一个描述性的首部和数据 ; 更新内没有可执行代码 , 包含特定列表的处理器签名 .</p>
+<p>处理器的签名列表可以包含多个处理器型号 , 添加到加密数据后 .</p>
+<p>在加载微代码更新前 , 软件需要检查校验和判断微代码更新的数据是否有效 .</p>
+<p>硬件重置后 , 加载过的微代码更新会被无效 ; 多次加载更新不会有副作用 .</p>
+<p>支持超线程技术的处理器 , 物理核心的每个逻辑处理器都必须加载微代码更新 , 每个逻辑处理器独立的加载更新 .</p>
+<h2 id="51-可选的处理器微代码更新规范">5.1. 可选的处理器微代码更新规范</h2>
+<p>系统软件可以构建自己的组件管理微代码更新 , 也可以依赖于 BIOS 提供的工具更新微代码 .</p>
+<p>实模式 INT 15H 0D042H 功能是 BIOS 可以提供给 OS 的微代码更新工具 , 允许应用读取和修改 NVRAM 中的微代码更新数据 .</p>
+<h3 id="511-bios-的职责">5.1.1. BIOS 的职责</h3>
+<p>如果 BIOS 通过了存在性测试 ( INT 15H , AX = 0D042H , BL = 0H ) , 必须实现所有定义在 <code>INT 15H , AX = 0D042H</code> 规范中的子功能 , 没有可选功能 .</p>
+<p>BIOS 负责管理 NVRAM 更新块 , 包括垃圾回收 , 比如移除 NVRAM 中已经不存在的处理器的微代码更新 .</p>
+<p>执行 <code>INT 15H, 0D042H</code> 功能时 , BIOS 必须假定调用者完全不知道平台的要求 , BIOS 需要管理所有的芯片组和平台需求信息 . 使用写更新子功能写入更新数据时 , BIOS 必须维护实现相关的数据 ( 比如更新 NVRAM 的校验和 ) .</p>
+<h3 id="512-调用程序的职责">5.1.2. 调用程序的职责</h3>
+<p>调用程序加载微代码更新到 BIOS NVRAM 时 :</p>
+<ul>
+<li>调用程序需要从实模式程序调用 <code>INT 15H, 0D042H</code> 功能 , 并且在运行在实模式的系统中运行 .</li>
+<li>调用程序应该调用存在性测试功能功能 , 校验签名和功能的返回代码 .</li>
+<li>调用程序向 BIOS 提供需要的 RAM 缓冲区和栈大小</li>
+<li>调用程序应该读取已经存在的任何更新数据 , 以加载合适的更新 ; BIOS 必须拒绝用更老的版本覆盖更新的更新 .</li>
+<li>不会有模棱两可的更新 , BIOS 必须防止同一个 CPU 的多个更新同时存在 ; 必须拒绝加载 CPU 已经不存在的更新 .</li>
+<li>调用程序应该实现一个验证功能 , 在更新写功能成功完成后执行 : 读取更新 , 校验 BIOS 返回了和写入一致的镜像 .</li>
+</ul>
+<p>调用程序需要在调用读写功能时给 BIOS 提供 3 个 64KB 的 RAM , 用 CX , DX 和 SI 指向这些 RAM 块 ; 提供的栈至少为 32 KB .</p>
+<p>每个功能返回时都会清除 CF , 保存返回状态到 AH , AL 用于返回额外的平台特定的错误信息 .</p>
+<p>必须实现的 4 个功能为 :</p>
+<ul>
+<li>功能 00H : 存在性测试</li>
+<li>功能 01H : 写微代码更新数据</li>
+<li>功能 02H : 微代码更新控制 , 加载更新数据到处理器</li>
+<li>功能 03H : 读微代码更新数据</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-28
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/0xfffffff0h/">0xFFFFFFF0H</a>
+          <a href="/tags/microcode-update/">microcode-update</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap10-apic/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap10-APIC</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap8-multi-processor_management/">
+            <span class="next-text nav-default">3A_chap8-multi-processor_management</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

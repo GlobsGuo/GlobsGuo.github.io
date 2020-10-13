@@ -6,7 +6,142 @@
     <description>Recent content in Posts on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 21 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>1_chap3-basic_execution_environment</title>
+      <link>https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/</guid>
+      <description>1. Overview of the Basic Execution Environment Intel 处理器架构分为两类 : IA-32 和 Intel 64 , 前者支持保护模式 , 实地址模式 , SMM 模式 ( 通过 APIC 的 SMI 中断或者激活外部 SMI# 进入 ) ; 后者增加了 IA-32e 模式 , 包</description>
+    </item>
+    
+    <item>
+      <title>3A_chap4-paging</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap4-paging/</guid>
+      <description>1. Paging Modes and Control Bits 分页行为受 CR0 , CR4 , IA32_EFER MSR 和 EFLAGS 寄存器的影响 . 具体如何影响 , 以及怎样正确开启分页分页模式 , 需要按照一定的次序设置相关的寄存器 , 查阅 sdm .</description>
+    </item>
+    
+    <item>
+      <title>3A_chap12-Intel_MMX_technology_system_programming</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/</guid>
+      <description>1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0</description>
+    </item>
+    
+    <item>
+      <title>3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/</guid>
+      <description>1. 简介 本章介绍操作处理器的状态扩展 ( SSE 状态 , XMM 寄存器 , MXCSR ) 和其他的处理器扩展状态的指令集扩展的系统编程特性 . 操作 SSE 状态的指令集扩展包括 streaming SIMD extensions</description>
+    </item>
+    
+    <item>
+      <title>3A_chap11-memory_cache_control</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap11-memory_cache_control/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap11-memory_cache_control/</guid>
+      <description>1. 内部 cache , TLB 和缓冲区 cache 有四种类型 : trace cache 基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 . L1 cache L1 cache 分两部分 , 一部分专用于</description>
+    </item>
+    
+    <item>
+      <title>3A_chap2-system_architecture_overview</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/</guid>
+      <description>1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ,</description>
+    </item>
+    
+    <item>
+      <title>3A_chap3-protected_mode_memory_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/</guid>
+      <description>1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &amp;mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化</description>
+    </item>
+    
+    <item>
+      <title>3A_chap10-APIC</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap10-apic/</guid>
+      <description>1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断</description>
+    </item>
+    
+    <item>
+      <title>3A_chap9-processor_management_and_initialization</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/</link>
+      <pubDate>Mon, 28 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap9-processor_management_and_initialization/</guid>
+      <description>1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (</description>
+    </item>
+    
+    <item>
+      <title>3A_chap8-multi-processor_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap8-multi-processor_management/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap8-multi-processor_management/</guid>
+      <description>1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器</description>
+    </item>
+    
+    <item>
+      <title>3A_chap6-interrupt_and_exception_handling</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/</guid>
+      <description>中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错</description>
+    </item>
+    
+    <item>
+      <title>3A_chap7-task_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap7-task_management/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap7-task_management/</guid>
+      <description>1. 简介 一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供</description>
+    </item>
+    
+    <item>
+      <title>3A_chap5-protection</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap5-protection/</link>
+      <pubDate>Mon, 21 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap5-protection/</guid>
+      <description>1. Protection Overview 使用保护机制时 , 每个内存引用的检查都在内存 cycle 之前进行 . 由于检查和地址转换过程并行执行 , 没有性能开销 . 执行的保护检查可以分成下面几类 : 限</description>
+    </item>
+    
+    <item>
+      <title>1_chap6-procedure_calls,interrupts,exceptions</title>
+      <link>https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/</link>
+      <pubDate>Wed, 16 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/</guid>
+      <description>处理器支持两种不同的程序调用方式 : CALL 和 RET 指令 ENTER 和 LEAVE 指令 , 结合 CALL 和 RET 两种机制都需要程序栈 , 通常简称为栈 , 保存调用程序的状态 , 传递参数给被调用程</description>
+    </item>
+    
+    <item>
+      <title>2_chap2-instruction_format</title>
+      <link>https://globsguo.github.io/post/intel-sdm/2_chap2-instruction_format/</link>
+      <pubDate>Mon, 14 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/2_chap2-instruction_format/</guid>
+      <description>IA-32 汇编语言的格式为 : label: mnemonic argument1 , argument2 , argument3 . 其中 : label 是后面跟有冒号的标识符 . mnemonic 是具有相同功能的一类指令操作码的保留名称 . 操作数 argument 1 2 3 是可选的 , 操作</description>
+    </item>
+    
     <item>
       <title>mm-buddy_allocator_free_page</title>
       <link>https://globsguo.github.io/post/mm/mm-buddy_allocator_free_page/</link>

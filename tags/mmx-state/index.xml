@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MMX state on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/mmx-state/</link>
+    <description>Recent content in MMX state on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 12 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/mmx-state/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap12-Intel_MMX_technology_system_programming</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/</guid>
+      <description>1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0</description>
+    </item>
+    
+  </channel>
+</rss>

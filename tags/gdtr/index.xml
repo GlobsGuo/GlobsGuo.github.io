@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GDTR on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/gdtr/</link>
+    <description>Recent content in GDTR on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 10 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/gdtr/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap2-system_architecture_overview</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap2-system_architecture_overview/</guid>
+      <description>1. Overview Of the System-Level Architecture 每个段描述符都有关联的段选择器 , 后者提供 GDT 或者 LDT 内的一个索引 , 一个全局 / 局部标志 ( 指明段选择器指向 LDT 还是 GDT ) , 以及访问权限信息 ,</description>
+    </item>
+    
+  </channel>
+</rss>

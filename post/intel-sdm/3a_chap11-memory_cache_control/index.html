@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap11-memory_cache_control - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 内部 cache , TLB 和缓冲区 cache 有四种类型 : trace cache 基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 . L1 cache L1 cache 分两部分 , 一部分专用于" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap11-memory_cache_control/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap11-memory_cache_control" />
+<meta property="og:description" content="1. 内部 cache , TLB 和缓冲区 cache 有四种类型 : trace cache 基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 . L1 cache L1 cache 分两部分 , 一部分专用于" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap11-memory_cache_control/" />
+<meta property="article:published_time" content="2020-10-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap11-memory_cache_control">
+<meta itemprop="description" content="1. 内部 cache , TLB 和缓冲区 cache 有四种类型 : trace cache 基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 . L1 cache L1 cache 分两部分 , 一部分专用于">
+<meta itemprop="datePublished" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="wordCount" content="7069">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,cache,TLB,store buffer,MTRR,PAT," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap11-memory_cache_control"/>
+<meta name="twitter:description" content="1. 内部 cache , TLB 和缓冲区 cache 有四种类型 : trace cache 基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 . L1 cache L1 cache 分两部分 , 一部分专用于"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap11-memory_cache_control</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-10 </span>
+        
+          <span class="more-meta"> 7069 words </span>
+          <span class="more-meta"> 15 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-内部-cache--tlb-和缓冲区">1. 内部 cache , TLB 和缓冲区</a></li>
+    <li><a href="#2-caching-术语">2. caching 术语</a></li>
+    <li><a href="#3-可用的-caching-方式">3. 可用的 caching 方式</a>
+      <ul>
+        <li><a href="#31-写组合内存区域的缓冲">3.1. 写组合内存区域的缓冲</a></li>
+        <li><a href="#32-从-uc-内存取回代码">3.2. 从 UC 内存取回代码</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-cache-控制">4. cache 控制</a>
+      <ul>
+        <li><a href="#41-cache-控制的优先性">4.1. cache 控制的优先性</a></li>
+        <li><a href="#42-阻止-cache">4.2. 阻止 cache</a></li>
+        <li><a href="#43-关闭-l3-cache">4.3. 关闭 L3 cache</a></li>
+        <li><a href="#44-cache-管理指令">4.4. cache 管理指令</a></li>
+        <li><a href="#45-l1-数据-cache-context-模式">4.5. L1 数据 cache context 模式</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-自修改代码">5. 自修改代码</a></li>
+    <li><a href="#6-隐式-cache">6. 隐式 cache</a></li>
+    <li><a href="#7-显式-cache">7. 显式 cache</a></li>
+    <li><a href="#8-无效-tlb">8. 无效 TLB</a></li>
+    <li><a href="#9-保存操作缓冲区">9. 保存操作缓冲区</a></li>
+    <li><a href="#10-mtrr">10. MTRR</a>
+      <ul>
+        <li><a href="#101-用-mtrr-设置内存范围">10.1. 用 MTRR 设置内存范围</a>
+          <ul>
+            <li><a href="#1011-ia32_mtrr_def_type-msr">10.1.1. IA32_MTRR_DEF_TYPE MSR</a></li>
+            <li><a href="#1012-固定范围-mtrr">10.1.2. 固定范围 MTRR</a></li>
+            <li><a href="#1013-可变范围-mtrr">10.1.3. 可变范围 MTRR</a></li>
+            <li><a href="#1014-smrr-接口">10.1.4. SMRR 接口</a></li>
+          </ul>
+        </li>
+        <li><a href="#102-mtrr-生效顺序">10.2. MTRR 生效顺序</a></li>
+        <li><a href="#103-mtrr-初始化">10.3. MTRR 初始化</a></li>
+        <li><a href="#104-内存类型的重映射">10.4. 内存类型的重映射</a></li>
+        <li><a href="#105-mp-系统-mtrr-要考虑的事">10.5. MP 系统 MTRR 要考虑的事</a></li>
+        <li><a href="#106-大页面需要考虑的事情">10.6. 大页面需要考虑的事情</a></li>
+      </ul>
+    </li>
+    <li><a href="#11-pat">11. PAT</a>
+      <ul>
+        <li><a href="#111-ia32_pat-msr">11.1. IA32_PAT MSR</a></li>
+        <li><a href="#112-从-pat-中选择一个内存类型">11.2. 从 PAT 中选择一个内存类型</a></li>
+        <li><a href="#113-编程-pat">11.3. 编程 PAT</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-内部-cache--tlb-和缓冲区">1. 内部 cache , TLB 和缓冲区</h1>
+<p>cache 有四种类型 :</p>
+<ol>
+<li>
+<p>trace cache<br>
+基于 Intel NetBurst 微架构的处理器有 , 在所有的模式下可用 : 保护模式 , SMM , 实地址模式 .</p>
+</li>
+<li>
+<p>L1 cache<br>
+L1 cache 分两部分 , 一部分专用于缓存指令 ( pre-coded 指令 ) , 一部分专用于缓存数据 ; 每个处理器核心都有自己的 L1 cache .</p>
+</li>
+<li>
+<p>L2 cache<br>
+L2 cache 是混合的数据和指令 cache .</p>
+</li>
+<li>
+<p>L3 cache<br>
+L3 cache 是混合的数据和指令 cache .</p>
+</li>
+</ol>
+<p>较新的处理器架构中 L1 和 L2 的 cache 行大小是 64 byte , 一个 cache 行用一个 8-transfer burst transaction 从内存填充 . cache 不支持部分填充 cache 行 , 即使缓存单个双字也需要缓存整个 cache 行 .</p>
+<hr>
+<p>TLB 保存最近使用的页目录项和页表项 , 通过减少读取保存在系统内存中的页表所需的内存访问的次数加速开启分页时的内存访问 .</p>
+<p>TLB 分成四组 : 4 KB 页的指令 TLB , 4KB 页的数据 TLB ; 大页面的指令 TLB , 大页面的数据 TLB . 保护模式下开启分页时 TLB 可用 , 关闭分页时 , 或者处理器处于实地址模式 , TLB 维持自己的内容 , 直到显式或隐式 flush .</p>
+<p>基于 Intel Core 微架构的处理器实现了一级指令 TLB 和两级数据 TLB ; Intel Core i7 处理器提供了两级混合 TLB .</p>
+<hr>
+<p>保存操作缓冲区和处理器的指令执行单元关联 , 允许针对系统内存和 / 或内部 cache 的写被保存 , 在某些情况下组合起来 , 加速处理器的总线访问 . 所有的模式下保存操作缓冲区通常都会打开 .</p>
+<hr>
+<p>处理器的 cache 对于软件多半是透明的 .</p>
+<h1 id="2-caching-术语">2. caching 术语</h1>
+<p>处理器识别出从内存中读取的一个操作数可以 cache 时 , 处理器读取整个 cache 行到合适的 cache ( L1 , L2 , L3 或者所有 cache ) , 这个操作称作 <strong>cache line fill</strong> . 如果包含操作数的内存地址在下一次处理器试图访问操作数时仍然被 cache , 处理器可以从 cache 中读取操作数 , 而不是内存中 , 这个操作称作 <strong>cache hit</strong> .</p>
+<p>处理器试图写入一个操作数到一个 cacheable 的内存区域时 , 首先检查内存地址的 cache 行在 cache 中是否存在 .<br>
+存在时处理器可以将操作数写入到 cache , 而不是到系统内存 . 这个操作称作 <strong>write hit</strong> .<br>
+如果一个写操作 miss cache , 处理器执行 cache 行填充 , 写分配 , 然后写入操作数到 cache 行 , 同时也可以写入到内存 . 如果操作数要写出到内存 , 首先写入到保存操作缓冲区 , 然后在系统总线可用时再从保存操作缓冲区写入到内存 .</p>
+<p>多处理器系统中 , 处理器具有 <strong>snoop</strong> 其他处理器对于系统内存和自身内部 cache 的访问的能力 , 处理器使用这个嗅探能力保持内部 cache 和系统内存以及其他处理器的内部 cache 的一致性 .<br>
+例如 , 如果一个处理器通过嗅探检测到另一个处理器要写入当前缓存为 <strong>shared state</strong> 的内存地址 , 嗅探的处理器就无效自己的 cache 行 , 强制下一次访问相同内存地址时执行一次 cache 行填充 .</p>
+<p>如果一个处理器探测 ( 通过嗅探 ) 到另一个处理器试图访问自己修改过的 cache 中的内存地址 , 但是还没有写回到系统内存中 , 嗅探的处理器会通知 ( 通过 HITM# 信号 ) 另一个处理器 cache 行处于已修改状态 , 并且执行隐式的已修改数据的写回操作 .<br>
+隐式的写回操作直接传递给初始的请求处理器 , 并由内存控制器嗅探 , 保证系统内存已经更新 . 这里 , 带有有效数据的处理器可能直接传递数据到其他处理器 , 实际没有写到系统内存 ; 内存控制器需要负责嗅探这个操作 , 并且更新内存 .</p>
+<h1 id="3-可用的-caching-方式">3. 可用的 caching 方式</h1>
+<p>处理器允许缓存任何系统内存区域到 L1 , L2 和 L3 cache , 单个页面或者系统内存的某些区域中 , 可以指明 cache 的类型 ( 也称作 <strong>memory type</strong> ) , 包括以下几种 :</p>
+<ul>
+<li>
+<p>strong uncacheable ( UC )<br>
+系统内存地址不能缓存 , 系统总线上的所有读写按照程序的次序执行 , 没有重新排列 . 没有投机内存访问 , 页表 walk , 或者分支的指令预取 . 这种 cache 类型对于映射到内存的 IO 设备十分有用 , 普通的 RAM 使用时会严重影响处理器的性能 .</p>
+</li>
+<li>
+<p>uncacheable<br>
+内存类型可以通过编程 MTRR 设置为 WC 内存类型覆盖 , 此外和 UC 内存类型特点相同 .</p>
+</li>
+<li>
+<p>write combining ( WC )<br>
+系统内存不会被 cache , 一致性不会被处理器的总线一致性协议加强 , 允许投机读 , 写可能被延迟 , 并在写组合缓冲区 ( WC 缓冲区 ) 组合以减少内存访问 .<br>
+如果 WC 缓冲区部分被填充 , 写可能被延迟 , 直到下一个序列化事件 , 比如 <code>SFENCE</code> 或 <code>MFENCE</code> 指令 , <code>CPUID</code> , 一个针对 UC 内存的度或者写 , 发生中断 , 执行 <code>LOCK</code> 指令 .</p>
+<p>这种内存类型适用于视频帧缓冲区 , 写入的顺序不重要 , 只要写操作能够更新内存 , 可以在图形显示器看到 .</p>
+</li>
+<li>
+<p>write-through ( WT )<br>
+系统内存的读写都会 cache , 读取 cache 行会命中 , 读 miss 导致 cache 填充 , 允许投机读 , 所有写会写入 cache 行 , 并且写入系统内存 . 写入内存中时 , 无效的 cache 行不会被填充 , 有效的 cache 行会被填充或者无效 . 允许写组合 .</p>
+<p>这种内存类型适用于帧缓冲区或系统总线上有设备访问系统内存 , 但是不嗅探内存访问 . 加强处理器中的 cache 和系统内存中的一致性 .</p>
+</li>
+<li>
+<p>write-back ( WB )<br>
+和 WT 不同 , WB 发生写 miss 时 , 填充 cache 行 . 消除针对系统内存的非必要写操作 , 减少总线负载 : 对于 cache 行的写入不会立即前递给系统内存 , 而是累积到 cache 中 ; 修改过的 cache 行在执行写回操作时写入系统内存中 .<br>
+写回操作在需要回收 cache 行时发生 , 比如已经满的 cache 需要分配新的 cache 行 ; 写回操作也可能由维持 cache 一致性的机制触发 .</p>
+<p>这种内存类型提供了最好的性能 , 但是需要系统总线上访问系统内存的所有设备能够嗅探内存访问 , 保证系统内存和 cache 的一致性 .</p>
+</li>
+<li>
+<p>write protected ( WP )<br>
+尽可能从 cache 行读取 , 读 miss 填充 cache , 写传播到系统总线 , 导致所有处理器中对应的 cache 行无效 . 允许投机读 .</p>
+</li>
+</ul>
+<h2 id="31-写组合内存区域的缓冲">3.1. 写组合内存区域的缓冲</h2>
+<p>WC 内存类型的写入不会以普通意义的方式 cache , 而是缓存在内部的 WC 缓冲区 , 区别于 L1 , L2 , L3 cache 和保存操作缓冲区 . WC 缓冲区无法被嗅探 , 因此不会提供数据一致性 .<br>
+缓存针对 WC 内存的写操作主要为了向软件提供一个小窗口期 , 尽可能保持 non-intrusive 的情况下向 WC 缓冲区提供更多修改过的数据 .<br>
+缓冲 WC 内存的写操作会导致数据坍塌 : 对于相同内存区域的多次写操作只有最后一次写才会保存在内存中 , 其他的写操作都会丢失 .</p>
+<p>WC 缓冲区由几个 64 字节的 WC 缓冲区组成 . 软件开始写入 WC 内存时 , 处理器开始一次填充一个 WC 缓冲区 . 一个或多个 WC 缓冲区被填满时 , 处理器可以选择写入到系统内存中 .</p>
+<p>处理器写入数据到系统内存中时 , 基于包含有效数据的缓冲区的数量确定如何进行总线 transaction : 如果缓冲区的所有字节都有效 , 处理器执行 burst-write , 在一个 burst transaction 传输所有的字节 ; 如果一些字节无效 , 处理器通过 partial-write transaction 传输部分数据到内存 .</p>
+<h2 id="32-从-uc-内存取回代码">3.2. 从 UC 内存取回代码</h2>
+<p>程序可能执行 UC 区域的代码 , 和访问 UC 区域的数据不同 , 取回代码时 , 处理器不会投机的从可缓存代码切换到 UC 代码 , 也不会投机取回目标为 UC 代码的分支 .</p>
+<h1 id="4-cache-控制">4. cache 控制</h1>
+<p>Intel 64 和 IA-32 架构提供了一些控制数据和指令 cache , 处理器 , cache 和内存间读写次序的机制 , 可以分成以下两组 :</p>
+<ul>
+<li>
+<p>cache 控制寄存器和 bit<br>
+控制寄存器和页目录项 , 页表项中的位 .</p>
+</li>
+<li>
+<p>cache 控制和内存次序指令<br>
+控制数据 cache , 内存读写次序和数据预取的指令 , 允许软件控制特定数据结构的 cache , 特定内存地址的内存一致性 , 加强程序中特定内存地址的内存次序 .</p>
+</li>
+</ul>
+<h2 id="41-cache-控制的优先性">4.1. cache 控制的优先性</h2>
+<p>页面级和 MTRR cache 控制交叉时 , 阻止 cache 的机制优先生效 .</p>
+<p>write-back 和 write-through cache 策略交叉时 , write-through 优先生效 .</p>
+<p>write-combining 优先 write-back 和 write-through 策略生效 .</p>
+<h2 id="42-阻止-cache">4.2. 阻止 cache</h2>
+<p>cache 开启并且收到 cache 填充后 , 可以通过以下步骤关闭 :</p>
+<ol>
+<li>进入 no-fill cache 模式</li>
+<li>使用 <code>WBINVD</code> 指令刷出所有 cache</li>
+<li>关闭 MTRR , 设置默认的内存类型为 uncached , 或者设置所有 uncached 内存类型的 MTRR</li>
+</ol>
+<p>设置 CD 标志后 , 必须 flush cache 确保系统内存的一致性 ; 如果不 flush cache , 读操作仍然会发生 cache 命中 , 从有效的 cache 行读取数据 .</p>
+<p>上述三个步骤解决三个不同要求 :</p>
+<ol>
+<li>中断新数据替代 cache 中的数据</li>
+<li>保证 cache 中已有的数据写入到内存中</li>
+<li>保证后续的内存引用观察到的是 UC 内存类型</li>
+</ol>
+<h2 id="43-关闭-l3-cache">4.3. 关闭 L3 cache</h2>
+<p>基于 Intel NetBurst 微架构的处理器 , L3 cache 可以通过 IA32_MSC_ENABLE MSR 的 bit 6 关闭 , 独立于 L1 和 L2 cache .</p>
+<h2 id="44-cache-管理指令">4.4. cache 管理指令</h2>
+<p>特权指令 <code>INVD</code> 和 <code>WBINVD</code> 用于无效 L1 , L2 , L3 cache 的内容 , 无效所有内部 cache 项 , 然后产生就一个特殊功能的总线 cycle , 指明外部的 cache 也应该无效 .<br>
+<code>INVD</code> 指令不强制写回修改过的 cache 行 , 因此保存在 cache 中的 , 没有写回到系统内存中的数据会丢失 .<br>
+<code>WBINVD</code> 指令首先写回所有内部 cache 中的已修改 cache line , 然后无效 L1 , L2 和 L3 中的内容 , 保证 cache 和系统内存的一致性 , 不管生效的写策略 . 这个策略之后 , <code>WBINVD</code> 指令产生一个或两个特殊功能的总线 cycle , 向外部 cache 控制器指明需要写回已修改数据 , 然后无效外部 cache .</p>
+<p><code>PREFETCHh</code> 指令允许程序向处理器建议特定系统内存中的 cache 行可以预取到 cache 中 .</p>
+<p><code>CLFLUSH</code> 和 <code>CLFUSHGOPT</code> 指令允许选择的 cache 行从内存刷出 , 程序可以显式释放 cache 空间 .</p>
+<p>non-temporal move 指令 ( <code>MOVNTI</code> , <code>MOVNTQ</code> , <code>MOVNTDQ</code> , <code>MOVNTPS</code> 和 <code>MOVNTPD</code> ) 可以直接从处理器寄存器移动数据到系统内存 , 不写入 L1 , L2 , 或 / 和 L3 cache . 防止操作只修改一次的数据污染 cache .</p>
+<h2 id="45-l1-数据-cache-context-模式">4.5. L1 数据 cache context 模式</h2>
+<p>L1 数据 cache context 模式是基于 Intel NetBurst 微架构支持超线程技术的处理器特性 , BIOS 负责配置 . 包括下列两种模式 :</p>
+<ul>
+<li>
+<p>adaptive mode<br>
+同一核心的逻辑处理器共享 L1 数据 cache , 如果 :</p>
+<ul>
+<li>共享 cache 的逻辑处理器的 CR3 一致</li>
+<li>共享 cache 的逻辑处理器使用相同的分页模式</li>
+</ul>
+<p>整个 L1 数据 cache 对于每个逻辑处理器都可用 . 如果逻辑处理器的 CR3 值不同 , 或逻辑处理器使用不同的分页模式 , 处理器竞争 cache 资源 , 降低每个逻辑处理器的有效 cache 大小 . 不允许 cache alias .</p>
+</li>
+<li>
+<p>shared mode<br>
+共享模式 L1 数据 cache 在逻辑处理器间竞争共享 , 即使逻辑处理器使用相同的 CR3 值和分页模式 .</p>
+<p>共享模式下 , L1 数据 cache 中的线性地址可以 alias , 即一个线性地址可能指向不同的物理地址 .</p>
+</li>
+</ul>
+<h1 id="5-自修改代码">5. 自修改代码</h1>
+<p>写入当前缓存到处理器的代码段内存地址会导致相关联的 cache 行被无效 , 这个检查基于指令的物理地址 .<br>
+Pentium 4 和 Xeon 处理器 , 如果代码段的目标指令已经译码 , 并且保存在 trace cache , 写入或者嗅探代码段的指令操作就会无效整个 trace cache .<br>
+这意味着自修改代码的程序可能严重降低性能 .</p>
+<h1 id="6-隐式-cache">6. 隐式 cache</h1>
+<p>一个内存元素有潜在的 cacheable 时 , 发生隐式 cache , 即使元素可能不会在正常的冯诺依曼序列访问 . 较新的处理器由于侵略的预取 , 分支预测和 TLB 缺失处理会进行隐式 cache .</p>
+<h1 id="7-显式-cache">7. 显式 cache</h1>
+<p>显式 cache 主要通过 <code>PREFETCHh</code> 指令 , 控制数据的 cache .</p>
+<h1 id="8-无效-tlb">8. 无效 TLB</h1>
+<p>处理器对 TLB 的更新对软件透明 , 但是软件和硬件可以通过一些机制显式或者通过其他操作的副作用无效 TLB . 下列操作无效所有 TLB , 无论 G 标志的设置 :</p>
+<ul>
+<li>使能或者去使能 FLUSH# 引脚</li>
+<li>写入一个 MTRR</li>
+<li>写入 CR0 , 修改 PG 或 PE 标志</li>
+<li>写入 CR4 , 修改 PSE , PGE 或 PAE 标志</li>
+<li>写入 CR4 , 将 PCIDE 标志由 1 改成 0</li>
+</ul>
+<h1 id="9-保存操作缓冲区">9. 保存操作缓冲区</h1>
+<p>Intel 64 和 IA-32 处理器临时保存每个写入内存的操作到一个保存操作缓冲区 ( store buffer ) , 保存操作缓冲区允许处理器继续执行指令 , 而不需要等待写入内存和 / 或 cache 的操作完成 , 从而提升处理器性能 .<br>
+同时允许写操作被延迟 , 更高效的使用内存访问总线 cycle .</p>
+<p>总体而言 , 保存操作缓冲区对于软件透明 , 即使在多处理器系统 . 处理器保证写操作总是按照程序的顺序执行 , 也保证保存操作缓冲区的内容在下列情形中写入内存 :</p>
+<ul>
+<li>产生异常或中断</li>
+<li>执行序列化指令</li>
+<li>执行 IO 指令</li>
+<li>执行 LOCK 操作</li>
+<li>执行 BINIT 操作</li>
+<li>使用 <code>SFENCE</code> 指令排序保存操作</li>
+<li>使用 <code>MFENCE</code> 指令排序保存操作</li>
+</ul>
+<h1 id="10-mtrr">10. MTRR</h1>
+<p>只有 P6 和更新的处理器有内存类型范围寄存器 .</p>
+<p>MTRR 提供了关联内存类型和系统内存的物理地址范围的机制 , 允许处理器优化不同类型内存的操作 , 比如 RAM , ROM , 帧缓冲区内存 , 内存映射的 IO 设备 ; 同时消除早期 IA-32 处理器上为了实现相同功能的内存控制引脚和驱动这些引脚需要的外部逻辑 , 从而简化系统硬件设计 .</p>
+<p>MTRR 允许在物理内存定义多个范围 , 通过一组 MSR 指明每个范围内包含的内存类型 , 通常情况下 BIOS 负责配置 MTRR .</p>
+<p>多处理器系统 , OS 必须维护处理器间的 MTRR 一致性 , 保证软件看到的内存是一致的 .</p>
+<p>MTRR 特性的支持和处理器型号相关 , 软件通过执行 <code>CPUID</code> 指令判断是否支持 MTRR . 如果支持 , 可以通过读取 IA32_MTRRCAP MSR 获取有关 MTRR 的信息 . 这个寄存器只读 , 通过 <code>RDMSR</code> 读取 , 包括下列标志和域 :</p>
+<ul>
+<li>VCNT 域 , bit 0:7 , 指明处理器实现的可变范围 ( variable range ) 数</li>
+<li>FIX 标志 , bit 8 , 设置表示支持固定范围 ( fixed-range ) MTRR ; 清除表示不支持</li>
+<li>WC 标志 , bit 10 , 设置表示支持写组合 ; 清楚表示不支持</li>
+<li>SMRR 标志 , bit 11 , 设置表示支持 system-management range register 接口 ; 清楚表示不支持</li>
+</ul>
+<p>IA32_MTRRCAP MSR 的其他位都保留 , 软件试图写入时会产生 #GP 异常 .</p>
+<h2 id="101-用-mtrr-设置内存范围">10.1. 用 MTRR 设置内存范围</h2>
+<p>内存范围和每个范围内的内存类型通过三组寄存器设置 : IA32_MTRR_DEFTYPE MSR , 固定范围 MTRR, variable range MTRR . 这些寄存器可以通过 <code>RDMSR</code> 和 <code>WRMSR</code> 读写 . IA32_MTRRCAP MSR 指明处理器是否支持这些寄存器 .</p>
+<h3 id="1011-ia32_mtrr_def_type-msr">10.1.1. IA32_MTRR_DEF_TYPE MSR</h3>
+<p>IA32_MTRR_DEF_TYPE MSR 设置没有包含在 MTRR 中的物理内存区域的默认属性 , 这个寄存器中的标志和域包括 :</p>
+<ul>
+<li>type 域 , bit 0:7 , 表明没有包含在 MTRR 中的物理内存地址的默认内存类型 . Intel 推荐不存在内存的物理地址使用 UC 内存类型 .</li>
+<li>FE 标志 , bit 10 , 设置开启固定范围 MTRR ; 清除关闭固定范围 MTRR . 开启时 , 二者交叉时 , 固定范围 MTRR 优先于可变范围 MTRR 生效 . 关闭固定范围 MTRR 时 , 可变范围 MTRR 仍然能够使用 , 并且映射正常情况下由固定范围 MTRR 覆盖的范围 .</li>
+<li>E 标志 , bit 11 , 设置开启 MTRR ; 清除关闭所有 MTRR , 所有物理内存使用 UC 内存类型 .</li>
+</ul>
+<h3 id="1012-固定范围-mtrr">10.1.2. 固定范围 MTRR</h3>
+<p>固定内存范围通过 11 个 64 bit 固定范围寄存器映射 , 每个寄存器分成 8 bit 域 , 用于指明下列子范围的内存类型 :</p>
+<ul>
+<li>寄存器 IA32_MTRR_FIX64K_00000 , 映射 0H-7FFFFH 范围的 512 KB , 分成 8 个 64 KB 的子范围 .</li>
+<li>寄存器 IA32_MTRR_FIX16K_80000 和 IA32_MTRR_FIX16K_A0000 , 映射 80000H-BFFFFH 范围的两个 128 KB , 每个分成 8 个 16 KB 的子范围 .</li>
+<li>寄存器 IA32_MTRR_FIX4K_C0000 - IA32_MTRR_FIX4K_F8000 , 映射 C0000H-FFFFFH 范围的 8 个 32 KB , 每个寄存器包含 8 个 4 KB 子范围 , 总计 64 个 4 KB .</li>
+</ul>
+<h3 id="1013-可变范围-mtrr">10.1.3. 可变范围 MTRR</h3>
+<p>Pentium 4 , Xeon 和 P6 处理器允许软件指明 m 个可变范围大小的地址范围 , m 通过 IA32_MTRRCAP MSR 的 bit 7:0 确定 , 每个可变大小的地址范围通过一对 MTRR 确定 .</p>
+<p>每一对 MTRR 的第一项 ( IA32_MTRR_PHYSBASEn ) 定义范围的基地址和内存类型 , 第二项 ( IA32_MTRR_PHYMASKn ) 包含了确定地址范围的掩码 .</p>
+<p>一些掩码可能导致不连续的范围 , 这些范围中 , 掩码没有映射的区域设置为默认的内存类型 .</p>
+<h3 id="1014-smrr-接口">10.1.4. SMRR 接口</h3>
+<p>系统管理范围寄存器接口用于限制 SMM 软件对于内存地址范围的访问 , 如果支持 SMMR 接口 , 强烈建议 SMM 软件使用接口保护 SMRAM 区域中由 SMI 处理函数保存的 SMI 代码和数据 .</p>
+<p>SMRR 由一对 MSR 组成 , IA32_SMRR_PHYSBASE MSR 定义 SMRAM 内存范围和在 SMM 访问内存范围的使用的内存类型 ; IA32_SMRR_PHYSMASK MSR 包含一个有效位和一个掩码 , 确定 SMRR 接口保护的 SMRAM 地址范围 . 这些 MSR 只能在 SMM 写 , 否则产生 #GP 异常 .</p>
+<h2 id="102-mtrr-生效顺序">10.2. MTRR 生效顺序</h2>
+<p>如果关闭 MTRR , 所有的内存访问使用 UC 内存类型 ; 如果开启 MTRR , 内存类型确定方式如下 :</p>
+<ol>
+<li>
+<p>如果物理地址在第一个 1MB , 并且开启了固定 MTRR , 处理器使用固定范围 MTRR 提供的内存类型 .</p>
+</li>
+<li>
+<p>否则 , 处理器试图匹配可变范围 MTRR 设置的内存类型 :</p>
+<ul>
+<li>如果一个可变内存范围匹配 , 处理器使用保存在 IA32_MTRR_PHYSBASEn 寄存器中的内存类型 .</li>
+<li>如果两个或多个可变内存范围匹配 , 并且内存类型一致 , 就是用这个内存类型 .</li>
+<li>如果两个或多个可变内存范围匹配 , 其中一个是 UC , 使用 UC 内存类型 .</li>
+<li>如果两个或多个可变内存范围匹配 , 并且内存类型是 WT 和 WB , 使用 WT 内存类型 .</li>
+<li>上述规则没有定义的交叉情况 , 处理器行为未定义 .</li>
+</ul>
+</li>
+<li>
+<p>如果没有固定或可变内存范围匹配 , 处理器使用默认内存类型 .</p>
+</li>
+</ol>
+<h2 id="103-mtrr-初始化">10.3. MTRR 初始化</h2>
+<p>较新的处理器硬件重置后 , 清除可变范围 MTRR 中的有效标志 , 清除 IA32_MTRR_DEF_TYPE MSR 中的 E 标志 , 关闭所有 MTRR , MTRR 中的所有其他位都未定义 .</p>
+<p>初始化 MTRR 前 , 软件 ( 通常是 BIOS ) 必须初始化所有的固定范围和可变范围 MTRR 寄存器为 0 , 然后根据已知的内存类型初始化 MTRR , 初始化过程需要在启动 OS 前完成 .</p>
+<h2 id="104-内存类型的重映射">10.4. 内存类型的重映射</h2>
+<p>一致性的内存类型重映射需要遵守下列规则 :</p>
+<ol>
+<li>一个内存类型不能映射为另一个 weaker 内存次序模型的内存类型 , 比如 UC 类型不能映射为其他任何类型 .</li>
+<li>没有推迟写操作的内存类型不能映射为推迟写操作的内存类型 , 因为使用这种内存类型的应用可能依赖内存的 write-through 行为 .</li>
+<li>将写入数据视为非必要的保存操作 , 并通过后续的读操作读取的内存类型 , 比如 write-protected 类型 , 只能映射为另一个具有相同行为的类型 , 或者是 UC 类型 .</li>
+</ol>
+<h2 id="105-mp-系统-mtrr-要考虑的事">10.5. MP 系统 MTRR 要考虑的事</h2>
+<p>MP 系统 OS 必须维护所有处理器间的 MTRR 一致性 , 处理器没有提供任何的硬件支持 .</p>
+<p>这意味着 OS 初始化一个 MP 系统时 , 必须在 MTRRdefType 的 E 标志为 0 时加载启动处理器的 MTRR , 然后控制其他处理器用相同的内存映射加载各自的 MTRR .<br>
+加载后 , OS 发送信号开启各自的 MTRR , barrier 同步机制可以用于阻止处理器表明 MTRR 开启前的内存访问 .</p>
+<p>任何对于 MP 系统中的 MTRR 修改都需要 OS 重复加载和开启过程维持一致性 , 过程挺复杂 .</p>
+<h2 id="106-大页面需要考虑的事情">10.6. 大页面需要考虑的事情</h2>
+<p>MTRR 以 4KB 的粒度给有限数量的内存区域提供内存类型 , 给定一个页面 , 内存类型缓存在处理器的 TLB 中 .<br>
+使用大页面 ( 2 MB , 4 MB , 1 GB ) 时 , 单个页表项覆盖多个 4 KB 粒度 , 每个都有自己的内存类型 . 由于大页面的内存类型缓存在 TLB , 如果一个大页面映射到 MTRR 指明的不同类型的内存范围 , 处理器可能按照未定义的方式行为 .</p>
+<p>未定义行为可以通过保证大页面内的所有 MTRR 内存类型范围是相同的避免 .<br>
+如果大页面映射到的内存范围包含不同的 MTRR 内存类型 , 页表项中的 PCD 和 PWT 标志应该设置为其中最保守的内存类型 .</p>
+<p>大页面内的所有 4KB 范围必须是相同的内存类型意味着包含不同类型的大页面可能会有性能开销 , 因为必须被标记为最小的共有内存类型 , 1 GB 页面也有同样的问题 .</p>
+<p>处理器针对 0-4MB 的物理内存提供了特殊支持 , 这个地址范围可能同时被固定和可变 MTRR 映射 . 处理器检测到一个大页面占用内存范围的第一 MB 时 , 并且内存类型和固定 MTRR 冲突 , 就会使用这个支持 .<br>
+处理器映射内存范围到 TLB 内的多个 4 KB 页 , 以性能为代价保证正确的行为 . 为了避免这个性能开销 , OS 应该保留内存地址大于或等于 4MB 的区域的大页面选项 .</p>
+<h1 id="11-pat">11. PAT</h1>
+<p>页面属性表扩展了 IA-32 架构的页表格式 , 基于线性地址映射分配内存类型给物理内存区域 , PAT 是 MTRR 的配套功能 , 意思是 , MTRR 允许映射内存类型到不同的物理地址空间 , PAT 允许映射内存类型到线性地址空间的页面 .<br>
+MTRR 用于静态描述物理地址范围的内存类型 , 通常由 BIOS 建立 ; PAT 扩展了 PCD 和 PWT 的功能 , 可以动态分配给线性地址空间的内存页 .</p>
+<p><code>CPUID</code> 指令可以判断处理器是否支持 PAT , 支持就可以通过 IA32_PAT MSR 编程 PAT . 分配内存类型给 PAT 中的项时 , 软件可以使用页表项和页目录项中的 PAT-index bit ( PAT ) , 以及 PCD 和 PWT 位 , 分配 PAT 中的内存类型给单独的页面 .</p>
+<p>控制寄存器中没有单独的标志或控制位可以开启 PAT , 支持 PAT 的处理器总是开启 PAT ; 所有的分页模式只要一开启分页 , 表查找操作就会发生 .</p>
+<h2 id="111-ia32_pat-msr">11.1. IA32_PAT MSR</h2>
+<p>IA32_PAT MSR 位于 MSR 地址 277H , 包含 8 个页面属性域 : PA0-PA7 , 每个域的低三位用于指明一个内存类型 , 高五位保留 , 设置为 0 . 8 个页面属性域可以包含任何内存类型的编码 .</p>
+<h2 id="112-从-pat-中选择一个内存类型">11.2. 从 PAT 中选择一个内存类型</h2>
+<p>内存页的页表项或页目录项中的 PAT , PCD 和 PWT 位组成一个 3 bit 索引 , 从 PAT 中选择一个内存类型 .</p>
+<p>早期的处理器可能不支持 PAT , 页表项和页目录项中的 PAT 设置为 0 , 只能选择 PCD 和 PWT 组成 4 中内存类型中的一个 .</p>
+<h2 id="113-编程-pat">11.3. 编程 PAT</h2>
+<p>处理器上电或者重置后 , 每个 PAT 项都有自己的默认值 , 可以通过 <code>RDMSR</code> 和 <code>WRMSR</code> 读写 , CPL = 0 .</p>
+<p>操作系统负责保证对于 PAT 项的更改必须维持处理器 cache 和 TLB 的一致性 , 流程和改变 MP 系统的 MTRR 值的流程相同 .</p>
+<p>PAT 可能映射一个物理页到两个或多个不同的线性地址 , 每个都有不同的内存类型 . Intel 不知这个操作 , 因为可能导致未定义的行为 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-10
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/cache/">cache</a>
+          <a href="/tags/tlb/">TLB</a>
+          <a href="/tags/store-buffer/">store buffer</a>
+          <a href="/tags/mtrr/">MTRR</a>
+          <a href="/tags/pat/">PAT</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap2-system_architecture_overview/">
+            <span class="next-text nav-default">3A_chap2-system_architecture_overview</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

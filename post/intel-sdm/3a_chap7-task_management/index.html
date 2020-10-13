@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap7-task_management - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 简介 一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap7-task_management/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap7-task_management" />
+<meta property="og:description" content="1. 简介 一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap7-task_management/" />
+<meta property="article:published_time" content="2020-09-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap7-task_management">
+<meta itemprop="description" content="1. 简介 一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供">
+<meta itemprop="datePublished" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2218">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,TSS," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap7-task_management"/>
+<meta name="twitter:description" content="1. 简介 一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap7-task_management</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-23 </span>
+        
+          <span class="more-meta"> 2218 words </span>
+          <span class="more-meta"> 5 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-任务管理数据结构">2. 任务管理数据结构</a>
+      <ul>
+        <li><a href="#21-task-state-segment--tss-">2.1. Task State Segment ( TSS )</a></li>
+        <li><a href="#22-tss-描述符">2.2. TSS 描述符</a></li>
+        <li><a href="#23-任务寄存器">2.3. 任务寄存器</a></li>
+        <li><a href="#24-任务门描述符">2.4. 任务门描述符</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-任务切换">3. 任务切换</a></li>
+    <li><a href="#4-任务链接">4. 任务链接</a></li>
+    <li><a href="#5-任务地址空间">5. 任务地址空间</a></li>
+    <li><a href="#6-64-位模式任务管理">6. 64 位模式任务管理</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-简介">1. 简介</h1>
+<p>一个任务由两部分组成 : 任务的执行空间和 TSS , 前者包括代码段 , 栈段 , 一个或多个数据段 ; 后者指明构成任务的执行空间的段 , 为任务的状态信息提供存储空间 .</p>
+<p>当前执行的任务状态包括以下组成部分 :</p>
+<ul>
+<li>任务的当前执行空间 , 由段寄存器 ( CS , DS , SS , ES , FS , GS ) 的段选择器定义 .</li>
+<li>通用寄存器的状态 .</li>
+<li>EFLAGS 的状态 .</li>
+<li>EIP 寄存器的状态 .</li>
+<li>CR3 寄存器的状态 .</li>
+<li>任务寄存器的状态 .</li>
+<li>LDTR 寄存器的状态 .</li>
+<li>IO 映射的基地址和 IO 映射 .</li>
+<li>特权级 0 , 1 , 2 的栈指针 .</li>
+<li>指向前一个执行程序的链接 .</li>
+<li>影子栈指针的状态 .</li>
+</ul>
+<h1 id="2-任务管理数据结构">2. 任务管理数据结构</h1>
+<h2 id="21-task-state-segment--tss-">2.1. Task State Segment ( TSS )</h2>
+<p>TSS 用于保存恢复一个任务所需要的处理器状态信息 , 分成两类 : 动态域和静态域 .</p>
+<p>当一个任务在切换时被挂起 , 处理器更新动态域 , 包括 :</p>
+<ul>
+<li>通用寄存器域</li>
+<li>段选择器域</li>
+<li>EFLAGS 寄存器域</li>
+<li>EIP 域</li>
+<li>先前任务链接域</li>
+</ul>
+<p>处理器读取静态域 , 通常不会修改 , 这些域在任务创建时设置 , 包括 :</p>
+<ul>
+<li>LDT 段选择器域</li>
+<li>CR3 控制寄存器域</li>
+<li>特权级 0 , 1 和 2 的栈指针域</li>
+<li>T 标志 ( 调试陷入 )</li>
+<li>IO 映射基地址域</li>
+<li>影子栈指针</li>
+</ul>
+<p>开启分页时 , 如果 TSS 的前 104 字节 ( 大小为 108 字节 ) 跨越了一个页的边界 , 处理器可能不会正确执行地址转化 . 进程切换时 , 处理器读取和写入每个 TSS 的 104 字节 ; 因此 , 开始访问 TSS 后 , 如果 104 字节的一部分物理不连续 , 处理器不会产生缺页异常 , 访问错误的信息 .</p>
+<h2 id="22-tss-描述符">2.2. TSS 描述符</h2>
+<p>和其他段一样 , TSS 通过一个段描述符定义 . TSS 的描述符只能保存到 GDT , 不能保存到 LDT 或 IDT.</p>
+<p>使用一个设置了 TI 标志的段选择器访问一个 TSS 会在 <code>CALL</code> 和 <code>JMP</code> 期间产生 #GP 异常 , 在 <code>IRET</code> 时产生 #TS 异常 .</p>
+<p>TSS 描述符的类型域中的 B 标志指明任务是否繁忙 , 繁忙的任务目前正在运行或者挂起 .</p>
+<hr>
+<p>64 位模式不支持任务切换 , 但是 TSS 描述符依然存在 .</p>
+<h2 id="23-任务寄存器">2.3. 任务寄存器</h2>
+<p>TR 保存当前任务 TSS 的段选择器和整个段描述符 , 这个信息拷贝自 GDT 中当前任务的 TSS 描述符 .</p>
+<p>TR 包含可见部分和不可见部分 , 前者可以由软件读取和修改 , 后者由处理器维护 , 软件不可访问 . 可见部分的段选择器指向 GDT 中的一个 TSS 描述符 , 处理器使用不可见部分缓存 TSS 的段描述符 , 提高任务的执行效率 .</p>
+<p><code>LTR</code> 指令先加载指向 GDT 中 TSS 描述符的段选择器到 TR , 然后加载 TSS 描述符中的信息到不可见部分 .</p>
+<h2 id="24-任务门描述符">2.4. 任务门描述符</h2>
+<p>任务门描述符提供了对于任务的间接受保护的引用 , 可以放到 GDT , LDT 或者 IDT . 任务门描述符的 TSS 段选择器域指向 GDT 中的一个 TSS 描述符 . 段选择器中的 RPL 没有使用 .</p>
+<p>一个任务门描述符或者 TSS 描述符都可以用来访问一个任务 , 两个结构满足了下列需求 :</p>
+<ul>
+<li>一个任务只能有一个繁忙标志<br>
+由于任务的繁忙标志保存在 TSS 描述符 , 每个任务只能有一个 TSS 描述符 . 但是可能有多个任务门引用同一个 TSS 描述符 .</li>
+<li>针对任务提供可选择的访问<br>
+任务门可以保存在 LDT , 具有不同于 TSS 描述符的 DPL , 没有足够权限访问 TSS 描述符的程序可以通过具有更大 DPL 的任务门访问任务 .</li>
+<li>用独立的任务处理中断或者异常<br>
+任务门可以位于 IDT , 通过处理函数任务响应中断或者异常 . 当一个中断或者异常向量指向一个任务门 , 处理器切换到指明的任务 .</li>
+</ul>
+<h1 id="3-任务切换">3. 任务切换</h1>
+<p>任务切换有 4 种情况 :</p>
+<ul>
+<li>当前的任务执行 <code>JMP</code> 或 <code>CALL</code> 指令 , 调用 GDT 中的 TSS 描述符 .</li>
+<li>当前的任务执行 <code>JMP</code> 或 <code>CALL</code> 指令 , 调用 GDT 或者 LDT 中的任务门描述符 .</li>
+<li>中断或者异常向量指向 IDT 中的任务门描述符 .</li>
+<li>EFLAGS 寄存器的 NT 标志设置时 , 当前任务执行 <code>IRET</code> .</li>
+</ul>
+<p>处理器切换任务时执行一大堆操作 , 详见 sdm . 还会检查一大堆的异常条件 , 这些条件依次进行判断 .</p>
+<h1 id="4-任务链接">4. 任务链接</h1>
+<p>TSS 的上一个任务链接域和 EFLAGS 寄存器的 NT 标志用于返回到上一个任务 . EFLAGS.NT = 1 表明当前执行的任务嵌入到另外一个任务的执行中 .</p>
+<p>执行 <code>CALL</code> 指令时 , 或者中断和异常导致的任务切换时 , 处理器拷贝当前 TSS 的段选择器到新任务的 TSS 的上一个任务链接域 , 然后设置 EFLAGS.NT = 1 .<br>
+软件使用 <code>IRET</code> 挂起新任务时 , 处理器检查 EFLAGS.NT = 1 , 然后使用上一个任务链接域返回到前一个任务 .</p>
+<p><code>JMP</code> 指令造成的任务切换不会设置 NT 标志 , 也不会使用上一个任务链接域 .</p>
+<p>一个 TSS 只允许保存一个任务的一个上下文信息 ; 因此 , 对于一个任务的递归调用会导致任务的当前状态丢失 , TSS 段描述符的繁忙标志用于阻止重入的任务切换导致的任务状态信息的丢失 . 处理器按照下列方式管理繁忙标志 :</p>
+<ul>
+<li>分派一个任务时 , 处理器设置新任务的繁忙标志 .</li>
+<li>如果任务切换时当前的任务被放到一个嵌套链中 , 当前任务的繁忙标志保持设置 .</li>
+<li>如果切换到新的任务时处理器检测到新任务的繁忙标志已经设置 , 产生 #GP 异常 . 如果任务切换由 <code>IRET</code> 指令触发 , 不会产生异常 .</li>
+<li>一个任务由于跳转到新的任务 , 或者由任务代码中的 <code>IRET</code> 指令终止时 , 处理器清除繁忙标志 .</li>
+</ul>
+<h1 id="5-任务地址空间">5. 任务地址空间</h1>
+<p>任务的地址空间由任务可以访问的段组成 , 包括 TSS 中引用的代码 , 数据 , 栈 , 系统段和任务代码访问的任何其他段 .</p>
+<p>TSS 中的 LDT 域可以用于给每一个任务分配自己的 LDT , 通过将和任务相关的所有段的描述符放到任务的 LDT 中 , 隔离任务的地址空间 .</p>
+<p>多个任务可以使用相同的 LDT , 高效的通信或者相互控制 .</p>
+<p>任务之间可以通过下列方式为数据段创建共享的逻辑到物理地址空间的映射 :</p>
+<ul>
+<li>GDT 内的段描述符</li>
+<li>共享的 LDT</li>
+<li>映射到线性地址空间的相同地址的不同 LDT 中的段描述符</li>
+</ul>
+<h1 id="6-64-位模式任务管理">6. 64 位模式任务管理</h1>
+<p>64 位模式不支持保护模式的任务切换机制 , 任务管理和切换必须由软件执行 , 处理器在下列情形中产生 #GP :</p>
+<ul>
+<li>使用 <code>JMP</code> , <code>CALL</code> , <code>INT n</code> , <code>INT3</code> , <code>INTO</code> , <code>INT1</code> 或中断跳转到一个 TSS 或者任务门 .</li>
+<li>EFLAGS.NT = 1 时执行 <code>IRET</code> 指令 .</li>
+</ul>
+<p>虽然不支持任务切换 , 64 位的 TSS 必须存在 , 保存一些和任务切换机制无关的重要信息 , 包括 :</p>
+<ul>
+<li>RSPn<br>
+特权级 0-2 的栈指针的 64 位 canonical 形式 .</li>
+<li>ISTn<br>
+中断栈表指针的 64 位 canonical 形式 .</li>
+<li>IO 映射基地址<br>
+相对于 64 位 TSS 基地址的 IO 权限比特映射的偏移 .</li>
+</ul>
+<p>激活 IA-32e 模式后 , 操作系统必须创建至少一个 64 位 TSS , 通过 <code>LTR</code> 指令给 64 位程序和兼容模式程序加载一个指向 64 位 TSS 的指针到 TR 寄存器 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-23
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/tss/">TSS</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap6-interrupt_and_exception_handling</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap5-protection/">
+            <span class="next-text nav-default">3A_chap5-protection</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

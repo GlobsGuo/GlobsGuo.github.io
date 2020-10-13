@@ -6,7 +6,403 @@
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 21 Nov 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EFLAGS</title>
+      <link>https://globsguo.github.io/tags/eflags/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/eflags/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Intel-SDM</title>
+      <link>https://globsguo.github.io/tags/intel-sdm/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/intel-sdm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>operand-addressing</title>
+      <link>https://globsguo.github.io/tags/operand-addressing/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/operand-addressing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>PCID</title>
+      <link>https://globsguo.github.io/tags/pcid/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/pcid/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TLB</title>
+      <link>https://globsguo.github.io/tags/tlb/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/tlb/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AVX</title>
+      <link>https://globsguo.github.io/tags/avx/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/avx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MMX</title>
+      <link>https://globsguo.github.io/tags/mmx/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mmx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MMX state</title>
+      <link>https://globsguo.github.io/tags/mmx-state/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mmx-state/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>SSE</title>
+      <link>https://globsguo.github.io/tags/sse/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/sse/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>XSAVE</title>
+      <link>https://globsguo.github.io/tags/xsave/</link>
+      <pubDate>Mon, 12 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/xsave/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>cache</title>
+      <link>https://globsguo.github.io/tags/cache/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/cache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CR</title>
+      <link>https://globsguo.github.io/tags/cr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/cr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>GDTR</title>
+      <link>https://globsguo.github.io/tags/gdtr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/gdtr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>IA32_EFER</title>
+      <link>https://globsguo.github.io/tags/ia32_efer/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/ia32_efer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>IDTR</title>
+      <link>https://globsguo.github.io/tags/idtr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/idtr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>LDTR</title>
+      <link>https://globsguo.github.io/tags/ldtr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/ldtr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MTRR</title>
+      <link>https://globsguo.github.io/tags/mtrr/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mtrr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>PAT</title>
+      <link>https://globsguo.github.io/tags/pat/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/pat/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>segmentation</title>
+      <link>https://globsguo.github.io/tags/segmentation/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/segmentation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>store buffer</title>
+      <link>https://globsguo.github.io/tags/store-buffer/</link>
+      <pubDate>Sat, 10 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/store-buffer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>IO-APIC</title>
+      <link>https://globsguo.github.io/tags/io-apic/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/io-apic/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>IPI</title>
+      <link>https://globsguo.github.io/tags/ipi/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/ipi/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>local-APIC</title>
+      <link>https://globsguo.github.io/tags/local-apic/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/local-apic/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>LVT</title>
+      <link>https://globsguo.github.io/tags/lvt/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/lvt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>x2APIC</title>
+      <link>https://globsguo.github.io/tags/x2apic/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/x2apic/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>0xFFFFFFF0H</title>
+      <link>https://globsguo.github.io/tags/0xfffffff0h/</link>
+      <pubDate>Mon, 28 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/0xfffffff0h/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>microcode-update</title>
+      <link>https://globsguo.github.io/tags/microcode-update/</link>
+      <pubDate>Mon, 28 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/microcode-update/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AP</title>
+      <link>https://globsguo.github.io/tags/ap/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/ap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>BSP</title>
+      <link>https://globsguo.github.io/tags/bsp/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/bsp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>LOCK</title>
+      <link>https://globsguo.github.io/tags/lock/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/lock/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>memory-ordering</title>
+      <link>https://globsguo.github.io/tags/memory-ordering/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/memory-ordering/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>abort</title>
+      <link>https://globsguo.github.io/tags/abort/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/abort/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>fault</title>
+      <link>https://globsguo.github.io/tags/fault/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/fault/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>interrupt-source</title>
+      <link>https://globsguo.github.io/tags/interrupt-source/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/interrupt-source/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>trap</title>
+      <link>https://globsguo.github.io/tags/trap/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/trap/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>TSS</title>
+      <link>https://globsguo.github.io/tags/tss/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/tss/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CPL</title>
+      <link>https://globsguo.github.io/tags/cpl/</link>
+      <pubDate>Mon, 21 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/cpl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>DPL</title>
+      <link>https://globsguo.github.io/tags/dpl/</link>
+      <pubDate>Mon, 21 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/dpl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RPL</title>
+      <link>https://globsguo.github.io/tags/rpl/</link>
+      <pubDate>Mon, 21 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/rpl/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>exception</title>
+      <link>https://globsguo.github.io/tags/exception/</link>
+      <pubDate>Wed, 16 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/exception/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>interrupt</title>
+      <link>https://globsguo.github.io/tags/interrupt/</link>
+      <pubDate>Wed, 16 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/interrupt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>procedure-call</title>
+      <link>https://globsguo.github.io/tags/procedure-call/</link>
+      <pubDate>Wed, 16 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/procedure-call/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>displacement</title>
+      <link>https://globsguo.github.io/tags/displacement/</link>
+      <pubDate>Mon, 14 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/displacement/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>REX</title>
+      <link>https://globsguo.github.io/tags/rex/</link>
+      <pubDate>Mon, 14 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/rex/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>buddy-allocator</title>
       <link>https://globsguo.github.io/tags/buddy-allocator/</link>

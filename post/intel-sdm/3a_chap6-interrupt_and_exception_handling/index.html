@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap6-interrupt_and_exception_handling - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap6-interrupt_and_exception_handling" />
+<meta property="og:description" content="中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/" />
+<meta property="article:published_time" content="2020-09-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap6-interrupt_and_exception_handling">
+<meta itemprop="description" content="中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错">
+<meta itemprop="datePublished" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-23T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2616">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,interrupt-source,fault,trap,abort," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap6-interrupt_and_exception_handling"/>
+<meta name="twitter:description" content="中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap6-interrupt_and_exception_handling</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-23 </span>
+        
+          <span class="more-meta"> 2616 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-中断源">1. 中断源</a></li>
+    <li><a href="#2-异常">2. 异常</a>
+      <ul>
+        <li><a href="#21-异常源">2.1. 异常源</a></li>
+        <li><a href="#22-异常分类">2.2. 异常分类</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-程序重启">3. 程序重启</a></li>
+    <li><a href="#4-不可屏蔽中断">4. 不可屏蔽中断</a></li>
+    <li><a href="#5-开启和关闭中断">5. 开启和关闭中断</a></li>
+    <li><a href="#6-idt">6. IDT</a></li>
+    <li><a href="#7-错误代码">7. 错误代码</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 <code>INT n</code> 指令产生中断 .</p>
+<p>执行指令时处理器检测到错误会产生异常 , 比如除 0 .</p>
+<h1 id="1-中断源">1. 中断源</h1>
+<p>中断源分成两类 :</p>
+<ul>
+<li>外部 ( 硬件产生的 ) 中断</li>
+<li>软件产生的中断</li>
+</ul>
+<p>外部中断通过处理器的引脚或者 local APIC 接收 , 处理器的基本中断引脚是 LINT[1:0] , 连接到 local APIC . 开启 local APIC 时 , 可以通过 APIC 的本地向量表 ( LVT ) 编程 LINT[1:0] , 关联到处理器的任何异常或中断向量 .</p>
+<p>global / hardware 关闭 local APIC , 这些引脚相应配置为 INTR 和 NMI 引脚 . 使能 INTR 引脚向处理器发出发生外部中断的信号 . 处理器从系统总线读取外部中断控制器 ( 比如 8259A ) 提供的中断向量号 . 使能 NMI 引脚发出 NMI 的信号 .</p>
+<p>通常处理器的本地 APIC 连接到一个 system-based IO APIC , IO APIC 引脚接收到外部中断可以通过系统总线或者 APIC 串行总线传递给本地 APIC . IO APIC 确定中断的向量号并发送给本地 APIC . 多处理器系统 , 处理器可以通过系统总线或者 APIC 串行总线发送中断给另一个处理器 .</p>
+<p>通过 INTR 引脚或者本地 APIC 发送给处理器的任何外部中断都被称作一个可屏蔽硬件中断 . 可以通过 INTR 引脚传递的可屏蔽硬件中断包括所有的 IA-32 架构定义的 0-255 中断向量 ; 可以通过本地 APIC 传递的包括中断向量 16-255 .</p>
+<p>软件通过 <code>INT n</code> 指令产生的中断无法通过 EFLAGS 寄存器的 IF 标志屏蔽 .</p>
+<h1 id="2-异常">2. 异常</h1>
+<h2 id="21-异常源">2.1. 异常源</h2>
+<p>异常源有三种 :</p>
+<ul>
+<li>处理器探测到的程序错误异常</li>
+<li>软件产生的异常</li>
+<li>机器检查异常</li>
+</ul>
+<p>处理器在执行程序期间检测到程序错误时产生一个或多个异常 , Intel 64 和 IA-32 架构给每个处理器可探测的异常定义了向量号 .</p>
+<p>软件通过 <code>INTO</code> , <code>INT1</code> , <code>INT3</code> 和 <code>BOUND</code> 指令产生异常 .</p>
+<p>P6 和 Pentium 处理器提供了内部和外部机器检查机制 , 检查内部芯片硬件和总线 transaction 的操作 .</p>
+<h2 id="22-异常分类">2.2. 异常分类</h2>
+<p>根据异常被报告的方式和造成异常的指令能否在不丢失程序连续性的前提下重新执行 , 分成 fault , trap 和 abort .</p>
+<ul>
+<li>
+<p>fault<br>
+fault 可以被修正 , 并且修正后程序可以重新执行 , 不会丢失连续性 . 报告 fault 时 , 处理器恢复机器状态到执行 fault 指令前的状态 , fault 处理函数的返回地址指向发生 fault 的指令 , 而不是 fault 后的指令 .</p>
+</li>
+<li>
+<p>trap<br>
+发生 trap 的指令执行后立即报告 trap , 可以在不丢失程序连续性的前提下继续执行程序 , trap 处理函数的返回地址指向发生 trap 后要执行的指令 .</p>
+</li>
+<li>
+<p>abort<br>
+abort 通常不会报告造成异常的准确位置 , 无法重新执行发生 abort 的指令 . abort 用于报告严重的错误 , 比如硬件错误和系统表中的不一致值和非法值 .</p>
+</li>
+</ul>
+<h1 id="3-程序重启">3. 程序重启</h1>
+<p>为了保证程序在处理异常或中断后可以重新执行 , 所有的异常 ( 除了 abort ) 都可以在一条指令的边界报告异常 , 所有的中断可以在一条指令的边界进行处理 .</p>
+<p>如果在跳转指令发生了陷入 , 返回指令指针会反映出跳转 &mdash;- 例如 , 如果执行 <code>JMP</code> 指令时发生陷入 , 返回指令指针指向 <code>JMP</code> 指令的目标地址 , 而不是 <code>JMP</code> 指令后的下一个地址 .</p>
+<p>中断严格支持被中断程序在保证连续性的前提下重启程序 . 如果执行的指令有一个重复前缀 , 中断在当前循环结束时处理 , 将寄存器设置为执行下一次循环 .</p>
+<p>指令的投机执行不会影响处理器处理中断 .</p>
+<h1 id="4-不可屏蔽中断">4. 不可屏蔽中断</h1>
+<p>NMI 有两种产生方式 :</p>
+<ul>
+<li>外部硬件使能 NMI 引脚</li>
+<li>处理器在系统总线或者 APIC 串行总线收到一个包含 delivery mode NMI 的消息</li>
+</ul>
+<p>处理器收到 NMI 时 , 立即调用中断向量 2 执行的 NMI 处理函数 , 还会保证其他中断 ( 包括 NMI ) 不会在中断处理函数执行期间产生 .</p>
+<p>执行 NMI 中断处理函数时 , 处理器阻止后续 NMI 的传递 , 直到执行 <code>IRET</code> 指令 , 防止 NMI 处理函数的嵌套执行 .</p>
+<p><code>IRET</code> 指令的执行开启 NMI , 即使指令本身产生了 fault .</p>
+<h1 id="5-开启和关闭中断">5. 开启和关闭中断</h1>
+<p>处理器根据处理器的状态和 ELFAGS 寄存器的 IF 和 RF 标志阻止某些中断的产生 .</p>
+<p>IF 标志可以关闭处理器通过 INTR 引脚或本地 APIC 收到的可屏蔽硬件中断 , 但是不会影响发送到 NMI 引脚或者通过本地 APIC 发送的 NMI 消息传输的 NMI 中断 , 也不会影响处理器产生的异常 .</p>
+<p>IF 标志可以通过 <code>STI</code> 和 <code>CLI</code> 设置和清除 , 只有 CPL 小于等于 IOPL 时可以执行 .</p>
+<p>RF 标志阻止调试异常的产生 .</p>
+<hr>
+<p>切换栈时 , 软件通常使用一对指令 , 比如 :</p>
+<p><code>MOV SS,AX</code><br>
+<code>MOV ESP,StackTop</code></p>
+<p>如果在 SS 段描述符加载后 , ESP 寄存器加载前发生了中断或异常 , 栈空间内线性地址的两部分在中断或异常处理函数期间就不一致 .</p>
+<p>为了解决这个问题 , 处理器在执行 <code>MOV to SS</code> 和 <code>POP to SS</code> 指令后 , 阻止一些事件的发生 .</p>
+<p>Intel 推荐软件使用 <code>LSS</code> 指令一起加载 SS 和 ESP , 上述问题不适用于 <code>LSS</code> , <code>LSS</code> 指令不阻止上面列出的事件 .</p>
+<h1 id="6-idt">6. IDT</h1>
+<p>IDT 将每个异常或中断向量和处理相关的异常或中断的处理函数的门描述符关联起来 , 总共只有 256 个中断向量 , 因此 IDT 最多只需要包含 256 了描述符 .</p>
+<p>IDT 可以保存到线性地址空间的任何位置 , 处理器通过 IDTR 定位 IDT .</p>
+<p>IDT 包含三种门描述符之一 :</p>
+<ul>
+<li>任务门描述符</li>
+<li>中断门描述符</li>
+<li>陷入门描述符</li>
+</ul>
+<p>任务门描述符和 GDT 或者 LDT 中的任务门相同 , 包含中断处理函数的 TSS 的段选择器 , 因此其调用方式和 <code>CALL</code> 指令调用程序的方式一致 .</p>
+<p>中断门和陷入门类似调用门 , 包含跳转到一个处理函数使用的远指针 , 调用方式和 <code>CALL</code> 调用调用门的方式类似 .</p>
+<p>如果中断处理函数运行在更高的特权级 , 处理器执行时需要切换栈 ; 如果运行在相同的特权级 , 处理器保存 EFLAGS , CS , EIP 的当前状态到当前栈 .</p>
+<p>必须使用 <code>IRET</code> 指令从处理函数返回 , 除了恢复保存的标志到 EFLAGS 寄存器外 , <code>IRET</code> 指令和 <code>RET</code> 类似 . 如果发生了栈切换 , <code>IRET</code> 指令还会在返回时切换回被中断程序的栈 .</p>
+<p>通过 IDT 中的任务门访问处理函数时 , 需要切换任务 . 在单独的任务中处理异常或者中断有以下优势 :</p>
+<ul>
+<li>被中断程序的整个上下文都自动保存 .</li>
+<li>新的 TSS 允许处理函数在处理中断或异常时使用新的特权级 0 , 如果当前的特权级为 0 的栈被损坏时发生了异常或中断 , 通过提供处理函数一个新的特权级为 0 的栈可以防止任务门访问处理函数时系统崩溃 .</li>
+<li>通过分配一个单独的地址空间 , 可以将处理函数进一步和其他的任务隔离 , 通过分配一个单独的 LDT 实现 .</li>
+</ul>
+<p>通过单独的任务处理中断的劣势是任务切换时必须保存的机器状态很多 , 导致其比使用一个中断门更慢 , 造成更多的中断延迟 .</p>
+<h1 id="7-错误代码">7. 错误代码</h1>
+<p>一个异常条件关联到一个特定的段选择器或 IDT 向量时 , 处理器在处理函数的栈上压入一个错误代码 , 后者包含段选择器的索引 , 以及下面的三个标志 :</p>
+<ul>
+<li>
+<p>EXT<br>
+外部事件 , 设置时表明异常在传递程序外部的事件时 , 比如中断或者更早的异常 . 如果异常在传递软件中断时发生 , 清除这个标志 .</p>
+</li>
+<li>
+<p>IDT<br>
+描述符的位置 , 设置时表明错误代码的索引域指向一个 IDT 中的门描述符 ; 清除表明指向 GTD 或者 LDT 中的一个描述符 .</p>
+</li>
+<li>
+<p>TI<br>
+GDT / LDT , 只有 IDT 标志清除时使用 , 设置是 LDT , 清除是 GDT .</p>
+</li>
+</ul>
+<p>如果错误代码除了 EXT 外都被清除 , 可能是空的错误代码 , 表明错误不是由引用特定的段引起 , 或者在操作中引用了空的段选择器 .</p>
+<p>和 32 位模式相比 , 64 位模式 :</p>
+<ul>
+<li>自动压栈 SS:RSP , 而不是只有 CPL 改变时</li>
+<li><code>IRET</code> 自动出栈 SS:RSP , 而不是只有 CPL 改变时</li>
+<li>实现了传统的栈切换机制的修改版和栈切换机制的替代品 , 成为中断栈表 ( IST )</li>
+<li>栈切换和传统模式类似 , 只是不从 TSS 加载新的 SS 选择器 , 新的 SS 强制为 NULL</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-23
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/interrupt-source/">interrupt-source</a>
+          <a href="/tags/fault/">fault</a>
+          <a href="/tags/trap/">trap</a>
+          <a href="/tags/abort/">abort</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap8-multi-processor_management/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap8-multi-processor_management</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap7-task_management/">
+            <span class="next-text nav-default">3A_chap7-task_management</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

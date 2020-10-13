@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>abort on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/abort/</link>
+    <description>Recent content in abort on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/abort/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3A_chap6-interrupt_and_exception_handling</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/</link>
+      <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/</guid>
+      <description>中断在程序执行期间随机发生 , 作为对硬件信号的回应 . 系统硬件使用中断处理处理器外的事件 , 软件可以通过 INT n 指令产生中断 . 执行指令时处理器检测到错</description>
+    </item>
+    
+  </channel>
+</rss>

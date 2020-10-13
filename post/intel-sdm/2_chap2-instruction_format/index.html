@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>2_chap2-instruction_format - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="IA-32 汇编语言的格式为 : label: mnemonic argument1 , argument2 , argument3 . 其中 : label 是后面跟有冒号的标识符 . mnemonic 是具有相同功能的一类指令操作码的保留名称 . 操作数 argument 1 2 3 是可选的 , 操作" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/2_chap2-instruction_format/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="2_chap2-instruction_format" />
+<meta property="og:description" content="IA-32 汇编语言的格式为 : label: mnemonic argument1 , argument2 , argument3 . 其中 : label 是后面跟有冒号的标识符 . mnemonic 是具有相同功能的一类指令操作码的保留名称 . 操作数 argument 1 2 3 是可选的 , 操作" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/2_chap2-instruction_format/" />
+<meta property="article:published_time" content="2020-09-14T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-09-14T00:00:00+00:00" />
+<meta itemprop="name" content="2_chap2-instruction_format">
+<meta itemprop="description" content="IA-32 汇编语言的格式为 : label: mnemonic argument1 , argument2 , argument3 . 其中 : label 是后面跟有冒号的标识符 . mnemonic 是具有相同功能的一类指令操作码的保留名称 . 操作数 argument 1 2 3 是可选的 , 操作">
+<meta itemprop="datePublished" content="2020-09-14T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-09-14T00:00:00+00:00" />
+<meta itemprop="wordCount" content="2976">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,REX,displacement," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="2_chap2-instruction_format"/>
+<meta name="twitter:description" content="IA-32 汇编语言的格式为 : label: mnemonic argument1 , argument2 , argument3 . 其中 : label 是后面跟有冒号的标识符 . mnemonic 是具有相同功能的一类指令操作码的保留名称 . 操作数 argument 1 2 3 是可选的 , 操作"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">2_chap2-instruction_format</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-09-14 </span>
+        
+          <span class="more-meta"> 2976 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-instruction-format-for-protected-modes--real-address-modes--and-virtual-8086-mode">1. Instruction Format for Protected Modes , Real-Address Modes , and Virtual-8086 Mode</a>
+      <ul>
+        <li><a href="#11-instruction-prefixes">1.1. Instruction Prefixes</a></li>
+        <li><a href="#12-opcodes">1.2. Opcodes</a></li>
+        <li><a href="#13-modr--m-and-sib-bytes">1.3. ModR / M and SIB Bytes</a></li>
+        <li><a href="#14-displacement-and-immediate-bytes">1.4. Displacement and Immediate Bytes</a></li>
+        <li><a href="#15-addressing-mode-encoding-of-modr--m-and-sib-bytes">1.5. Addressing-Mode Encoding of ModR / M and SIB Bytes</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-ia-32e-mode">2. IA-32e Mode</a>
+      <ul>
+        <li><a href="#21-rex-prefixes">2.1. REX Prefixes</a>
+          <ul>
+            <li><a href="#211-encoding">2.1.1. Encoding</a></li>
+            <li><a href="#212-more-on-rex-prefix-fields">2.1.2. More on REX Prefix Fields</a></li>
+            <li><a href="#213-displacement">2.1.3. Displacement</a></li>
+            <li><a href="#214-direct-memory-offset-movs">2.1.4. Direct Memory-Offset MOVs</a></li>
+            <li><a href="#215-immediates">2.1.5. Immediates</a></li>
+            <li><a href="#216-rip-relative-addressing">2.1.6. RIP-Relative Addressing</a></li>
+            <li><a href="#217-default-64-bit-operand-size">2.1.7. Default 64-Bit Operand Size</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>IA-32 汇编语言的格式为 : <code>label: mnemonic argument1 , argument2 , argument3</code> .</p>
+<p>其中 :</p>
+<ul>
+<li>label 是后面跟有冒号的标识符 .</li>
+<li>mnemonic 是具有相同功能的一类指令操作码的保留名称 .</li>
+<li>操作数 argument 1 2 3 是可选的 , 操作数可能有 0-3 个 , 取决于操作码 . 数学运算或者逻辑运算中有两个操作数时 , 右边的操作数是源 , 左边的是目的 .</li>
+</ul>
+<h1 id="1-instruction-format-for-protected-modes--real-address-modes--and-virtual-8086-mode">1. Instruction Format for Protected Modes , Real-Address Modes , and Virtual-8086 Mode</h1>
+<p>Intel 64 和 IA-32 架构的指令编码是下图中格式的子集 , 指令包括可选的指令前缀 , 基本的操作码字节 ( 最多 3 个字节 ) , 一个由 ModR / M 字节或者 SIB ( Scale-Index-Base ) 字节组成的寻址形式区分标志 ( 如果需要的话 ) , 一个 displacement ( 如果需要的话 ) , 和一个立即数据域 ( 如果需要的话 ) .</p>
+<p><img src="../images/decccc9ff9722a87c7c9b6a5c1bafce5e300094566abc71a19da4a00aac3c511.png" alt="picture 1"></p>
+<h2 id="11-instruction-prefixes">1.1. Instruction Prefixes</h2>
+<p>指令前缀分成四组 , 每组都包括一些被允许的前缀码 ,  4 种前缀码 , 每个指令只需要包含每组前缀中的一个前缀 , 4 组前缀可以按照任意顺序排列 .</p>
+<ul>
+<li>
+<p>Group 1</p>
+<ul>
+<li>Lock and repeat prefixes :
+<ul>
+<li>锁前缀编码为 F0H</li>
+<li>REPNE / REPNZ 前缀通过 F2H 编码 , Repeat-Not-Zero 前缀只适用于字符串和 input / output 指令 ( F2H 是一些指令必须前缀 )</li>
+<li>REP 或者 REPE / REPZ 编码为 F3H , repeat 前缀只能用于字符串和 input / output 指令 , F3H 也是 POPCNT , LZCNT 和 ADOX 指令的必须前缀</li>
+</ul>
+</li>
+<li>如果下列条件为真 , BND 前缀使用 F2H 编码 :
+<ul>
+<li>设置了 CPUID ( EAX=07H, ECX=0 ):EBX.MPX[bit 14]</li>
+<li>设置了 BNDCFGU.EN 和 / 或 IA32_BNDCFGS.EN</li>
+<li>F2 前缀之前有一个 near CALL , near RET , near JMP , short Jcc , 或者 near Jcc</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Group 2</p>
+<ul>
+<li>Segment override prefixes :
+<ul>
+<li>2EH &ndash; CS 段 override ( use with any branch instruction is reserved )</li>
+<li>36H &ndash; SS 段 override ( use with any branch instruction is reserved )</li>
+<li>3EH &ndash; DS 段 override ( use with any branch instruction is reserved )</li>
+<li>26H &ndash; ES 段 override ( use with any branch instruction is reserved )</li>
+<li>64H &ndash; FS 段 override ( use with any branch instruction is reserved )</li>
+<li>65H &ndash; GS 段 override ( use with any branch instruction is reserved )</li>
+</ul>
+</li>
+<li>Branch hints :
+<ul>
+<li>2EH &ndash; 分值没有执行 ( 只用于 Jcc 指令 )</li>
+<li>3EH &ndash; 分支执行 ( 用于 Jcc 指令 )</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Group 3</p>
+<ul>
+<li>operand-size override prefix 编码为 66H ( 66H 也是一些指令的必须前缀 )</li>
+</ul>
+</li>
+<li>
+<p>Group 4</p>
+<ul>
+<li>67H &ndash; address-size override prefix</li>
+</ul>
+</li>
+</ul>
+<p>锁前缀 ( F0H ) 确保多处理器环境对于共享内存的互斥访问 .</p>
+<p>重复前缀 ( F2H , F3H ) 针对一个字符串的每个元素重复一个指令 , 这些前缀只能和字符串和 IO 指令 ( MOVS , CMPS , SCAS , LODS , STOS , INS , OUTS ) 搭配使用 . 重复前缀和 / 或未定义操作码搭配其他 Intel 64 或 IA-32 指令是保留的 , 这些用法会导致无法预测的行为 .</p>
+<p>一些指令可以使用 F2H , F3H 作为一个必要前缀 , 实现不同的功能 .</p>
+<p>branch hint 前缀允许程序暗示处理器一个分支最可能的代码路径 , 这些前缀只能和条件分支指令 ( Jcc ) 搭配使用 , 分支暗示前缀和 / 或未定义操作码搭配其他 Intel 64 或 IA-32 指令是保留的 , 这些用法会导致无法预测的行为 .</p>
+<p>操作数大小重载前缀允许程序在 16 位和 32 位操作数大小间切换 , 某种大小可以是默认值 , 使用前缀会选择非默认值 .</p>
+<p>一些 SSE2 / SSE3 / SSSE3 / SSE4 指令和使用 3 字节序列的基本操作码字节的指令可以使用 66H 作为必需前缀 , 实现不同的功能 .</p>
+<p>对于 66H 的其他使用时保留的 , 这些用法会导致无法预测的行为 .</p>
+<p>地址大小重载前缀 ( 67H ) 允许程序在 16 位和 32 位地址间切换 , 两种大小都可以是默认值 , 前缀选择非默认值 . 指令的操作数不在内存中时使用这个前缀和 / 或其他未定义的操作码是保留的 ; 这种用法会导致无法预测的行为 .</p>
+<h2 id="12-opcodes">1.2. Opcodes</h2>
+<p>基本的操作码长度可以是 1 , 2 , 3 字节 , 额外的 3 bit 操作码有时编码在 ModR / M 字节 , 类似的域可以定义在基本操作码 . 这些域定义了操作的方向 , displacement 的大小 , 寄存器编码 , 条件代码 , 或符号扩展 . 操作码使用的编码域根据操作的种类有所不同 .</p>
+<p>通用的两字节操作码和 SIMD 指令由下面之一组成 :</p>
+<ul>
+<li>一个转义操作码字节 0FH 作为基本操作码 , 一个第二操作码字节</li>
+<li>一个必需前缀 ( 66H , F2H , F3H ) , 一个转义操作码字节 , 一个第二操作码字节</li>
+</ul>
+<p>例如 , CVTDQ2PD 由下面的序列组成 : F3 0F E6 . 第一个字节是必需前缀 ( 而不是一个重复前缀 ) .</p>
+<p>通用的 3 字节操作码格式和 SIMD 指令由下面一种组成 :</p>
+<ul>
+<li>一个转义操作码字节 0FH 作为基本操作码 , 加上两个额外的操作码字节</li>
+<li>一个必需前缀 ( 66H , F2H , F3H ) , 一个转义操作码字节 , 加上两个额外的操作码字节</li>
+</ul>
+<p>例如 , XMM 寄存器的 PHADDW 指令由下面的序列组成 : 66 0F 38 01 . 第一个字节是必需前缀 .</p>
+<h2 id="13-modr--m-and-sib-bytes">1.3. ModR / M and SIB Bytes</h2>
+<p>引用内存中操作数的许多指令在基本的操作码后都有一个字节指明寻址方式 ( 称作 ModR / M 字节) , 包含下面三种信息域 :</p>
+<ul>
+<li><em>mod</em> 和 <em>r / m</em> 域共同组成 32 个可能值 : 8 个寄存器和 24 个寻址模式</li>
+<li><em>reg / opcode</em> 域指明一个寄存器号 , 或者 3 bit 的操作码信息 , <em>reg / opcode</em> 域的用法在基本操作码说明</li>
+<li><em>r / m</em> 域可以指明一个寄存器为操作数 , 或者和 <em>mod</em> 域组合编码一个寻址模式 , 有时 <em>mod</em> 和 <em>r / w</em> 的某些组合用于表示一些指令的操作码信息</li>
+</ul>
+<p>ModR / W 字节的某些编码需要一个第二寻址字节 ( SIB 字节 ) , 32 位寻址的 base-plus-index 和 scale-plus-index 形式需要 SIB 字节 . SIB 字节包括下列域 :</p>
+<ul>
+<li><em>scale</em> 域指明比例系数</li>
+<li><em>index</em> 域指明索引寄存器的寄存器号</li>
+<li><em>base</em> 域指明基寄存器的寄存器号</li>
+</ul>
+<h2 id="14-displacement-and-immediate-bytes">1.4. Displacement and Immediate Bytes</h2>
+<p>一些寻址形式包括一个 ModR / W 字节后的立即代替 ( displacement immediately ) , 可以是 1 , 2 , 4 字节 .</p>
+<p>如果一个指令指明了立即数操作数 , 操作数通常跟着任何替代字节 , 一个立即数操作数可以是 1 , 2 , 4 字节 .</p>
+<h2 id="15-addressing-mode-encoding-of-modr--m-and-sib-bytes">1.5. Addressing-Mode Encoding of ModR / M and SIB Bytes</h2>
+<p>这部分内容由 4 个表格组成 , 需要时直接查阅 SDM Vol-2 , 2.1.5 小节 .</p>
+<h1 id="2-ia-32e-mode">2. IA-32e Mode</h1>
+<p>IA-32e 包含两个子模式 :</p>
+<ul>
+<li>兼容模式 , 64 位操作系统执行大部分未修改的传统保护模式软件 .</li>
+<li>64-bit 模式 , 64 位操作系统运行访问 64 位地址空间的应用 .</li>
+</ul>
+<h2 id="21-rex-prefixes">2.1. REX Prefixes</h2>
+<p>REX 前缀是 64 位模式使用的指令前缀字节 , 用来 :</p>
+<ul>
+<li>指明 GPR 和 SSE 寄存器</li>
+<li>指明 64 位操作数大小</li>
+<li>指明扩展的控制寄存器</li>
+</ul>
+<p>64 位模式不是所有的指令需要 REX 前缀 , 当且仅当指令引用扩展寄存器之一或者使用 64 位操作数时才需要一个前缀 . 如果使用 REX 前缀 , 但是没有含义 , 会被直接忽略 .</p>
+<p>每条指令只能有一个 REX 前缀 , 使用时 , REX 前缀字节必须在操作码字节或者转义操作码字节前 ; 用在包含必需前缀的指令中时 , REX 必须跟在必须前缀后 .</p>
+<h3 id="211-encoding">2.1.1. Encoding</h3>
+<p>Intel 64 和 IA-32 指令格式通过编码中的 3-bit 指明了最多三个寄存器 , 取决于格式 :</p>
+<ul>
+<li>ModR / M : ModR / M 字节的 reg 和 r / m 域</li>
+<li>带有 SIB 的 ModR / M : ModR / M 字节的 reg 域 , SIB 的 base 和 index 域</li>
+<li>没有 ModR / M 的指令 : 操作码的 reg 域</li>
+</ul>
+<p>64 位模式 , 这些格式没有变化 , 需要定义域的 bit 由 REX 前缀额外提供 .</p>
+<h3 id="212-more-on-rex-prefix-fields">2.1.2. More on REX Prefix Fields</h3>
+<p>REX 前缀是一组 16 个操作码 , 占用 40H 到 4FH . 这些操作码代表 IA-32 操作模式和兼容模式下的有效指令 ( INC 或 DEC ) . 64 位模式 , 同样的操作码代表指令前缀 REX , 没有被当做单独的指令 .</p>
+<p>INC / DEC 指令的单字节操作码形式 64 位模式下不可用 , INC / DEC 功能可以通过相同指令的 ModR / M 形式实现 .</p>
+<h3 id="213-displacement">2.1.3. Displacement</h3>
+<p>64 位模式的寻址使用已有的 32 位 ModR / M 和 SIB 编码 , ModR / M 和 SIB 替代大小没有改变 , 剩余 8 位或 32 位符号扩展到 64 位 .</p>
+<h3 id="214-direct-memory-offset-movs">2.1.4. Direct Memory-Offset MOVs</h3>
+<p>64 位模式 , MOV 指令的直接内存偏移形式被扩展指明 64 位立即数绝对地址 , 这个地址成为 moffset , 这个内存偏移不需要前缀 . 这些 MOV 指令的内存偏移大小遵循地址大小的默认值 . 这些指令格式如下 :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Opcode</th>
+<th style="text-align:left">Instruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">A0</td>
+<td style="text-align:left">MOV AL, moffset</td>
+</tr>
+<tr>
+<td style="text-align:left">A1</td>
+<td style="text-align:left">MOV EAX, moffset</td>
+</tr>
+<tr>
+<td style="text-align:left">A2</td>
+<td style="text-align:left">MOV moffset, AL</td>
+</tr>
+<tr>
+<td style="text-align:left">A3</td>
+<td style="text-align:left">MOV moffset, EAX</td>
+</tr>
+</tbody>
+</table>
+<h3 id="215-immediates">2.1.5. Immediates</h3>
+<p>64 位模式 , 立即数操作数的典型大小保持 32 位 , 如果操作数是 64 位 , 处理器在使用前符号扩展所有的立即数为 64 位 .</p>
+<p>对于 64 位立即数操作数的支持通过扩展现有的 MOV 指令 ( MOV reg, imm16/32 ) 语义完成 . 这些指令 ( opcode B8H - BFH ) 移动 16 位或 32 位立即数到一个通用寄存器 . 操作数为 64 位时 , 这些指令可以用于加载一个立即数到 GPR , 需要一个 REX 前缀重载 32 位默认操作数大小为 64 位操作数 .</p>
+<h3 id="216-rip-relative-addressing">2.1.6. RIP-Relative Addressing</h3>
+<p>新的寻址方式 , RIP 相对寻址 ( 相对指令指针 ) 在 64 位模式实现 , 一个有效地址通过把 displacement 加到下一条指令的 64 位 RIP 组成 .</p>
+<p>IA-32 架构和兼容模式下 , 相对于指令指针的寻址只能通过 control-transfer 指令实现 . 64 位模式 , 使用 ModR / M 寻址的指令可以使用 RIP 相对寻址 ; 没有 RIP 相对寻址 , 所有的 ModR / M 模式的地址内存相对于 0 .</p>
+<p>RIP 相对寻址允许特定的 ModR / M 模式通过有符号的 32 位 displacement 寻址相对于 64 位 RIP 的内存 , 提供一个相对于 RIP 前后 2GB 的偏移范围 .</p>
+<p>RIP 相对寻址由 64 位模式开启 , 而不是 64 位地址大小开启 , 地址大小前缀不会关闭 RIP 相对寻址 , 前缀只会阶段有效地址 , 然后 0 扩展为 32 位 .</p>
+<h3 id="217-default-64-bit-operand-size">2.1.7. Default 64-Bit Operand Size</h3>
+<p>64 位模式 , 两组指令的默认操作数大小为 64 位 :</p>
+<ul>
+<li>near 分支</li>
+<li>所有隐式引用 RSP 的指令 , 除了 far 分支</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-09-14
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/rex/">REX</a>
+          <a href="/tags/displacement/">displacement</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/1_chap6-procedure_callsinterruptsexceptions/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">1_chap6-procedure_calls,interrupts,exceptions</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/mm/mm-buddy_allocator_free_page/">
+            <span class="next-text nav-default">mm-buddy_allocator_free_page</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

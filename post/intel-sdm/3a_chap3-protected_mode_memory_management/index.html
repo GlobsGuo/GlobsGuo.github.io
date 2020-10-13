@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap3-protected_mode_memory_management - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &amp;mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap3-protected_mode_memory_management" />
+<meta property="og:description" content="1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap3-protected_mode_memory_management/" />
+<meta property="article:published_time" content="2020-10-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap3-protected_mode_memory_management">
+<meta itemprop="description" content="1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化">
+<meta itemprop="datePublished" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-10T00:00:00+00:00" />
+<meta itemprop="wordCount" content="632">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,segmentation," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap3-protected_mode_memory_management"/>
+<meta name="twitter:description" content="1. Memory Management Overview IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 逻辑地址 &mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap3-protected_mode_memory_management</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-10 </span>
+        
+          <span class="more-meta"> 632 words </span>
+          <span class="more-meta"> 2 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-memory-management-overview">1. Memory Management Overview</a></li>
+    <li><a href="#2-segmentation">2. Segmentation</a>
+      <ul>
+        <li><a href="#21-segment-selector">2.1. Segment Selector</a></li>
+        <li><a href="#22-segment-registers">2.2. Segment Registers</a></li>
+        <li><a href="#23-segment-descriptors">2.3. Segment Descriptors</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-memory-management-overview">1. Memory Management Overview</h1>
+<p>IA-32 架构的内存管理工具分成两部分 : 分段和分页 . 要访问段中的某个字节 , 必须提供字节的 <strong>逻辑地址</strong> &mdash;- 段选择器 : 段内偏移 . 分段机制将逻辑地址转化为 <strong>线性地址</strong> , 分页机制将线性地址转化为 <strong>物理地址</strong> .</p>
+<p>分段机制将处理器可寻址的内存空间 ( 线性地址空间 ) 分成较小的受保护的地址空间 , 成为 <strong>段</strong> ; 分页机制用于虚拟化线性地址空间 , 用少量的物理内存和磁盘存储模拟一个大的线性地址空间 .</p>
+<h1 id="2-segmentation">2. Segmentation</h1>
+<h2 id="21-segment-selector">2.1. Segment Selector</h2>
+<p>段选择器是一个段的 16 位标识符 , 不直接指向段 , 而是指向定义段的段描述符 . 段选择器包含以下内容 :</p>
+<ul>
+<li>Index ( bit 3:15 ) , 选择 GDT 或者 LDT 8192 个描述符中的一个 , 处理器将 index 乘以 8 ( 一个段描述符中的字节数 ) 的结果加到 GDT 或 LDT 的基地址 .</li>
+<li>TI ( table indicator ) flag ( bit 2 ) , 指明使用的描述符表 , 清除选择 GDT , 设置选择 LDT .</li>
+<li>Requested Privilege Level ( RPL ) ( bit 1:0 ) , 指明选择器的特权级 , 范围 0-3 , 0 最高 .</li>
+</ul>
+<p>处理器不使用 GDT 中的第一项 , 指向该项的段选择器用作 &ldquo;null segment selector&rdquo; .</p>
+<h2 id="22-segment-registers">2.2. Segment Registers</h2>
+<p>处理器提供了 6 个段寄存器 , 程序要访问一个段 , 必须将段选择器加载到 6 个寄存器之一 ; 因此系统中的段只有 6 个可以立即使用 .</p>
+<p>每个段寄存器都有 &ldquo;可见&rdquo; 部分和 &ldquo;隐藏&rdquo; 部分 ( 也被称为 &ldquo;描述符 cache&rdquo; 或 &ldquo;shadow register&rdquo; ) , 加载段选择器到段寄存器的可见部分时 , 处理器还会加载段描述符中的基地址 , 段限制 , 访问控制信息到隐藏部分 .</p>
+<h2 id="23-segment-descriptors">2.3. Segment Descriptors</h2>
+<p>段描述符是 GDT 或 LDT 中的一个数据结构 , 向处理器提供一个段的位置和大小 , 访问控制和状态信息 . 下图列出了段描述符的结构：</p>
+<p><img src="../images/42423b51666a0465b1e58a0aae5228cee9f65bbbaea37daaf66d5bad4ef70892.png" alt="picture 2"></p>
+<p>其中 segment limit 指明段的大小 , 单位受 G 标志的影响 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-10
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/segmentation/">segmentation</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap2-system_architecture_overview/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap2-system_architecture_overview</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap10-apic/">
+            <span class="next-text nav-default">3A_chap10-APIC</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

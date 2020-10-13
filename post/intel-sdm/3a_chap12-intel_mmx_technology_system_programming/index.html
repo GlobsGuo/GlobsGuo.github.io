@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3A_chap12-Intel_MMX_technology_system_programming - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3A_chap12-Intel_MMX_technology_system_programming" />
+<meta property="og:description" content="1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3a_chap12-intel_mmx_technology_system_programming/" />
+<meta property="article:published_time" content="2020-10-12T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="name" content="3A_chap12-Intel_MMX_technology_system_programming">
+<meta itemprop="description" content="1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0">
+<meta itemprop="datePublished" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-12T00:00:00+00:00" />
+<meta itemprop="wordCount" content="1247">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,MMX,MMX state," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3A_chap12-Intel_MMX_technology_system_programming"/>
+<meta name="twitter:description" content="1. MMX 指令集的模拟 不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 : EM MP TS action 0"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3A_chap12-Intel_MMX_technology_system_programming</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-12 </span>
+        
+          <span class="more-meta"> 1247 words </span>
+          <span class="more-meta"> 3 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-mmx-指令集的模拟">1. MMX 指令集的模拟</a></li>
+    <li><a href="#2-mmx-状态和寄存器别名">2. MMX 状态和寄存器别名</a></li>
+    <li><a href="#3-保存和恢复-mmx-状态和寄存器">3. 保存和恢复 MMX 状态和寄存器</a></li>
+    <li><a href="#4-任务或上下文切换时保存-mmx-状态">4. 任务或上下文切换时保存 MMX 状态</a></li>
+    <li><a href="#5-执行-mmx-指令可能产生的异常">5. 执行 MMX 指令可能产生的异常</a></li>
+    <li><a href="#6-调试-mmx-代码">6. 调试 MMX 代码</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-mmx-指令集的模拟">1. MMX 指令集的模拟</h1>
+<p>不同于 x87 FPU 指令 , IA-32 和 Intel 64 架构不支持 MMX 指令的模拟 , CR0.EM 标志无法用于 MMX 指令的模拟 . CR0 的标志位和 MMX 指令的执行情况关系如下 :</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">EM</th>
+<th style="text-align:center">MP</th>
+<th style="text-align:center">TS</th>
+<th style="text-align:center">action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">执行</td>
+</tr>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">#NM 异常</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">#UD 异常</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">#UD 异常</td>
+</tr>
+</tbody>
+</table>
+<p>支持 MMX 指令的处理器 , 必须设置 MP 标志 .</p>
+<h1 id="2-mmx-状态和寄存器别名">2. MMX 状态和寄存器别名</h1>
+<p>MMX 状态由 8 个 64-bit 寄存器 ( MM0-MM7 ) 组成 , 是浮点寄存器 R0-R7 的别名 . MMX 寄存器映射到 R0-R7 的物理地址 , 而不是浮点寄存器栈 ( ST0-ST7 ) 中的相对地址 . 因此 MMX 寄存器的映射是固定的 , 不会被浮点状态字中的 Top Of Stack ( TOS ) 域影响 .</p>
+<p><img src="../images/53d17facf296f8f2d8e3da139a4e0128d4661e6f9362f32dea40b406e77291ed.png" alt="picture 1"></p>
+<p>通过 MMX 指令写入值到 MMX 寄存器时 , 写入的值也会出现在对应浮点寄存器的 bit 0:63 ; 类似的 , x87 FPU 写入一个数到浮点寄存器时 , 数的低 64 位也会出现在对应的 MMX 寄存器 .</p>
+<p>MMX 指令对于包含在浮点寄存器中的 x87 FPU 状态 , x87 FPU tag 字 , x87 FPU 状态字有影响 :</p>
+<ul>
+<li>MMX 指令写入值到 MMX 寄存器时 , 对应浮点寄存器的 bit 64:79 会设置为 1 .</li>
+<li>执行 MMX 指令 ( 除了 EMMS 指令 ) 时 , x87 FPU tag 字中的每个标签域都设置为 00B ( 有效 ) .</li>
+<li>执行 EMMS 指令时 , x87 FPU tag 字中的每个标签域都设置为 11B ( 空 ) .</li>
+<li>每次执行 MMX 指令 , TOS 的值设置为 000B .</li>
+</ul>
+<p>MMX 指令的执行不会影响 x87 FPU 状态字中的其他位 ( bit 0:10 , bit 14:15 ) , 也不会影响组成 x87 状态域的其他 x87 FPU 寄存器的内容 .</p>
+<hr>
+<p>x87 FPU tag 字的值不会影响 MMX 寄存器的值 , 也不会影响 MMX 指令的执行 ; 但是 MMX 指令确实会修改 x87 FPU tag 字的内容 . 如果在执行 x87 FPU 指令前没有初始化或恢复 x87 FPU 的状态 , 这些修改可能会影响 x87 FPU 的操作 .</p>
+<p><code>FSAVE</code> , <code>FXSAVE</code> 和 <code>FSTENV</code> 指令读取 x87 FPU tag 寄存器和每一个浮点寄存器的内容 , 确定每一个寄存器的真实 tag 值 , 保存被更新的 tag 字到内存 .<br>
+执行这些指令后 , x87 FPU tag 字中的所有标签都设置为空 ( 11B ) ; 类似的 , EMMS 指令设置 x87 FPU tag 字中的所有标签为 11B 清除 MMX 状态 .</p>
+<h1 id="3-保存和恢复-mmx-状态和寄存器">3. 保存和恢复 MMX 状态和寄存器</h1>
+<p>MMX 寄存器是 x87 FPU 数据寄存器的别名 , 因此可以通过下列方式保存 MMX 状态到内存 , 或者从内存恢复 :</p>
+<ul>
+<li>执行 <code>FSAVE</code> , <code>FNSAVE</code> 或 <code>FXSAVE</code> 指令保存 MMX 状态到内存 .</li>
+<li>执行 <code>FRSTOR</code> 或 <code>FXRSTOR</code> 指令从内存恢复 MMX 状态 .</li>
+</ul>
+<p>上述方式供 OS 使用 , 应用可以通过下列方式 :</p>
+<ul>
+<li>执行 8 个 <code>MOVQ</code> 指令 , 保存 MMX0-MMX7 的值到内存 , 然后执行 EMMS 指令清除 x87 FPU 中的 MMX 状态 .</li>
+<li>执行 8 个 <code>MOVQ</code> 指令 , 从内存读取状态到 MMX0-MMX7 .</li>
+</ul>
+<h1 id="4-任务或上下文切换时保存-mmx-状态">4. 任务或上下文切换时保存 MMX 状态</h1>
+<p>切换任务或上下文时通常需要保存 MMX 状态 , 一般规则是如果任务切换代码包含保存 x87 FPU 状态的工具 , 就可以用这些工具保存 MMX 状态 .</p>
+<h1 id="5-执行-mmx-指令可能产生的异常">5. 执行 MMX 指令可能产生的异常</h1>
+<p>MMX 指令不产生 x87 FPU 浮点异常 , 也不会影响 EFLAGS 和 x87 FPU 状态字 , 执行 MMX 指令可能产生的异常如下 :</p>
+<ul>
+<li>
+<p>内存访问时的异常 :</p>
+<ul>
+<li>stack-segment fault ( #SS )</li>
+<li>general protection ( #GP )</li>
+<li>缺页 ( #PF )</li>
+<li>对齐检查 ( #AC )</li>
+</ul>
+</li>
+<li>
+<p>系统异常</p>
+<ul>
+<li>无效的操作码 ( #UD ) , 设置 CR0.EM 标志时执行 MMX 指令</li>
+<li>设备不可用 ( #NM ) , 设置 CR0.TS 标志时执行 MMX 指令</li>
+</ul>
+</li>
+<li>
+<p>浮点错误 ( #MF )</p>
+</li>
+<li>
+<p>上述异常的处理函数执行失败时简介产生的异常</p>
+</li>
+</ul>
+<hr>
+<p>如果有 x87 FPU 浮点异常没有处理 , 处理器接收到一个 MMX 指令 , 处理器就会在执行 MMX 指令前产生一个 x87 FPU 浮点错误 ( #MF ) , 允许 x87 FPU 浮点错误异常处理函数处理未处理的异常 .<br>
+执行异常处理函数时 , x87 FPU 状态对于处理函数可见 ; 一旦从处理函数返回 , MMX 指令就会被执行 , 改变 x87 FPU 状态 .</p>
+<h1 id="6-调试-mmx-代码">6. 调试 MMX 代码</h1>
+<p>调试工具的工作方式和执行其他的指令相同 , 需要注意的是 x87 FPU 寄存器的逻辑位置和 TOS , MMX 寄存器的物理位置的关系 :</p>
+<p><img src="../images/aa4db72ecfb964effcae7f42467eb3342f1c9c6c572f314bcbcb2b4d3dd2f0f2.png" alt="picture 2"></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-12
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/mmx/">MMX</a>
+          <a href="/tags/mmx-state/">MMX state</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3a_chap4-paging/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3A_chap4-paging</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3a_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states/">
+            <span class="next-text nav-default">3A_chap13-system_programming_for_instruction_set_extensions_and_processor_extended_states</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
