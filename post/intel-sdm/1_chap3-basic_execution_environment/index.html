@@ -183,9 +183,9 @@
 <li>EBP : 栈中的数据指针</li>
 </ul>
 <p>通用寄存器的高字节和低字节可以通过下面的方式引用 :</p>
-<p><img src="../images/836bcc57de9178f879c5d60514e23da2239fddea68f28d95cec341bf2219a3c2.png" alt="picture 1"></p>
+<p><img src="images/836bcc57de9178f879c5d60514e23da2239fddea68f28d95cec341bf2219a3c2.png" alt="picture 1"></p>
 <p>64 位模式 , 虽然默认的操作数大小为 32 位 , 通用寄存器可以工作在 32 位或 64 位模式 , REX 前缀用于产生 64 位大小的操作数 .</p>
-<p><img src="../images/b29eb151d35272a8cbf99db8740eaa702c14ed3d78a13f57a699292032323e62.png" alt="picture 2"></p>
+<p><img src="images/b29eb151d35272a8cbf99db8740eaa702c14ed3d78a13f57a699292032323e62.png" alt="picture 2"></p>
 <p>64 位模式 , 操作数的大小决定目的通用寄存器中有效位的数量 :</p>
 <ul>
 <li>64 位操作数产生 64 位结果 , 保存到目的通用寄存器 .</li>
@@ -197,7 +197,7 @@
 <p>EFLAGS 寄存器的某些标志可以通过特殊目的的指令修改 , 但是无法直接检测或修改整个寄存器 .</p>
 <p>下列指令可以将标志移入和移出程序栈或 EAX 寄存器 : <code>LAHF</code> , <code>SAHF</code> , <code>PUSHF</code> , <code>PUSHFD</code> , <code>POPF</code> , <code>POPFD</code> . EFLAGS 寄存器的内容保存到程序栈或者 EAX 寄存器后 , 可以通过处理器的位操作 ( BT , BTS , BTR , BTC ) 指令检测或修改 .</p>
 <p>许多指令在执行时需要用到 EFLAGS 寄存器 , 寄存器结构如下 :</p>
-<p><img src="../images/eeb582a89e468d694d4fb982d610c6a4b33d7523b79e35dc4268e1ee8d068e89.png" alt="picture 2"></p>
+<p><img src="images/eeb582a89e468d694d4fb982d610c6a4b33d7523b79e35dc4268e1ee8d068e89.png" alt="picture 3"></p>
 <p>挂起一个应用时 , 处理器自动保存 EFLAGS 寄存器的状态到被挂起进程的 TSS ; 执行新进程时 , 处理器从新进程的 TSS 加载 EFLAGS 寄存器 .</p>
 <h3 id="221-状态标志">2.2.1. 状态标志</h3>
 <p>EFLAGS 寄存器的状态标志 ( bit 0 , 2 , 4, 6 , 7 和 11 ) 表明算术指令的结果 , 比如 <code>ADD</code> , <code>SUB</code> , <code>MUL</code> 和 <code>DIV</code> 指令 . 状态标志的功能为 :</p>
@@ -309,7 +309,7 @@ identification flag , 程序设置或者清楚这个标志的能力表明对于 
 </ul>
 <h2 id="41-specifying-a-segment-selector">4.1. Specifying a Segment Selector</h2>
 <p>处理器根据下表中的规则自动选择一个段 :</p>
-<p><img src="../images/5c20fbcdecf4a5000e55c015ef02d8eb4dd5e20ebbd946d633b7e07f2c1680b0.png" alt="picture 3"></p>
+<p><img src="images/5c20fbcdecf4a5000e55c015ef02d8eb4dd5e20ebbd946d633b7e07f2c1680b0.png" alt="picture 4"></p>
 <p>向内存中保存数据 , 或者从内存中加载数据时 , 默认的 DS 段可以被覆盖 , 以访问其他段 . 编译器内 , 段重载通常通过 &ldquo;:&rdquo; 操作符完成 . 比如下面的 <code>MOV</code> 指令将 EAX 内的值移动到 ES 寄存器指向的段 , 偏移地址包含在 EBX 寄存器 : <code>MOV ES:[EBX],EAX</code> .</p>
 <p>机器层面通过段覆盖前缀 ( 指令开始的一个字节 ) 实现段覆盖 , 但是下面的段无法被覆盖 :</p>
 <ul>
@@ -328,7 +328,7 @@ identification flag , 程序设置或者清楚这个标志的能力表明对于 
 </ul>
 <p>通过这些组件计算而来的偏移称为有效地址 ( effective address ) , 每个组件都可以是正的或负的 , 除了 scale factor .</p>
 <p>这些组件的组合使用方式如下 :</p>
-<p><img src="../images/f9ab84dc40e283bbd3ae04705ae1d882f63a88fd13bf6116086171083396e13e.png" alt="picture 4"></p>
+<p><img src="images/f9ab84dc40e283bbd3ae04705ae1d882f63a88fd13bf6116086171083396e13e.png" alt="picture 5"></p>
 <p>这些组件的受到以下限制 :</p>
 <ul>
 <li>ESP 寄存器无法作为索引寄存器 .</li>
@@ -388,7 +388,11 @@ identification flag , 程序设置或者清楚这个标志的能力表明对于 
           <a href="/tags/operand-addressing/">operand-addressing</a>
           </div>
       <nav class="post-nav">
-        
+        <a class="prev" href="/post/intel-sdm/3b_chap14-power_and_thermal_management/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3B_chap14-power_and_thermal_management</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
         <a class="next" href="/post/intel-sdm/3a_chap4-paging/">
             <span class="next-text nav-default">3A_chap4-paging</span>
             <span class="next-text nav-mobile">Next</span>

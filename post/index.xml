@@ -6,7 +6,34 @@
     <description>Recent content in Posts on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 22 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/</guid>
+      <description>Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存</description>
+    </item>
+    
+    <item>
+      <title>3B_chap15-machine_check_architecture</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/</link>
+      <pubDate>Fri, 16 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/</guid>
+      <description>1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生</description>
+    </item>
+    
+    <item>
+      <title>3B_chap14-power_and_thermal_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/</link>
+      <pubDate>Thu, 15 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/</guid>
+      <description>1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的</description>
+    </item>
+    
     <item>
       <title>1_chap3-basic_execution_environment</title>
       <link>https://globsguo.github.io/post/intel-sdm/1_chap3-basic_execution_environment/</link>

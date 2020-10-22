@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MCA on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/mca/</link>
+    <description>Recent content in MCA on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 16 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/mca/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3B_chap15-machine_check_architecture</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/</link>
+      <pubDate>Fri, 16 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/</guid>
+      <description>1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生</description>
+    </item>
+    
+  </channel>
+</rss>

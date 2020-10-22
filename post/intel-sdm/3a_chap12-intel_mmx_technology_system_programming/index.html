@@ -187,7 +187,7 @@
 <p>支持 MMX 指令的处理器 , 必须设置 MP 标志 .</p>
 <h1 id="2-mmx-状态和寄存器别名">2. MMX 状态和寄存器别名</h1>
 <p>MMX 状态由 8 个 64-bit 寄存器 ( MM0-MM7 ) 组成 , 是浮点寄存器 R0-R7 的别名 . MMX 寄存器映射到 R0-R7 的物理地址 , 而不是浮点寄存器栈 ( ST0-ST7 ) 中的相对地址 . 因此 MMX 寄存器的映射是固定的 , 不会被浮点状态字中的 Top Of Stack ( TOS ) 域影响 .</p>
-<p><img src="../images/53d17facf296f8f2d8e3da139a4e0128d4661e6f9362f32dea40b406e77291ed.png" alt="picture 1"></p>
+<p><img src="images/53d17facf296f8f2d8e3da139a4e0128d4661e6f9362f32dea40b406e77291ed.png" alt="picture 11"></p>
 <p>通过 MMX 指令写入值到 MMX 寄存器时 , 写入的值也会出现在对应浮点寄存器的 bit 0:63 ; 类似的 , x87 FPU 写入一个数到浮点寄存器时 , 数的低 64 位也会出现在对应的 MMX 寄存器 .</p>
 <p>MMX 指令对于包含在浮点寄存器中的 x87 FPU 状态 , x87 FPU tag 字 , x87 FPU 状态字有影响 :</p>
 <ul>
@@ -245,7 +245,7 @@
 执行异常处理函数时 , x87 FPU 状态对于处理函数可见 ; 一旦从处理函数返回 , MMX 指令就会被执行 , 改变 x87 FPU 状态 .</p>
 <h1 id="6-调试-mmx-代码">6. 调试 MMX 代码</h1>
 <p>调试工具的工作方式和执行其他的指令相同 , 需要注意的是 x87 FPU 寄存器的逻辑位置和 TOS , MMX 寄存器的物理位置的关系 :</p>
-<p><img src="../images/aa4db72ecfb964effcae7f42467eb3342f1c9c6c572f314bcbcb2b4d3dd2f0f2.png" alt="picture 2"></p>
+<p><img src="images/aa4db72ecfb964effcae7f42467eb3342f1c9c6c572f314bcbcb2b4d3dd2f0f2.png" alt="picture 12"></p>
 
     </div>
 

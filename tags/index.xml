@@ -6,22 +6,94 @@
     <description>Recent content in Tags on Globs&#39; Catchall</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 13 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 22 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>EFLAGS</title>
-      <link>https://globsguo.github.io/tags/eflags/</link>
-      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      <title>DR</title>
+      <link>https://globsguo.github.io/tags/dr/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://globsguo.github.io/tags/eflags/</guid>
+      <guid>https://globsguo.github.io/tags/dr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>DS</title>
+      <link>https://globsguo.github.io/tags/ds/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/ds/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Intel-SDM</title>
       <link>https://globsguo.github.io/tags/intel-sdm/</link>
-      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
       
       <guid>https://globsguo.github.io/tags/intel-sdm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>LBR</title>
+      <link>https://globsguo.github.io/tags/lbr/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/lbr/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RDT</title>
+      <link>https://globsguo.github.io/tags/rdt/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/rdt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MC</title>
+      <link>https://globsguo.github.io/tags/mc/</link>
+      <pubDate>Fri, 16 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MCA</title>
+      <link>https://globsguo.github.io/tags/mca/</link>
+      <pubDate>Fri, 16 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/mca/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>HDC</title>
+      <link>https://globsguo.github.io/tags/hdc/</link>
+      <pubDate>Thu, 15 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/hdc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>HWP</title>
+      <link>https://globsguo.github.io/tags/hwp/</link>
+      <pubDate>Thu, 15 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/hwp/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>EFLAGS</title>
+      <link>https://globsguo.github.io/tags/eflags/</link>
+      <pubDate>Tue, 13 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/tags/eflags/</guid>
       <description></description>
     </item>
     

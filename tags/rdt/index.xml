@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RDT on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/rdt/</link>
+    <description>Recent content in RDT on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 22 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/rdt/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/</link>
+      <pubDate>Thu, 22 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/</guid>
+      <description>Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存</description>
+    </item>
+    
+  </channel>
+</rss>

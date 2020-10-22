@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features" />
+<meta property="og:description" content="Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/" />
+<meta property="article:published_time" content="2020-10-22T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-22T00:00:00+00:00" />
+<meta itemprop="name" content="3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features">
+<meta itemprop="description" content="Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存">
+<meta itemprop="datePublished" content="2020-10-22T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-22T00:00:00+00:00" />
+<meta itemprop="wordCount" content="12014">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,DR,LBR,RDT,DS," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features"/>
+<meta name="twitter:description" content="Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 : 调试寄存器保存"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-22 </span>
+        
+          <span class="more-meta"> 12014 words </span>
+          <span class="more-meta"> 24 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-简介">1. 简介</a></li>
+    <li><a href="#2-dr">2. DR</a></li>
+    <li><a href="#3-调试异常">3. 调试异常</a>
+      <ul>
+        <li><a href="#31-db--中断向量-1">3.1. #DB , 中断向量 1</a>
+          <ul>
+            <li><a href="#311-指令断点异常条件">3.1.1. 指令断点异常条件</a></li>
+            <li><a href="#312-数据内存和-io-断点异常条件">3.1.2. 数据内存和 IO 断点异常条件</a></li>
+            <li><a href="#313-一般检测的异常条件">3.1.3. 一般检测的异常条件</a></li>
+            <li><a href="#314-单步异常条件">3.1.4. 单步异常条件</a></li>
+            <li><a href="#315-任务切换异常条件">3.1.5. 任务切换异常条件</a></li>
+          </ul>
+        </li>
+        <li><a href="#32-bp--中断向量-3">3.2. #BP , 中断向量 3</a></li>
+        <li><a href="#41-调试异常--断点异常和受限事务内存--rtm-">4.1. 调试异常 , 断点异常和受限事务内存 ( RTM )</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-上一个分支--中断--和异常记录">5. 上一个分支 , 中断 , 和异常记录</a>
+      <ul>
+        <li><a href="#51-ia32_debugctl-msr">5.1. IA32_DEBUGCTL MSR</a></li>
+        <li><a href="#52-分支--异常--和中断的监测">5.2. 分支 , 异常 , 和中断的监测</a></li>
+        <li><a href="#53-分支的单步执行">5.3. 分支的单步执行</a></li>
+        <li><a href="#54-分支轨迹消息">5.4. 分支轨迹消息</a></li>
+        <li><a href="#55-分支轨迹存储">5.5. 分支轨迹存储</a></li>
+        <li><a href="#56-cpl-限定的分支轨迹机制">5.6. CPL 限定的分支轨迹机制</a></li>
+        <li><a href="#57-收到-pmi-时冻结-lbr-和性能计数器">5.7. 收到 PMI 时冻结 LBR 和性能计数器</a></li>
+        <li><a href="#58-lbr-栈">5.8. LBR 栈</a>
+          <ul>
+            <li><a href="#581-lbr-栈和-intel-64-处理器">5.8.1. LBR 栈和 Intel 64 处理器</a></li>
+            <li><a href="#582-上一个异常记录和-intel-64-架构">5.8.2. 上一个异常记录和 Intel 64 架构</a></li>
+          </ul>
+        </li>
+        <li><a href="#59-bts-和-ds-保存区域">5.9. BTS 和 DS 保存区域</a>
+          <ul>
+            <li><a href="#591-建立-ds-保存区域">5.9.1. 建立 DS 保存区域</a></li>
+            <li><a href="#592-建立-bts-缓冲区">5.9.2. 建立 BTS 缓冲区</a></li>
+            <li><a href="#593-编写-ds-中断服务例程--isr-">5.9.3. 编写 DS 中断服务例程 ( ISR )</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#6-skylake-架构的上一次分支--调用栈--中断和异常记录">6. Skylake 架构的上一次分支 , 调用栈 , 中断和异常记录</a></li>
+    <li><a href="#7-tsc">7. TSC</a>
+      <ul>
+        <li><a href="#71-invariant-tsc">7.1. invariant TSC</a></li>
+        <li><a href="#72-ia32_tsc_aux-寄存器和-rdtscp-支持">7.2. IA32_TSC_AUX 寄存器和 RDTSCP 支持</a></li>
+        <li><a href="#73-tsc-调整">7.3. TSC 调整</a></li>
+        <li><a href="#74-invariant-time-keeping">7.4. invariant time-keeping</a></li>
+      </ul>
+    </li>
+    <li><a href="#8-intel-资源主管技术监测特性">8. Intel 资源主管技术监测特性</a>
+      <ul>
+        <li><a href="#81-cmt-和-mbm-简介">8.1. CMT 和 MBM 简介</a></li>
+        <li><a href="#82-监测资源-rmid-的关联">8.2. 监测资源 RMID 的关联</a></li>
+        <li><a href="#83-监测资源的选择和报告架构">8.3. 监测资源的选择和报告架构</a></li>
+        <li><a href="#84-监测编程需要考虑的事">8.4. 监测编程需要考虑的事</a></li>
+      </ul>
+    </li>
+    <li><a href="#9-intel-rdt-分配特性">9. Intel RDT 分配特性</a>
+      <ul>
+        <li><a href="#91-cat-简介">9.1. CAT 简介</a></li>
+        <li><a href="#92-cat-架构">9.2. CAT 架构</a></li>
+        <li><a href="#93-代码和数据分级--cdp--技术">9.3. 代码和数据分级 ( CDP ) 技术</a></li>
+        <li><a href="#94-开启-cat-的流程">9.4. 开启 CAT 的流程</a></li>
+        <li><a href="#95-cdp--枚举和开启-l3-cdp-技术">9.5. CDP : 枚举和开启 L3 CDP 技术</a></li>
+        <li><a href="#96-cdp--枚举和开启-l2-cdp-技术">9.6. CDP : 枚举和开启 L2 CDP 技术</a>
+          <ul>
+            <li><a href="#961-节电特性下的-cat-操作">9.6.1. 节电特性下的 CAT 操作</a></li>
+            <li><a href="#962-其他操作模式的-cat-操作">9.6.2. 其他操作模式的 CAT 操作</a></li>
+            <li><a href="#963-关联线程和-cat--cdp-cos">9.6.3. 关联线程和 CAT / CDP COS</a></li>
+          </ul>
+        </li>
+        <li><a href="#97-内存带宽分配简介">9.7. 内存带宽分配简介</a>
+          <ul>
+            <li><a href="#971-mba-枚举">9.7.1. MBA 枚举</a></li>
+            <li><a href="#972-mba-配置">9.7.2. MBA 配置</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>Intel 64 和 IA-32 架构提供了调试代码和监视性能的调试工具 , 对于调试应用程序 , 系统软件和多任务 OS 十分重要 . 调试支持通过调试寄存器和 MSR 获取 :</p>
+<ul>
+<li>调试寄存器保存内存和 IO 的断点地址 , 程序员或系统设计者想要停止程序的执行 , 获取处理器的状态时 , 就设置断点 . 内存或 IO 访问涉及到断点地址时 , 就会产生 #DB 异常 .</li>
+<li>MSR 监测分支 , 中断和异常 , 记录上一条分支 , 中断或者异常的地址 , 也记录中断或异常前执行的分支地址 .</li>
+<li>时间戳计数器 .</li>
+<li>监测共享的平台资源的特性 , 即 Intel Resource Director Technology .</li>
+</ul>
+<h1 id="1-简介">1. 简介</h1>
+<p>下列 CPU 组件支持调试和性能监视 :</p>
+<ul>
+<li>调试异常 #DB , 发生调试事件时 , 切换程序控制到一个调试程序或任务 .</li>
+<li>断点异常 #BP , <code>INT3</code> 指令.</li>
+<li>断点地址寄存器 , DR0-DR3 .</li>
+<li>DR6 , 产生调试或断点异常时报告生效的条件 .</li>
+<li>DR7 , 指明导致断点的内存或 IO 访问形式 .</li>
+<li>TSS 的 T 标志 , 尝试切换到设置了 TSS 的 T 标志的任务会产生一个 #DB .</li>
+<li>EFLAGS 的 RF 标志 , 压缩多个异常到一条指令 .</li>
+<li>EFLAGS 的 TF 标志 , 每执行一条指令 , 产生一个 #DB .</li>
+<li>断点指令 <code>INT3</code> , 产生一个 #BP , 切换程序控制到调试器任务或进程 .</li>
+<li>上一个分支的记录工具 , 记录最近一次的分支记录到上一次分支记录 ( last branch record , LBR ) 栈 MSR . 一条分支记录包括一个分支源和目的指令地址 , 将分支记录作为 branch trace message ( BTM ) 发送到系统总线 .</li>
+</ul>
+<p>这些组件允许在当前的程序或任务的上下文将调试器作为一个单独的任务或程序调用 , 下列条件可以用于调用调试器 :</p>
+<ul>
+<li>切换到一个特定的任务</li>
+<li>执行断点指令</li>
+<li>执行任何指令</li>
+<li>执行特定地址的指令</li>
+<li>读写特定内存地址 / 范围</li>
+<li>写入特定的内存地址 / 范围</li>
+<li>从特定 IO 地址 / 范围输入</li>
+<li>输出到特定 IO 地址 / 范围</li>
+<li>实处改变调试寄存器的内容</li>
+</ul>
+<h1 id="2-dr">2. DR</h1>
+<p>DR 时特权级资源 , 实地址模式 , SMM 或者 CPL = 0 的保护模式可以通过 <code>MOV</code> 指令访问寄存器 .</p>
+<p>DR 的基本功能时设置并监测最多 4 个断点 , 指明每个断点的下列信息 :</p>
+<ul>
+<li>产生断点的线性地址</li>
+<li>断点位置的长度 : 1 , 2 , 4 或 8 字节</li>
+<li>产生调试异常的地址必须执行的操作</li>
+<li>断点是否开启</li>
+<li>产生调试异常时 , 断点的条件是否存在</li>
+</ul>
+<p>DR 寄存器介绍如下 ：</p>
+<ul>
+<li>
+<p>DR0-DR3 , 调试地址寄存器 , 保存断点的 32 bit 线性地址 , 物理地址转换前进行断点比较 .</p>
+</li>
+<li>
+<p>DR4 和 DR5 , 开启调试扩展时保留 .</p>
+</li>
+<li>
+<p>DR6 , 调试状态寄存器 , 报告上一次调试异常产生时的调试条件 , 只有产生异常时才会更新这个寄存器 . 寄存器中的标志包含以下信息 :</p>
+<ul>
+<li>B0-B3 标志 , 指明 #DB 产生时 , 关联的断点条件是否满足 .</li>
+<li>BD ( debug register access detected ) 标志 , 指明指令流中的下一条指令访问了一个调试寄存器 .</li>
+<li>BS ( single step ) 标志 , 指令调试异常由单步执行模式触发 , 单步模式是特权级最高的 #DB 异常 .</li>
+<li>BT ( task switch ) 标志 , 表明 #DB 异常由切换到设置了 T 标志的任务产生 .</li>
+<li>RTM ( restricted transactional memory ) 标志 , 清除时表示开启 RTM 会话区域的高级调试时 , RTM 区域发生了 #DB 或者 #BP .</li>
+</ul>
+</li>
+<li>
+<p>DR7 , 开启或关闭断点 , 设置断点条件 , 寄存器中的标志和域控制下列设置 :</p>
+<ul>
+<li>L0 - L3 ( local breakpoint enable ) 标志 , 设置时开启当前任务的断点的断点条件 . 检测到一个断点条件 , 并且相关的 Ln 标志设置 , 产生一个 #DB .<br>
+每次任务切换处理器都会自动清除这些标志 , 避免新任务的断点条件 .</li>
+<li>G0 - G3 ( global breakpoint enable ) 标志 , 设置时开启所有任务的断点的断点条件 . 检测到一个断点条件 , 并且相关的 Gn 标志设置 , 产生一个 #DB . 任务切换时处理器不会清除这些标志 , 允许所有任务开启一个断点 .</li>
+<li>LE 和 GE ,( local and global exact breakpoint enable ) 标志 , 较新的处理器不支持 , 设置为 1 .</li>
+<li>RTM ( restricted transactional memory ) 标志 , 设置时开启 RTM 事务区域的高级调试  .</li>
+<li>GD ( general detect enable ) 标志 , 设置时开启 DR 保护 , 任何访问 DR 的 <code>MOV</code> 指令前都会产生一个 #DB 异常 . 检测到这种条件时 , 产生异常前设置 DR6 的 BD 标志 .</li>
+<li>R / W0 - R / W3 , 指明断点的断点条件 , 含义受 CR4.DE 的影响 .</li>
+<li>LEN0 - LEN3 , 指明对应断点地址寄存器中内存地址的大小 .</li>
+</ul>
+</li>
+</ul>
+<p>如果 RWn 是 00 ( 指令执行 ) , LENn 也应该是 00 , 使用其他的大小未定义 .</p>
+<p>如果一次访问中的任何字节在断点地址寄存器和 LENn 域指明的范围内 , 就会触发数据断点 .</p>
+<h1 id="3-调试异常">3. 调试异常</h1>
+<p>Intel 64 和 IA-32 架构有两个中断向量专用于处理调试异常 : vector 1 ( #DB ) 和 vector 3 ( #BP ) .</p>
+<h2 id="31-db--中断向量-1">3.1. #DB , 中断向量 1</h2>
+<p>调试异常的处理函数通常是一个调试器程序 , 或一个大的软件系统的一部分 .</p>
+<p>指令断点和一般检测条件导致 fault , 其他的调试异常条件导致 trap , 调试异常可能一次报告一个或者两个 .</p>
+<p><code>INT1</code> 指令产生一个 trap 类型的调试异常 , 硬件厂商可能使用这个指令进行硬件调试 , 因此 Intel 推荐软件厂商使用 <code>INT3</code> 指令产生软件断点 .</p>
+<p><img src="images/96017c7e330f2fe9e3cb621d53eba028460521a382917d2a33e76fc6619e3489.png" alt="picture 1"></p>
+<h3 id="311-指令断点异常条件">3.1.1. 指令断点异常条件</h3>
+<p>处理器试图执行的指令位于用于检测指令执行的断点地址寄存器指明的地址时 , 报告一个指令断点 , 执行断点处的目标指令前产生一个 fault 类型的 #DB .</p>
+<p>指令断点是优先级最高的调试异常 , 优先指令的译码或执行阶段检测到的任何其他异常处理 . 但是 , 如果一个指令断点紧跟在 <code>POP SS / MOV SS</code> 指令后 , 断点会被压缩 , 就像 EFLAGS.RF = 1 .</p>
+<p>由于指令断点的调试异常在指令执行前产生 , 如果异常处理函数没有移除指令断点 , 处理器恢复执行指令后 , 会再次检测到指令断点 , 产生另一个 #DB . 为了防止在一个指令断点循环 , Intel 64 和 IA-32 架构提供了 EFLAGS 的 RF 标志 , 设置时 , 处理器忽略指令断点 .</p>
+<p>所有的处理器按照下列防止管理 RF 标志 : 检查指令断点 , CS 限制 , FP 异常后 , 开始执行指令时清除 RF 标志 . 任务切换和 <code>IRETD / IRETQ</code> 指令会传递 TSS / stack 中的 RF 镜像到 EFLAGS 寄存器 .</p>
+<p>处理器调用一个处理函数时 , 建立压入栈中的 EFLAGS 镜像的 RF 标志 :</p>
+<ul>
+<li>对于指令断点产生的 #DB 外的任何 fault 类型的异常 , 压入栈中的 RF 值为 1 .</li>
+<li>对于任何重复的字符串指令的迭代后到达的中断 , 除了最后一次迭代 , 压入的 RF 值为 1 .</li>
+<li>对于任何重复的字符串指令的迭代产生的 trap 类型的异常 , 除了最后一次迭代 , 压入的 RF 值为 1 .</li>
+<li>对于其他情况 , 压入的 RF 值是调用处理函数时 EFLAGS.RF 的值 , 这些情况包括 :
+<ul>
+<li>指令断点产生的 #DB .</li>
+<li>指令间硬件产生的中断 .</li>
+<li>指令完成后产生的陷入类型的异常 .</li>
+<li>软件产生的中断 .</li>
+</ul>
+</li>
+</ul>
+<p>如上所述 , 处理器调用指令断点产生的调试异常的处理函数前不会设置 RF 标志 , 异常处理函数通过设置栈中 EFLAGS 镜像的 RF 标志防止指令断点的重复发生 . 处理器从异常处理函数返回时 , 导致返回的 <code>IRETD / IRETQ</code> 或任务切换拷贝 EFLAGS 镜像到 EFLAGS 的 RF 标志 , 处理器就会在执行下一条指令时忽略指令断点 .<br>
+设置 RF 标志不会阻止检测其他类型的调试异常条件 , 也不会阻止非调试异常的产生 .</p>
+<p>对于 Pentium 处理器 , 一个指令断点和另一个 fault 类型的异常同时产生时 , 第二个异常处理后 , 处理器可能产生一个假的调试异常 , 即使调试异常处理函数设置了 EFLAGS 镜像的 RF 标志 . 为了防止产生假的异常 , 所有的 fault 类型的异常处理函数需要设置 EFLAGS 镜像的 RF 标志 .</p>
+<h3 id="312-数据内存和-io-断点异常条件">3.1.2. 数据内存和 IO 断点异常条件</h3>
+<p>处理器试图访问断点地址寄存器中指明的内存或 IO 地址时 , 就会报告数据内存和 IO 断点 . 处理器执行进行访问的指令后产生异常 , 因此这些断点条件会产生陷入类型的异常 .</p>
+<p>由于数据断点是陷入 , 写内存的指令会在异常产生前覆盖原始数据 , 如果一个调试器需要保存写断点的内容 , 需要在设置断点前保存原始内容 . 处理函数可以在触发断点后报告保存的值 , 调试寄存器中的地址可以用于定位触发断点的指令保存的新值 .</p>
+<p>如果快速字符串操作的字符串指令迭代期间检测到一个数据断点 , 调试异常的传递可能推迟到对应的迭代组完成后 .</p>
+<p>对于产生 IO 断点调试异常的重复的 <code>INS</code> 和 <code>OUTS</code> 指令 , 处理器在第一次迭代完成后产生异常 . 重复的 <code>INS</code> 和 <code>OUTS</code> 指令在访问内存地址断点位置的迭代后产生数据断点调试异常 .</p>
+<p>如果 <code>MOV</code> 或 <code>POP</code> 指令加载了 SS 寄存器 , 遇到一个数据断点 , 产生的调试异常在下一条指令完成后传递 .</p>
+<p>任何挂起的数据或 IO 断点在传递异常时都会丢失 , 例如 , 如果一个 #MC 异常在包含数据断点的指令后发生 ( 在传递调试异常前 ) , 数据断点就会丢失 . 如果加载 SS 寄存器的 <code>MOV</code> 或 <code>POP</code> 指令遇到一个数据断点 , 如果下一条指令导致一个 fault , 数据断点就会丢失 .</p>
+<p><code>INT n</code> , <code>INT3</code> 或 <code>INTO</code> 产生的事件不会导致数据断点的丢失 . 如果一个加载 SS 寄存器的 <code>MOV</code> 或 <code>POP</code> 指令遇到一个数据断点 , 并且下一条指令是软件中断 ( <code>INT n</code> , <code>INT3</code> , 或 <code>INTO</code> ) , 数据断点导致的 #DB 异常会在切换到软件中断处理函数后传递 . #DB 处理函数需要考虑 #DB 可能在调用软件中断处理函数后传递的事实 , 尤其是识别数据断点和传递 #DB 之间 , CPL 可能已经改变 .</p>
+<h3 id="313-一般检测的异常条件">3.1.3. 一般检测的异常条件</h3>
+<p>设置 DR7 的 GD 标志时 , 如果 DR 正在被另一个应用 , 比如模拟器或调试器 , 使用 , 处理器试图访问任何 DR 都会产生一般检测的调试异常 . 这个保护特性保证在需要时能够完全控制 DR , 调试异常处理函数可以检查 DR6 的 BD 标志检测这个条件 . 处理器在执行访问 DR 的 <code>MOV</code> 指令前产生一个 fault 类型的异常 .</p>
+<h3 id="314-单步异常条件">3.1.4. 单步异常条件</h3>
+<p>如果处理器在执行指令时检测到设置了 EFLAGS 寄存器的 TF 标志 , 就会产生一个陷入类型的单步调试异常 , 因为异常在指令执行后产生 . 处理器不会在设置 TF 标志的指令后产生异常 .</p>
+<p>处理器调用异常处理函数前清除 TF 标志 , 如果任务切换时 TSS 设置了 TF 标志 , 新任务执行第一条指令后产生异常 .</p>
+<p>任务内的特权级改变不会清除 TF 标志 , <code>INT n</code> , <code>INT3</code> 和 <code>INTO</code> 指令会清除这个标志 . 为了保证安全 , OS 必须在每一个单步陷入后检查 CPL , 判断当前的特权级是否应该继续单步 .</p>
+<p>中断特权级保证发生外部中断时 , 单步停止 . 外部中断和单步中断同时一起时 , 单步异常优先处理 . 这个操作清除 TF 标志 .<br>
+保存返回地址或者切换任务后 , 执行单步处理函数的第一条指令前检查外部的中断输入 , 如果外部中断仍然挂起 , 进行处理 . 外部中断处理函数不会运行在单步模式 , 要单步执行一个中断处理函数 , 单步执行调用中断处理函数的 <code>INT n</code> 指令 .</p>
+<p>如果 EFLAGS.TF = 1 时 <code>MOV</code> 或 <code>POP</code> 指令加载 SS 寄存器 , <code>MOV</code> 或 <code>POP</code> 指令后不会产生单步调试异常 .</p>
+<h3 id="315-任务切换异常条件">3.1.5. 任务切换异常条件</h3>
+<p>如果设置了新任务的 TSS 的 T 标志 , 任务切换后处理器产生一个调试异常 . 异常在程序控制传给新的任务后 , 执行新任务的第一条指令前产生 . 异常处理函数可以检查 DR6.BT 标志检测这个条件 .</p>
+<p>如果 IDT 的第一项 #DB 是一个人物们 , 对应的 TSS 不能设置 T 标志 , 否则会导致处理器处于循环状态 .</p>
+<h2 id="32-bp--中断向量-3">3.2. #BP , 中断向量 3</h2>
+<p>#BP 由 <code>INT3</code> 指令产生 , 是调试器挂起程序执行 , 检查寄存器和内存地址的机制 , 对于断点调试器十分有用 , 因为断点异常可以调用单独的异常处理函数 .<br>
+需要设置的断点多于调试寄存器时 , 或者开发时需要放置断点在程序的源码时 , 断点异常也十分有用 .</p>
+<h2 id="41-调试异常--断点异常和受限事务内存--rtm-">4.1. 调试异常 , 断点异常和受限事务内存 ( RTM )</h2>
+<p>RTM 是一个指令集接口 , 允许软件使用 <code>XBEGIN</code> 和 <code>XEND</code> 指令标识事务区域 ( 或者临界区域 ) .</p>
+<p>一个 RTM 事务区域的执行以 <code>XBEGIN</code> 指令开始 , 如果区域的执行成功到达一个 <code>XEND</code> 指令 , 处理器保证区域内发生的所有内存操作就像是一瞬间发生的 , 从其他的逻辑处理器看时 .<br>
+如果处理器无法原子的提交所做更改 , RTM 事务区域的执行无法成功 . 这种情况发生时 , 处理器回退执行 , 即事务终止 , 处理器丢弃区域内执行的所有更改 , 恢复状态到执行没有发生时 , 恢复执行 <code>XBEGIN</code> 指令指明的 fallback 指令地址 .</p>
+<p>如果 RTM 事务区发生了 #DB 或 #BP , 事务终止 , 处理器设置 EAX[4] , 不会传递异常 .</p>
+<p>软件可以开启 RTM 事务区的高级调试 , RTM 事务区域内 #DB 或 #BP 导致的事务终止不会从 <code>XBEGIN</code> 指令指明的 fallback 地址恢复执行 , 而是在 <code>XBEGIN</code> 指令恢复执行 , 并传递一个 #DB , 这种 #DB 会清除 DR6.RTM[bit 16] .</p>
+<h1 id="5-上一个分支--中断--和异常记录">5. 上一个分支 , 中断 , 和异常记录</h1>
+<p>P6 处理器引入了在执行的分支 , 中断 , 异常设置断点 , 从一个分支单步执行到下一个的能力 ; 更新的处理器允许在内存中的分支轨迹存储缓冲区 ( branch trace store , BTS ) 记录分支信息 .</p>
+<p>17 章有很多部分介绍了这种功能 , 不同的处理器架构在不同的部分介绍 , 这个文档只介绍 Skylake . 这一部分介绍共同的特性 , 通常由 IA32_DEBUGCTL MSR 控制 .</p>
+<h2 id="51-ia32_debugctl-msr">5.1. IA32_DEBUGCTL MSR</h2>
+<p>IA32_DEBUGCTL MSR 位于地址 01D9H , 包括以下标志 :</p>
+<ul>
+<li>LBR ( last branch / interrupt / exception ) 标志 , 设置时处理器记录最近分支 , 中断 , 或 / 和异常的执行轨迹到上一个分支记录 ( LBR ) 栈中 .</li>
+<li>BTF ( single-step on branches ) 标志 , 设置时 , 处理器将 EFLAGS 寄存器的 TF 标志作为 &ldquo;单步分支&rdquo; , 而不是 &ldquo;单步指令&rdquo; , 允许处理器单步执行分支 .</li>
+<li>TR ( trace message enable ) 标志 , 设置时 , 开启分支轨迹消息 , 处理器检测到分支 , 中断或异常时 , 将分支记录作为一个分支轨迹消息 ( BTM ) 发送到系统总线 .</li>
+<li>BTS ( branch trace store ) 标志 , 设置时 , BTS 组件记录 BTM 到内存驻留 BTS 缓冲区 , 作为 DS 保存区域的一部分 .</li>
+<li>BTINT ( branch trace interrupt ) 标志 , 设置时 , BTS 组件在 BTS 缓冲区满时产生一个中断 ; 清除时 , BTM 以循环的方式记录 BTM 到缓冲区 .</li>
+<li>BTS_OFF_OS ( branch trace off in privileged code ) 标志 , 设置时 , CPL = 0 时忽略 BTS 或 BTM .</li>
+<li>BTS_OFF_USR ( branch trace off in user code ) 标志 , 设置时 , CPL &gt; 0 时忽略 BTS 或 BTM .</li>
+<li>FREEZE_LBRS_ON_PMI 标志 , 设置时 , 硬件 PMI 请求会冻结 LBR 栈 .</li>
+<li>FREEZE_PERFMON_ON_PMI 标志 , 设置时 , PMI 请求冻结性能计数器 .</li>
+<li>FREEZE_WHILE_SMM , 设置时 , 传递 SMI 时 , 处理器切换控制到 SMI 处理函数前清除 IA32_PERF_GLOBAL_CTRL 的所有使能位 , 保存 IA32_DEBUGCTL 的内容 , 关闭 LBT , BTF , TR , BTS 域 .<br>
+随后 , SMI 处理函数发出 <code>RSM</code> 完成服务后 , 设置 IA32_PERF_GLOBAL_CTRL 的使能位为 1 , 恢复 SMI 切换前保存的 IA32_DEBUGCTL 副本 .</li>
+<li>RTM , 设置时 , 如果同时设置了 DR7.RTM , 开启 RTM 事务区域的高级调试 .</li>
+</ul>
+<h2 id="52-分支--异常--和中断的监测">5.2. 分支 , 异常 , 和中断的监测</h2>
+<p>IA32_DEBUGCTL MSR 的 LBR 标志设置时 , 处理器自动记录分支 , 中断和异常 ( 除了调试异常 ) 的分支记录到 LBR 栈 MSR .</p>
+<p>处理器产生一个 #DB , 执行异常处理函数前自动清除 LBR 标志 , 不会清除之前保存的 LBR 栈 MSR .</p>
+<p>调试器可以使用 LBR 栈中的线性地址重新设置断点地址寄存器中的地址 , 允许从特定 bug 反向追踪到源码 .</p>
+<p>某些处理器如果清除了 LBR 标志 , 设置 TR 标志 , 处理器会继续更新 LBR 栈 MSR , 这是因为这些处理器产生 BTM / BTS 记录过程中使用 LBR 栈中的项 , #DB 不会自动清除 TR 标志 .</p>
+<h2 id="53-分支的单步执行">5.3. 分支的单步执行</h2>
+<p>软件同时设置 IA32_DEBUGCTL MSR 的 BTF 标志和 EFLAGS 的 TF 标志时 , 处理器只会在导致分支的指令后产生一个单步调试异常 , 允许调试器单步执行分支导致的控制转换 , 隔离一个 bug 到特定的代码块 .</p>
+<p>处理器产生调试异常时自动清除 BTF 标志 , 调试器恢复程序执行时 , 要继续单步执行分支 , 必须设置 BTF 标志 .</p>
+<h2 id="54-分支轨迹消息">5.4. 分支轨迹消息</h2>
+<p>设置 IA32_DEBUGCTL MSR 的 TR 标志开启 BTM , 处理器检测到一个分支 , 异常或中断时 , 将一个分支记录作为一个 BTM 发送到系统总线 . 监视系统总线的调试设备可以读取这些信息 , 和分支 , 中断 , 异常事件的操作同步 .</p>
+<h2 id="55-分支轨迹存储">5.5. 分支轨迹存储</h2>
+<p>分支 , 中断和异常的轨迹提供了确定达到特定代码位置执行的代码路径 , 对于调试代码十分有用 . IA32_DEBUGCTL MSR 的 LBR 标志提供了记录分支 , 中断和异常的机制 , 将其保存到 LBR 栈 MSR , 并且通过 BTM 发送到系统总线 .<br>
+BTS 机制提供了保存分支记录到内存驻留 BTS 缓冲区的机制 , 作为 DS 保存区域的一部分 . BTS 缓冲区可以配置为循环的 , 也可以配置为缓冲区满时产生一个中断 .</p>
+<p>单独设置 BTS 可能严重降低处理器的性能 ,  CPL 限定的分支轨迹保存机制可以减轻发送 / 记录 BTM 导致的性能下降 .</p>
+<h2 id="56-cpl-限定的分支轨迹机制">5.6. CPL 限定的分支轨迹机制</h2>
+<p>CPL 限定的分支轨迹机制只有部分处理器可用 , 系统软件可以选择性的指明发送 / 保存 BTM 需要的特权级 .</p>
+<h2 id="57-收到-pmi-时冻结-lbr-和性能计数器">5.7. 收到 PMI 时冻结 LBR 和性能计数器</h2>
+<p>很多情况都会产生性能监视中断 ( PMI ) , 处理函数需要确定原因 . IA21_DEBUGCTL 中的接口可以降低服务 PMI 的时间开销 :</p>
+<ul>
+<li>收到 PMI 时冻结 LBR , 允许 PMI 服务例程确保 LBR 栈中的内容和目标负载相关 , 不会被处理 PMI 的分支更改 .</li>
+<li>收到 PMI 时冻结 PMC , 允许 PMI 服务例程确保性能计数器中的内容和目标负载相关 , 不会被 PMI 服务例程内的活动修改 .</li>
+</ul>
+<p>满足下列条件时 , 收到 PMI 时冻结 LBR 和 PMC :</p>
+<ul>
+<li>一个性能计数器溢出 , 并且编程设定溢出时发送 PMI .</li>
+<li>PEBS 缓冲区快满 , 到达了中断的阈值 .</li>
+<li>BTS 缓冲区快满 , 达到了中断的阈值 .</li>
+</ul>
+<h2 id="58-lbr-栈">5.8. LBR 栈</h2>
+<p>Intel 处理器支持 LBR 栈和 top-of-stack ( TOS ) 指针 MSR , 但是 LBR 栈中 MSR 的数量和 TOS 指针值的有效范围可能不同 .</p>
+<p>上一个分支记录机制不但追踪分支指令 ( <code>JMP</code> , <code>Jcc</code> , <code>LOOP</code> , <code>CALL</code> ) , 还会记录改变指令指针的操作 ( 外部中断 , 陷入和 fault ) .<br>
+分支记录机制通常使用一组 MSR , 称作上一个分支记录 ( LBR ) 栈 .</p>
+<ul>
+<li>LBR 栈 , 由 N 对 MSR 组成 , 保存最近分支的源和目的地址 :
+<ul>
+<li>MSR_LASTBRANCH_0_FROM_IP 到连续的 N-1 个 MSR 地址保存源地址 .</li>
+<li>MSR_LASTBRANCH_0_TO_IP 到连续的 N-1 个 MSR 地址保存目的地址 .</li>
+</ul>
+</li>
+<li>上一个分支记录 TOS 指针 , TOS 指针 MSR 的最低 M 位包含一个指向包含最近记录的分支 , 中断或异常的 M 位指针 .</li>
+</ul>
+<h3 id="581-lbr-栈和-intel-64-处理器">5.8.1. LBR 栈和 Intel 64 处理器</h3>
+<p>LBR MSR 都是 64 位的 , 64 位模式保存完整的地址 ; 64 位模式外 , 高 32 位为 0 .</p>
+<p>软件需要查询 IA32_PERF_CAPABILITIES[5:0] 查询 LBR 栈中保存的地址格式 , 定义了 4 种格式 :</p>
+<ul>
+<li>000000B , 32 位记录格式 , 保存源 / 目的地址的 32 位偏移到当前的 CS .</li>
+<li>000001B , 64 位 LIP 记录格式 , 保存源 / 目的地址的 64 位线性地址 .</li>
+<li>000010B , 64 位 EIP 记录格式 , 保存源 / 目的地址的 64 位偏移 ( 有效地址 ) .</li>
+<li>000011B , 64 位 EIP 记录格式和标志 , 保存源 / 目的地址的 64 位偏移 ( 有效地址 ) , 错误预测信息报告在 LBR 栈中 FROM 寄存器的高位 .</li>
+</ul>
+<p>其余的格式和 000011B 类似 , 只是保存更多的额外信息 , 包括 :</p>
+<ul>
+<li>TSX 信息</li>
+<li>报告上次 LBR 更新后逝去的 cycle 数</li>
+<li>保存信息到 LBR_INFO MSR 中</li>
+</ul>
+<h3 id="582-上一个异常记录和-intel-64-架构">5.8.2. 上一个异常记录和 Intel 64 架构</h3>
+<p>Intel 64 和 IA-32 架构还提供了保存异常或中断前的最后一次分支的分支记录的 MSR , 64 位模式记录是 64 位的 , 兼容模式下高 32 位为 0 .</p>
+<h2 id="59-bts-和-ds-保存区域">5.9. BTS 和 DS 保存区域</h2>
+<p>调试存储 ( debug store , DS ) 特性标志指明处理器是否提供了 DS 机制 , DS 机制允许 :</p>
+<ul>
+<li>保存 BTM 到一个内存驻留 BTS 缓冲区 .</li>
+<li>处理器基于事件取样 ( processor event-based sampling , PEBS ) 也使用 DS 保存区域 .</li>
+</ul>
+<p>DS 保存区域时软件设计的内存区域 , 用于收集下列两类信息 :</p>
+<ul>
+<li>分支记录 , 任何时候检测到分支 , 中断或异常 , 都会保存一个分支记录到 DS 保存区域的 BTS 缓冲区 .</li>
+<li>PEBS 记录 , 配置一个性能计数器给 PEBS , 计数器溢出时 , 保存一个 PEBS 记录到 DS 保存区域 . 记录包含导致计数器溢出的下一个 PEBS 事件发生时处理器的状态 ( 8 个通用寄存器 , EIP 寄存器 , EFLAGS 寄存器 ) .<br>
+状态信息记录后 , 计数器自动重置为特定值 , 事件计数再次开始 .</li>
+</ul>
+<p>DS 保存区域分为三部分 : 缓冲区管理区域 , BTS 缓冲区 , PEBS 缓冲区 .<br>
+缓冲区管理区域用于定义 BTS 和 PEBS 缓冲区的位置和大小 , 处理器使用缓冲区管理区追踪分支和 / 或对应缓冲区中的 PEBS 记录 , 并且记录性能计数器的重置值 . DS 缓冲区管理区域的第一个字节的线性地址通过 IA32_DS_AREA MSR 指明 .</p>
+<hr>
+<p>缓冲区管理区域包括以下域:</p>
+<ul>
+<li>BTS 缓冲区基地址 , BTS 缓冲区第一个字节的线性地址</li>
+<li>BTS 索引 , 下一条 BTS 记录要写入的线性地址</li>
+<li>BTS 绝对最大值 , BTS 缓冲区外的第一个字节的线性地址</li>
+<li>BTS 中断阈值 , 产生中断的 BTS 记录的线性地址</li>
+<li>PEBS 缓冲区基地址</li>
+<li>PEBS 索引</li>
+<li>PEBS 绝对最大值</li>
+<li>PEBS 中断阈值</li>
+<li>PEBS 计数器重置值</li>
+</ul>
+<p>BTS 缓冲区中的记录长度为 12 byte , 包括以下域 :</p>
+<ul>
+<li>last branch from , 分支 , 中断或异常产生分支的指令的线性地址 .</li>
+<li>last branch to , 分支目标 , 异常或中断处理函数服务例程的第一条指令的线性地址 .</li>
+<li>branch predicted , bit 4 指明分支是否被预测到 .</li>
+</ul>
+<h3 id="591-建立-ds-保存区域">5.9.1. 建立 DS 保存区域</h3>
+<p>DS 保存区域必须在内存中按照下列方式建立 :</p>
+<ol>
+<li>在内存中创建 DS 缓冲区管理信息 .</li>
+<li>写入 DS 缓冲区管理区域的基线性地址到 IA32_DS_AREA MSR .</li>
+<li>在 xAPIC LVT 为 fixed delivery and edge sensitive 创建性能计数器项 .</li>
+<li>在 IDT 创建和 xAPIC LVT 中性能计数器项相关的 vector 的中断处理函数 .</li>
+<li>编写处理中断的中断服务例程 .</li>
+</ol>
+<p>DS 保存区域需要满足以下限制 :</p>
+<ul>
+<li>三个 DS 保存区域需要从一个 non-paged pool 分配 , 标记为 accessed 和 dirty , OS 需要负责保留包含缓冲区的内存页 present , 并且标记为 accessed 和 dirty .</li>
+<li>DS 保存区域可以大于一个页 , 但是页面必须映射到连续的线性地址 .</li>
+<li>推荐 BTS 和 PEBS 缓冲区的大小是对应记录大小的整数倍 .</li>
+<li>精确的事件记录缓冲区应该足以保存等待服务中断时可能发生的精确的事件记录 .</li>
+<li>DS 保存区应该位于内核空间 , 不能和代码位于同一个页 , 避免触发自修改代码的行为 .</li>
+<li>缓冲区没有内存类型的限制 , 处于性能考虑 , 推荐使用 WB 内存类型 .</li>
+<li>DS 保存区域活跃时 , 必须防止系统进入 A20M 模式 , 缓冲区内的所有地址的 bit 20 必须为 0 .</li>
+<li>所有的进程必须映射包含缓冲区的页到相同的物理地址 , 保证对于 CR3 的更改不会改变 DS 地址 .</li>
+<li>DS 保存区域预期只在开启 APIC 的系统上使用 , APIC 中的 LVT 性能计数器项必须初始化使用中断门而不是陷入门 .</li>
+</ul>
+<h3 id="592-建立-bts-缓冲区">5.9.2. 建立 BTS 缓冲区</h3>
+<p>三个标志 TR , BTS , BTINT 控制分支记录的生成和保存到 BTS 缓冲区 .<br>
+TR 开启 BTM 的生成 , BTS 决定是发送 BTM 到系统总线 ( 清除 ) 还是保存到 BTS 缓冲区 ( 设置 ) .<br>
+BTM 无法在发送到系统总线的同时保存到 BTS 缓冲区 .<br>
+BTINT 标志开启 BTS 缓冲区满时产生中断 , 清除时 , 缓冲区是一个循环缓冲区 .</p>
+<p>建立一个 DS 保存区 , 收集分支记录到 BTS 缓冲区的操作如下 :</p>
+<ol>
+<li>设置 DS 缓冲区管理区域的 BTS 缓冲区基地址 , BTS 索引 , BTS 绝对最大值 , BTS 中断阈值 , 在内存建立 BTS 缓冲区 .</li>
+<li>设置较新的处理器的 IA32_DEBUGCTL 的 TR 和 BTS 标志 .</li>
+<li>如果使用循环缓冲区 , 清除 IA32_DEBUGCTL 的 BTINT 标志 .</li>
+</ol>
+<h3 id="593-编写-ds-中断服务例程--isr-">5.9.3. 编写 DS 中断服务例程 ( ISR )</h3>
+<p>BTS , 非精确的基于事件取样 ( non-precise event-based sampling ) 和 PEBS 组件共享同样的中断向量和 ISR . 要处理三种中断 , DS ISR 必须包含分开的处理函数例程 . 通过下列方式编写一个 DS ISR :</p>
+<ul>
+<li>ISR 必须是内核驱动的一部分 , 运行在特权级 0 ,  保证缓冲区存储区域的安全 .</li>
+<li>三种组件共享中断向量 , DS ISR 必须检查所有可能的中断原因 , 传递控制给合适的处理函数 .</li>
+<li>MP 系统中的每个处理器都必须有单独的保存区域 , 缓冲区和状态 .</li>
+<li>一进入 ISR , 应该关闭分支踪迹信息和 PEBS , 防止访问 DS 保存区域的竞争条件 . 退出 ISR 时需要恢复到原来的值 .</li>
+<li>缓冲区满时 , 处理器不会关闭 DS 保存区域 .</li>
+<li>读取合适缓冲区的内容后 , 直到当前索引 , 不包括缓冲区的当前索引 , ISR 必须重置缓冲区的索引为缓冲区的其实地址 .</li>
+<li>ISR 必须清除性能计数器 LVT 项中的掩码 .</li>
+<li>如果 ISR 正在处理 PEBS 导致的 PMI 溢出 , 必须通过 IA32_PERF_GLOBAL_CTRL / IA32_PERF_GLOBAL_OVF_CTRL 重新开启计数器 .</li>
+<li>Pentium 4 和 Xeon 处理器收到中断会屏蔽 PMI , 退出中断处理函数时需要清除 .</li>
+</ul>
+<h1 id="6-skylake-架构的上一次分支--调用栈--中断和异常记录">6. Skylake 架构的上一次分支 , 调用栈 , 中断和异常记录</h1>
+<p>基于 Skylake 微架构的处理器提供了一些保存上一次分支记录的扩展 :</p>
+<ul>
+<li>新 LBR 格式 : IA32_PERF_CAPABILITIES[5:0] = 00101b .</li>
+<li>每个 LBR 栈包括一个 MSR 三元组 :
+<ul>
+<li>MSR_LASTBRACH_x_FROM_IP</li>
+<li>MSR_LASTBRANCH_x_TO_IP</li>
+<li>MSR_LBR_INFO_x , 保存分支预测标志 , TSX 信息 , 逝去的 cycle 数据 .</li>
+</ul>
+</li>
+<li>LBR 栈的大小增加到 32 .</li>
+</ul>
+<h1 id="7-tsc">7. TSC</h1>
+<p>Intel 处理器定义了一个时间戳计数器机制 , 可以用于监测和标识处理器事件发生的相对时间 . 计数器的架构包含下列组件 :</p>
+<ul>
+<li>TSC 标志 , 指示 TSC 是否可用 .</li>
+<li>IA32_TIME_STAMP_COUNTER MSR , 作为计数器使用的 MSR .</li>
+<li><code>RDTSC</code> 指令 , 读取 TSC 的指令 .</li>
+<li>TSD 标志 , 控制寄存器的标志位 , 用于开启或关闭 TSC .</li>
+</ul>
+<p>TSC 是一个 64-bit 计数器 , RESET 后重置为 0 , 即使处理器由 <code>HLT</code> 指令或者外部引脚 STPCLK# 停止 , 计数依然增加 . 外部的 DPSLP# 引脚可能停止 TSC .</p>
+<p>不同的处理器以不同的方式增加 TSC :</p>
+<ul>
+<li>较老的处理器 , TSC 随着每个内部处理器时钟周期增加 , 后者通过当前的核心时钟和总线时钟的比率确定 , Intel Speedstep 计数可能影响处理器时钟 .</li>
+<li>较新的处理器 , TSC 以固定的比率增加 . 比率可以是处理器的最大核心时钟和总线时钟的比率 , 或者是处理器启动时的最大解析频率 . 某些处理器的 TSC 频率可能和品牌字符串中的频率不同 .<br>
+特定的处理器配置决定了具体行为 , 不变的 TSC 行为保证每一个时钟周期是相同的 , 支持将 TSC 作为一个 wall clock 使用 , 即使处理器核心改变了频率 .</li>
+</ul>
+<p><code>RDTSC</code> 指令返回的值至少在 10 年内不会重复 , 可以由运行在任何特权级的软件使用 , 也可以在 virtual-8086 模式下执行 . TSD 标志可以限制指令只能由运行在特权级 0 的应用执行 .</p>
+<p><code>RDMSR</code> 和 <code>WRMSR</code> 也可以用于读写 TSC , 某些处理器只能写低 32 位 , 有些寄存器可以写全部 64 位 .</p>
+<h2 id="71-invariant-tsc">7.1. invariant TSC</h2>
+<p>较新的处理器可能支持不变的 TSC 特性 , 在所有的 ACPI P- , C- 和 T-State 下以固定的比率运行 .</p>
+<h2 id="72-ia32_tsc_aux-寄存器和-rdtscp-支持">7.2. IA32_TSC_AUX 寄存器和 RDTSCP 支持</h2>
+<p>Nehalem 架构提供了一个辅助 TSC 寄存器 , IA32_TSC_AUX , 和 IA32_TSC 一起使用 , 由特权软件初始化为一个签名值 ( 比如逻辑处理器的 ID ) .</p>
+<p><code>RDTSCP</code> 可以在一个原子操作内读取 64-bit TS 和签名值 , 前者保存在 EDX:EAX , 后者保存到 ECX . 原子性确保读取 TSC 和 TSC_AUX 之间不会发生上下文的切换 .</p>
+<p>用户模式软件可以使用 <code>RDTSCP</code> 检测连续读取 TSC 之间是否发生了 CPU 迁移 , 也可以用于调整 NUMA 系统内的 per-CPU 差异 .</p>
+<h2 id="73-tsc-调整">7.3. TSC 调整</h2>
+<p>软件可以使用 <code>WRMSR</code> 指令写入 IA32_TIME_STAMP_COUNTER MSR 修改逻辑处理器的 TSC 值 , 要同步多个逻辑处理器的 TSC 值 , 软件必须写入每个逻辑处理器 . 软件可能很难保证某个时刻所有的逻辑处理器都有相同的值 .</p>
+<p>IA32_TSC_ADJUST MSR 可以简化这个同步调整操作 , 每个逻辑处理器都维护自己的 IA32_TSC_ADJUST , 并且按照以下方式使用 :</p>
+<ul>
+<li>重置后 , IA32_TSC_ADJUST MSR 为 0 .</li>
+<li>如果写入 IA32_TIME_STAMP_COUNTER 的操作和 TSC 相比增加了值 X , 逻辑处理器也增加值 X 到 IA32_TSC_ADJUST .</li>
+<li>如果写入 IA32_TSC_ADJUST 的操作向 MSR 增加了值 X , 逻辑处理器也增加值 X 到 TSC .</li>
+</ul>
+<p>和 TSC 不同 , IA32_TSC_ADJUST MSR 的值只会随着 <code>WRMSR</code> 改变 , 不会随着时间的消逝改变 , 因此软件可以向 IA32_TSC_ADJUST 写入相同的值调整 TSC .</p>
+<h2 id="74-invariant-time-keeping">7.4. invariant time-keeping</h2>
+<p>不变的 TSC 基于不变的时间保持硬件 ( 称作 always running timer , ART ) , 运行在核心水晶时钟频率 .</p>
+<h1 id="8-intel-资源主管技术监测特性">8. Intel 资源主管技术监测特性</h1>
+<p>Intel Resource Director Technology ( Intel RDT ) 特性提供了一组监测技术 , 包括 cache 监测技术 ( CMT ) 和内存带宽监测 ( MBM ) . Xeon E5 v3 引入了每个逻辑处理器的资源监测能力 , 测量共享资源 .</p>
+<p>CMT 允许 OS , 管理员或类似的系统管理代理确定平台上运行的应用对 cache 的使用情况 .<br>
+MBM 基于 CMT 架构 , 允许监测某一级到下一级 cache 的带宽 , 比如 L3 到系统内存 .</p>
+<p>上述的监测机制提供了下列主要共享的基本架构特性 :</p>
+<ul>
+<li>枚举平台可用的监测机制 .</li>
+<li>枚举每个一个子特性的细节的框架 .</li>
+<li>OS 或管理程序为每一个要调度执行在逻辑处理器的软件线程指明一个软件定义的 ID 的机制 , 这些标识符称作资源监视 ID ( RMID ) .</li>
+<li>硬件内监视 cache 占有率和带宽数据的机制 .</li>
+<li>软件执行期间的任意时刻 , OS 或管理程序读取收集的某个给定软件 ID 的度量信息比如 L3 占有率或内存带宽的机制 .</li>
+</ul>
+<h2 id="81-cmt-和-mbm-简介">8.1. CMT 和 MBM 简介</h2>
+<p>共享资源的监测机制通过资源监视 ID ( RMID ) 提供了应用和逻辑处理器之间的一层抽象 , 系统中的每个逻辑处理器可以独立分配一个 RMID , 或者多个逻辑处理器可以分配相同的 RMID . 对于每个逻辑处理器 , 某个时间只有一个 RMID 活跃 , IA32_PQR_ASSOC MSR 指明逻辑处理器的活跃 RMID . 软件可以修改这个 MSR , 改变活跃的 RMID .</p>
+<p>底层的平台共享资源监视硬件根据 RMID 记录 cache 数据 , 比如使用率 , 内存访问导致的 miss , 并通过一个计数器寄存器 ( IA32_QM_CTR ) 报告监视到的数据 .<br>
+读取数据前 , 软件必须通过 IA32_QM_EVTSEL 选择要报告的数据类型和 RMID .</p>
+<p>处理器对于 CMT 和 BMB 的支持 , 对于监测资源类型和能力的支持都需要通过 <code>CPUID</code> 指令获取 .</p>
+<h2 id="82-监测资源-rmid-的关联">8.2. 监测资源 RMID 的关联</h2>
+<p>软件使用监测特性的第一步是关联一个 RMID 到一个软件线程 ( 或某个应用的一组线程 ) , 这个过程对于所有的监测特性 ( CMT , MBM ) 都相同 ; 从 package 内的任何逻辑处理器的角度看 , 一个给定的 RMID 含义相同 . 也就是说 , 线程和 RMID 是一一对应的关系 , 从而通过 RMID 获取 cache 占用率 , 内存带宽或者其他的监测信息 .</p>
+<p>应用线程和 RMID 的关联要求 OS 在上下文切换时编程 per-logical-processor MSR IA32_PQR_ASSOC , MSR 指明监测硬件用于标记内部操作的活跃 RMID . RMID 的宽度和处理器的型号相关 , 在物理封装内全局有效 .</p>
+<h2 id="83-监测资源的选择和报告架构">8.3. 监测资源的选择和报告架构</h2>
+<p>CMT 和其他相关的特性的报告机制通过一对 MSR 导出 , 可以用于读取不同的测量数据 , 数据基于 per-RMID 报告 . 这些事件不会触发 APIC 中断 , 只是显式用于取样计数 .</p>
+<p>共享资源监视特性的 MSR 对和性能监视计数器独立 , 软件可以同时使用监视特性和性能监视计数器 .</p>
+<p>访问汇总的监测信息通过下列可编程的监测 MSR 完成 :</p>
+<ul>
+<li>
+<p>IA32_QM_EVTSEL , 和可编程的性能监视的事件选择 MSR 类似 , IA32_QM_EVTSEL.EvtID 指明支持的资源类型的事件代码 , 供硬件报告和 IA32_QM_EVTSEL.RMID 相关的监测数据 . 支持的事件编码包括 :</p>
+<p><img src="images/19d1403b35df1427a1c23d7ad8bf349a0cfed716b8b4c655702c0ac947f6046a.png" alt="picture 1"></p>
+</li>
+<li>
+<p>IA32_QM_CTR , 可用时报告监控数据 , IA32_QM_CTR.Error 表明不支持软件配置的 RMID 或事件类型 ; IA32_QM_CTR.Unavailable 表明 RMID 的监测数据不可用 ; IA32_QM_CTR.data 只有 error 和 unavailable 清除时有效 , CMT 可以转化为 cache 占用或带宽数据 .</p>
+</li>
+</ul>
+<h2 id="84-监测编程需要考虑的事">8.4. 监测编程需要考虑的事</h2>
+<p>系统软件编程 IA32_QM_EVTSEL , 然后读取 IA32_QM_CTR 获取返回的数据 . 具体使用时 , 需要考虑下列情况 :</p>
+<ul>
+<li>监测动态配置 , IA32_QM_EVTSEL 和 IA32_PQR_ASSOC 都能通过 <code>RDMSR</code> / <code>WRMSR</code> 读写 , 写入保留位或者 RMID 超过 maxRMID 时会产生 #GP .</li>
+<li>监测节电特性的操作 , 一些高级电源管理特性可能收缩 L3 cache , 减少 CMT 占用计数 , 也可能刷出 L3 数据影响 MBM 带宽 .</li>
+<li>监测其他运行模式的操作 , 传递 SMI 的过程中 IA32_PQR_ASSOC 和监测计数器的状态保持不变 , 因此 SMM 处理函数和 SMM 处理函数的数据可能对监测数据表现出虚假的贡献 .<br>
+SMM 可以在进入 SMM 时保存配置的 QOS 监测状态 , 退出时恢复 , 减少对于监测数据的影响 .</li>
+<li>监测 RAS 特性的操作 , 总体而言 , Intel 平台的 Reliability , Availability , Serviceability ( RAS ) 特性不会影响共享资源的监测计数 . 软件 RAS 特性导致的内存拷贝 , cache 访问可能影响共享资源监视计数器 .</li>
+</ul>
+<h1 id="9-intel-rdt-分配特性">9. Intel RDT 分配特性</h1>
+<p>RDT 特性提供了一组分配功能 , 包括 cache 分配技术 ( CAT ) 和代码数据分级 ( CDP ) .</p>
+<h2 id="91-cat-简介">9.1. CAT 简介</h2>
+<p>OS , 管理程序 / 虚拟机管理者 ( VMM ) 可以通过 CAT 指明应用可以填充的 cache 空间 ( 作为硬件的提示信息 &ndash; 一些特性如电源管理可能覆盖 CAT 设置 ) .</p>
+<p>CAT 包含以下主要特性 :</p>
+<ul>
+<li>一种枚举平台的 CAT 功能和可用的提供 CAT 控制的资源类型的机制 .</li>
+<li>一种 OS 或管理程序可以配置可用资源的机制 .</li>
+<li>控制 LLC 填充策略的硬件机制 .</li>
+</ul>
+<h2 id="92-cat-架构">9.2. CAT 架构</h2>
+<p>CAT 的基本目标是基于应用的优先级或服务类型 ( COS 或 CLOS ) 分配资源 , 处理器提供一组可以分配给应用的 COS .<br>
+资源间的 COS 是一致的 , 一个 COS 可能包含多个资源控制参数 , 减少上下文切换时的软件开销 .</p>
+<p>CAT 的基本组件包括 :</p>
+<ul>
+<li>使用 CPUID 指明是否支持 CAT , 可以控制的资源类型</li>
+<li>对于每种可用的资源类型 , CPUID 可以枚举 COS 的数量和可以用于控制资源分配的位掩码 ( CBM )</li>
+<li>执行环境 ( OS / VMM ) 可以通过位掩码配置不同 COS 的行为</li>
+<li>执行环境 ( OS / VMM ) 可以分配一个 COS 给软件线程</li>
+<li>指明和内存访问关联的 COS , 基于 COS 控制 cache 分配</li>
+</ul>
+<p>需要说明的是 , capacity bitmask ( CBM ) 中的 1 必须连续 .</p>
+<h2 id="93-代码和数据分级--cdp--技术">9.3. 代码和数据分级 ( CDP ) 技术</h2>
+<p>CDP 技术是 CAT 的扩展 , CDP 以软件可以配置的方式隔离和分级取回到 L2 和 L3 cache 的代码和数据 , 依赖硬件支持 , 根据工作负载的特点进行分级和调整 cache .<br>
+CDP 通过提供单独的基于 COS 的代码和数据掩码扩展了 CAT , L2 CDP 和 L3 CDP 的支持单独控制 .</p>
+<p>处理器默认关闭 CDP , 开启时 , CAT 掩码 MSR 重映射到取回的代码或数据的 interleaved 掩码 MSR 对 ; CAT 的 COS 范围重新索引 , COS 范围的低一半对于 CDP 可用 .</p>
+<p>和 CAT 类似 , CDP 可以由特权软件动态配置 .</p>
+<h2 id="94-开启-cat-的流程">9.4. 开启 CAT 的流程</h2>
+<p>开启处理器的 CAT , 需要执行以下流程 :</p>
+<ol>
+<li>枚举和监测处理器对于 CAT 的支持 , 通过 CPUID .</li>
+<li>CAT : 枚举资源类型和功能 .</li>
+<li>CAT : cache 掩码配置 .</li>
+<li>cache 掩码关联的 COS .</li>
+</ol>
+<h2 id="95-cdp--枚举和开启-l3-cdp-技术">9.5. CDP : 枚举和开启 L3 CDP 技术</h2>
+<p>支持 CDP 的处理器提供了一个新的 MSR IA32_L3_QOS_CFG , 设置 bit 0 开启 CDP , 映射 CAT 掩码 MSR 到数据掩码和代码掩码 MSR 对 ; 其余的 bit 保留 .</p>
+<p>开启 CDP 时 , 重映射已有的 CAT 掩码 MSR 空间 , 给每个 COS 提供一个代码掩码和一个数据掩码 . 每个 COS 对应两个掩码 MSR , 一个掩码开启数据填充位置的控制 , 一个掩码开启代码位置的控制 .</p>
+<p>掩码 MSR 的定义相同 , 必须由连续的 1 组成 , 长度不能超过掩码长度的最大值 .</p>
+<h2 id="96-cdp--枚举和开启-l2-cdp-技术">9.6. CDP : 枚举和开启 L2 CDP 技术</h2>
+<p>L2 CDP 是 L2 CAT 的扩展 , 支持 L2 CDP 的处理器提供了新的 MSR IA32_l2_QOS_CFG , 设置 bit 0 开启 CDP , 映射 CAT 掩码 MSR 到数据掩码和代码掩码 MSR 对 ; 其余位保留 .</p>
+<p>L2 CDP 掩码和 L2 CAT 掩码之间的映射关系和 L3 相同 , 掩码 MSR 的定义也相同 .</p>
+<h3 id="961-节电特性下的-cat-操作">9.6.1. 节电特性下的 CAT 操作</h3>
+<p>CAT 无法用于保持 cache 一致性 , 一些高级电源管理的特性 , 比如 C-state 可能压缩或关闭某些 cache , 妨碍 CAT 线索 &ndash; 这种情况下 CAT 掩码会被忽略 , 其他的特性优先生效 .</p>
+<h3 id="962-其他操作模式的-cat-操作">9.6.2. 其他操作模式的 CAT 操作</h3>
+<p>SMI 传递过程中 IA32_PQR_ASSOC 和掩码寄存器的状态保持不变 , 因此 SMM 处理函数的执行可以和 CAT 资源交互 , 对 non-SMM 软件栈表现出某种程度上的非确定性 . SMM 处理函数还可以执行一些影响 CAT 操作的系统层或电源管理操作 .</p>
+<h3 id="963-关联线程和-cat--cdp-cos">9.6.3. 关联线程和 CAT / CDP COS</h3>
+<p>线程通过每个逻辑处理器的 IA32_PQR_ASSOC MSR 和 COS 关联 , 相同 COS 适用于 CAT 和 CDP , 开启 CDP 时改变 COS 和掩码 MSR 的映射 .</p>
+<h2 id="97-内存带宽分配简介">9.7. 内存带宽分配简介</h2>
+<p>内存带宽分配 ( MBA ) 特性间接大约控制每个核心的可用内存带宽 , 可以控制相对于其优先级多度使用内存带宽的应用 .</p>
+<p>MBA 使用 RDT 特性集的限制 , 包括 COS , 即 MBA 的 COS 和 L3 CAT 的含义相同 , 共享一些基本框架比如关联到 COS 的 MSR 和 CPUID 枚举的元素 .</p>
+<h3 id="971-mba-枚举">9.7.1. MBA 枚举</h3>
+<p>和其他 RDT 特性类似 , MBA 的支持和特性通过 <code>CPUID</code> 枚举 , 主要组件包括 :</p>
+<ul>
+<li>处理器支持的 COS 数</li>
+<li>支持的最大 MBA 延时值</li>
+<li>可以编程的延时值是否是线性的</li>
+</ul>
+<h3 id="972-mba-配置">9.7.2. MBA 配置</h3>
+<p>枚举过后 , MBA 的配置由两个步骤组成 :</p>
+<ul>
+<li>关联线程到 COS , 软件可能在上下文切换时更新 PQR MSR 的 COS 域 , 维护软件线程和硬件 COS 的关联 .</li>
+<li>配置 per-COS 延时值 , 通过 IA32_L2_QoS_Ext_BW_Thrtl_n MSR .</li>
+</ul>
+<p>延时值可以是 0 到 MBA_MAX 之间的值 , throttling 值是约数 , 所有 COS 相加可能不到 100% .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-22
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/dr/">DR</a>
+          <a href="/tags/lbr/">LBR</a>
+          <a href="/tags/rdt/">RDT</a>
+          <a href="/tags/ds/">DS</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/intel-sdm/3b_chap15-machine_check_architecture/">
+            <span class="next-text nav-default">3B_chap15-machine_check_architecture</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

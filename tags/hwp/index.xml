@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>HWP on Globs&#39; Catchall</title>
+    <link>https://globsguo.github.io/tags/hwp/</link>
+    <description>Recent content in HWP on Globs&#39; Catchall</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 15 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://globsguo.github.io/tags/hwp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>3B_chap14-power_and_thermal_management</title>
+      <link>https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/</link>
+      <pubDate>Thu, 15 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/</guid>
+      <description>1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的</description>
+    </item>
+    
+  </channel>
+</rss>

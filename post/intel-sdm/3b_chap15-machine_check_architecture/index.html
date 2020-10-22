@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3B_chap15-machine_check_architecture - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3B_chap15-machine_check_architecture" />
+<meta property="og:description" content="1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3b_chap15-machine_check_architecture/" />
+<meta property="article:published_time" content="2020-10-16T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-16T00:00:00+00:00" />
+<meta itemprop="name" content="3B_chap15-machine_check_architecture">
+<meta itemprop="description" content="1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生">
+<meta itemprop="datePublished" content="2020-10-16T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-16T00:00:00+00:00" />
+<meta itemprop="wordCount" content="3000">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,MCA,MC," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3B_chap15-machine_check_architecture"/>
+<meta name="twitter:description" content="1. 机器检查架构 机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 . 处理器通过产生"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3B_chap15-machine_check_architecture</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-16 </span>
+        
+          <span class="more-meta"> 3000 words </span>
+          <span class="more-meta"> 6 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-机器检查架构">1. 机器检查架构</a></li>
+    <li><a href="#2-mc-msr">2. MC MSR</a>
+      <ul>
+        <li><a href="#21-mc-全局控制-msr">2.1. MC 全局控制 MSR</a></li>
+        <li><a href="#22-错误报告寄存器组">2.2. 错误报告寄存器组</a>
+          <ul>
+            <li><a href="#221-iomca">2.2.1. IOMCA</a></li>
+          </ul>
+        </li>
+        <li><a href="#23-pentium-处理器-mc-错误到-mc-架构的映射">2.3. Pentium 处理器 MC 错误到 MC 架构的映射</a></li>
+      </ul>
+    </li>
+    <li><a href="#3-增强的-cache-错误报告">3. 增强的 cache 错误报告</a></li>
+    <li><a href="#4-纠正的-mc-错误中断">4. 纠正的 MC 错误中断</a></li>
+    <li><a href="#5-未纠正的可恢复--ucr--错误的恢复">5. 未纠正的可恢复 ( UCR ) 错误的恢复</a>
+      <ul>
+        <li><a href="#51-ucr-错误报告和记录">5.1. UCR 错误报告和记录</a>
+          <ul>
+            <li><a href="#511-ucr-错误分类">5.1.1. UCR 错误分类</a></li>
+            <li><a href="#512-ucr-错误覆盖写规则">5.1.2. UCR 错误覆盖写规则</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#6-翻译-mca-错误代码">6. 翻译 MCA 错误代码</a>
+      <ul>
+        <li><a href="#61-多个-mca-错误">6.1. 多个 MCA 错误</a></li>
+        <li><a href="#62-mc-错误代码的翻译">6.2. MC 错误代码的翻译</a></li>
+      </ul>
+    </li>
+    <li><a href="#7-编写-mc-软件的准则">7. 编写 MC 软件的准则</a>
+      <ul>
+        <li><a href="#71-mc-异常处理函数">7.1. MC 异常处理函数</a></li>
+        <li><a href="#72-记录可修正的-mc-错误">7.2. 记录可修正的 MC 错误</a></li>
+        <li><a href="#73-mc-软件处理器函数错误恢复准则">7.3. MC 软件处理器函数错误恢复准则</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-机器检查架构">1. 机器检查架构</h1>
+<p>机器检查架构提供了探测和报告硬件 ( 机器 ) 错误的机制 , 这些错误包括 : 系统总线错误 , ECC 错误 , parity 错误 , cache 错误 , TLB 错误 .</p>
+<p>处理器通过产生一个机器检查异常 ( #MC ) 报告无法纠正的机器检查错误 , 异常产生时 , 通常不允许处理器可靠地重新启动 . 异常处理函数可以从 MC MSR 收集错误相关的信息 .<br>
+处理器可以报告纠正过的 MC 错误信息 , 传递一个可编程的中断供软件回应 MC 错误 , 这个中断称作 MC 错误中断  ( CMCI ) .</p>
+<p>Pentium 处理器可以报告下列 MC 错误 :</p>
+<ul>
+<li>读 cycle 期间的数据 parity 错误</li>
+<li>总线 cycle 没有成功完成</li>
+</ul>
+<p>探测到错误时 , 记录到 P5_MC_TYPE 和 P5_MC_ADDR MSR , 处理器然后产生一个 #MC .</p>
+<h1 id="2-mc-msr">2. MC MSR</h1>
+<p>MC MSR 包括一组全局控制和状态寄存器 , 一些错误报告寄存器组 ; 每组错误报告寄存器都和特定的硬件单元关联 , 可以通过 <code>RDMSR</code> 和 <code>WRMSR</code> 读写 .</p>
+<h2 id="21-mc-全局控制-msr">2.1. MC 全局控制 MSR</h2>
+<p>MC 全局控制 MSR 包括 :</p>
+<ul>
+<li>IA32_MCG_CAP , 只读 , 提供处理器的 MC 架构相关信息</li>
+<li>IA32_MCG_STATUS , 描述 MC 异常发生后处理器的当前状态</li>
+<li>IA32_MCG_CTL ( 可选 ) , 控制 MC 异常的报告</li>
+<li>IA32_MCG_EXT_CTL ( 可选 ) , 控制硬件只报告一些 MCE 给单个逻辑处理器</li>
+</ul>
+<h2 id="22-错误报告寄存器组">2.2. 错误报告寄存器组</h2>
+<p>错误报告寄存器组可以包含 IA32_MCi_CTL , IA32_MCi_STATUS , IA32_MCi_ADDR 和 IA32_MCi_MISC MSR , 寄存器组数通过 IA32_MCG_CAP MSR bit 7:0 指明 .</p>
+<ul>
+<li>IA32_MCi_CTL , 控制某个硬件单元产生的错误是否发出 #MC .</li>
+<li>IA32_MCi_STATUS , 设置有效标志时 , 包含和 MC 错误相关的信息 .
+<ul>
+<li>如果 IA32_MCi_STATUS 的有效标志已经设置 , 即 MC MSR 已经报告一个 MC 错误 , 新的事件需要报告时 , 需要遵照一定的规则覆盖写之前的 MC 错误 .</li>
+<li>如果一个新的事件覆盖写了前一个事件 , IA32_MCi_STATUS 中包含的信息都和新的事件相关 .</li>
+</ul>
+</li>
+<li>IA32_MCi_ADDR , 包含产生 MC 错误的代码或者数据的内存地址 .</li>
+<li>IA32_MCi_MISC , 包含 MC 错误的额外信息 .</li>
+<li>IA32_MCi_CTL2 , 设定一个阈值 , 如果纠正过的错误数量达到阈值 , 报告一个溢出事件给 APIC 中的 CMCI LVT 项 .</li>
+<li>IA32_MCG_CAP 扩展 MC 状态 MSR , 检测到 MC 错误时 , 处理器保存通用寄存器 , EFLAGS , EIP 寄存器到这些 MC 状态 MSR , 供调试器使用 .<br>
+软件可以读取这些 MSR , 但是只能向 MSR 写入 0 .</li>
+</ul>
+<h3 id="221-iomca">2.2.1. IOMCA</h3>
+<p>PCI-E 错误的记录和报告由 PCI-E 高级错误报告 ( AER , advanced error reporting ) 控制 ; PCI-E 架构将错误分成可修正的和不可修正的两种 ; 后者又分成致命的和非致命的 .<br>
+不可修正的 IO 错误通过 AER MSR 或平台相关的机制比如 NMI 报告给系统软件 . 一些处理器支持一种称作 IOMCA 模式的错误处理模式 , 不可修正的 PCI-E 错误以 MC 异常的形式报告 , 记录在 MC 寄存器组中 .</p>
+<p>IOMCA 模式下 , 处理器将不可修正的 PCI-E 错误作为通用的 IO 错误保存到 IA32_MCi_STATUS 寄存器的 MCACOD 域 .</p>
+<h2 id="23-pentium-处理器-mc-错误到-mc-架构的映射">2.3. Pentium 处理器 MC 错误到 MC 架构的映射</h2>
+<p>Pentium 处理器使用两个寄存器 P5_MC_TYPE 和 P5_MC_ADDR 报告 MC 错误 , Pentium 4 , XEON 等处理器映射这些寄存器到 IA32_MCi_STATUS 和 IA32_MCi_ADDR , 但是错误信息的编码方式不一致 .</p>
+<h1 id="3-增强的-cache-错误报告">3. 增强的 cache 错误报告</h1>
+<p>较早的 cache 状态基于 cache 中发生的纠错事件的个数 , 增强的 cache 错误报告称作 &ldquo;基于阈值的错误状态&rdquo; , cache 状态基于 cache 中发生重复纠错的 cache 行数 ( ECC 块数 ) . 这个阈值由 Intel 基于多个因素选定 .</p>
+<p>支持增强的 cache 错误报告的处理器包含记录 cache 运行状态的硬件 , 提供健康状况的指示器 .</p>
+<h1 id="4-纠正的-mc-错误中断">4. 纠正的 MC 错误中断</h1>
+<p>纠正的 MC 错误中断 ( CMCI ) 提供了基于阈值的错误报告机制外的功能 . 基于阈值的错误报告, 软件被限制使用阶段性的轮训操作 , 查询硬件纠正的 MC 错误的状态 . CMCI 提供了基于软件可编程的阈值传递一个本地中断的机制 .</p>
+<p>如果多个逻辑处理器都受到 MC 错误的影响 , CMCI 传递给多于一个逻辑处理器 .</p>
+<h1 id="5-未纠正的可恢复--ucr--错误的恢复">5. 未纠正的可恢复 ( UCR ) 错误的恢复</h1>
+<p>系统软件可以尝试恢复的 architectural MCA 错误称作未纠正的可恢复错误 : 已经检测到并报告的未纠正错误 , 但是没有损坏处理器的上下文 . 一旦系统软件执行了某些恢复操作 , 可以继续在处理器执行程序 .</p>
+<h2 id="51-ucr-错误报告和记录">5.1. UCR 错误报告和记录</h2>
+<p>IA32_MCi_STATUS MSR 用于报告 UCR 错误和现有的已纠正的和未纠正错误 . 设置 IA32_MCG_CAP[24] 时 , 下列设置表明 UCR 错误 :</p>
+<ul>
+<li>valid ( bit 63 ) = 1</li>
+<li>UC ( bit 61 ) = 1</li>
+<li>PCC ( bit 57 ) = 0</li>
+</ul>
+<p>此外 , IA32_MCI_STATUS bit 55:56 项系统软件提供额外信息 , 确定 UCR 错误的必要恢复操作 :</p>
+<ul>
+<li>bit 56 , S ( signaling ) 标志 , 设置表明报告了 UCR 错误 , 系统软件需要检查 AR 标志和 IA32_MCi_STATUS 的 MCA 错误代码域 ; 清除表明 UCR 错误作为一个纠正的 MC ( CMC ) 报告 , 系统软件不需要执行任何的恢复操作 .</li>
+<li>bit 55 , AR ( action required ) 标志 , 设置表明系统软件必须在错误报告时执行 MCA 特定错误代码的恢复操作 , 恢复操作必须在处理器执行后续任务前完成 ; 如果恢复操作无法成功完成 , 系统软件必须关闭系统 . 清除时 , 系统软件仍然可以选择执行恢复操作 , 也可以安全的恢复执行保存在栈中的指令指针 .</li>
+</ul>
+<p>两个标志都是 sticky , 设置后 , 处理器不会清除 , 只有软件和开机重置可以清除 .</p>
+<h3 id="511-ucr-错误分类">5.1.1. UCR 错误分类</h3>
+<p>UCR 错误可以根据 S 和 AR 标志分类 :</p>
+<ul>
+<li>
+<p>未纠正 , 不需要执行操作 ( uncorrected no action required , UCNA ) , UCR 错误没有作为 MC 异常报告 , 而是纠正的 MC 错误报告给系统软件 . 处理器状态依然有效 , 可以继续执行 , 不需要执行额外的操作 . UC = 1 , PCC = 0 , S = 0 , AR = 0 .</p>
+</li>
+<li>
+<p>可选的软件可恢复的操作 ( software recoverable action optional , SRAO ) , UCR 错误通过 MC 异常或 CMCI 报告 , 软件恢复操作可选 , 非必须 . 处理器状态依然有效 , 提供了执行恢复操作所需的额外错误信息 .<br>
+通过 MC 报告时 , UC = 1 , PCC = 0 , S = 1 , EN = 1 , AR = 0 ; 通过 CMCI 报告时 , UC = 1 , PCC = 0 , S = 0 .</p>
+</li>
+<li>
+<p>必要的软件可恢复的操作 ( SRAR ) , UCR 错误需要软件执行其他指令流前进行恢复操作 , UC = 1 , PCC = 0 , S = 1 , EN = 1 , AR = 1 .</p>
+</li>
+</ul>
+<h3 id="512-ucr-错误覆盖写规则">5.1.2. UCR 错误覆盖写规则</h3>
+<p>规则包括 :</p>
+<ul>
+<li>UCR 错误覆盖纠正的错误</li>
+<li>未纠正的 ( PCC = 1 ) 错误覆盖 UCR 错误</li>
+<li>UCR 错误不会覆盖前一个 UCR 错误</li>
+<li>纠正的错误不会覆盖写之前的 UCR 错误</li>
+</ul>
+<p>不管是否保留第一个错误 , 或第二个错误覆盖了第一个错误 , 都会设置 IA32_MCi_STATUS 寄存器指明发生了溢出 .</p>
+<h1 id="6-翻译-mca-错误代码">6. 翻译 MCA 错误代码</h1>
+<p>处理器探测到 MC 错误时 , 写入一个 16-bit 错误代码到 IA32_MCi_STATUS 寄存器的 MCA 错误代码域 , 并设置寄存器的有效标志 .</p>
+<p>MCA 错误代码分成两种 : 简单的错误代码和复合的错误代码 .</p>
+<p>简单的错误代码描述全局的错误信息 ; 复合的错误代码描述和 TLB , cache , 内存 , 总线和互连逻辑 , 内部计时器关联的错误 , 错误代码指明具体的 TLB , cache , 内存等信息 .</p>
+<h2 id="61-多个-mca-错误">6.1. 多个 MCA 错误</h2>
+<p>一个探测窗口内检测到多个 MCA 错误时 , 处理器可能在单个事件内报告这些错误 , 系统软件就会在不同的 MC 寄存器组发现多个记录的 MCA 错误 . 为了处理器单个 MC 事件报告的多个 UCR 错误 , 并从多个错误中恢复 , 系统软件需要考虑下列问题 :</p>
+<ul>
+<li>通过系统报告的最严重的错误判断是否可以从多个软件恢复 , 如果最严重的错误是一个不可恢复错误 , 系统软件就无法恢复 , 需要重置系统 .</li>
+<li>报告多个可恢复的错误 , 错误中没有发现致命条件 , 系统软件执行每个可恢复错误的恢复操作后 , 可能从错误恢复 .</li>
+</ul>
+<h2 id="62-mc-错误代码的翻译">6.2. MC 错误代码的翻译</h2>
+<p>16 章提供了翻译 MCA 错误代码的信息 .</p>
+<h1 id="7-编写-mc-软件的准则">7. 编写 MC 软件的准则</h1>
+<p>MCA 和错误日志可以用三种不同的方法使用 :</p>
+<ul>
+<li>使用 #MC 异常在正常的指令执行期间检测机器错误</li>
+<li>定期检查和记录机器错误</li>
+<li>通过一个 MC 异常处理函数或一个纠正的 MC 中断处理函数仔细检查可恢复的 UCR 错误 , 确定软件可恢复性 , 执行恢复操作</li>
+</ul>
+<h2 id="71-mc-异常处理函数">7.1. MC 异常处理函数</h2>
+<p>MC 异常对应向量 18 , 要服务机器检查异常 , 必须添加一个陷入门到 IDT .陷入门的指针必须执行一个 MC 异常处理函数 , 两种途径可以用于设计异常处理函数 :</p>
+<ol>
+<li>处理函数只记录所有的机器状态和错误信息 , 然后调用调试器关闭系统 .</li>
+<li>处理函数分析报告的错误信息 , 尝试修复错误 , 重启处理器 .</li>
+</ol>
+<h2 id="72-记录可修正的-mc-错误">7.2. 记录可修正的 MC 错误</h2>
+<p>如果 MC 错误可以修正 , 处理器不会产生 MC 异常 . 要探测可修正的 MC 错误 , 需要一个软件工具读取每一个机器检查错误报告寄存器组 , 记录结果到统计文件或数据结构 . 软件工具可以按照以下方式之一实现 :</p>
+<ul>
+<li>一个系统守护进程不经常的轮训寄存器组 , 比如每小时或每天</li>
+<li>一个用户启动的应用 , 轮训寄存器组 , 记录异常 . 实际的轮训服务由 OS 驱动或者系统调用提供 .</li>
+<li>一个服务 CMCI 的中断服务例程 , 可以读取 MC 寄存器组 , 记录错误 .</li>
+</ul>
+<h2 id="73-mc-软件处理器函数错误恢复准则">7.3. MC 软件处理器函数错误恢复准则</h2>
+<p>错误恢复的 MC 异常处理函数和错误恢复的纠正的 MC 处理函数的编写需要根据寄存器中的标志位执行对应的操作 .</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-16
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/mca/">MCA</a>
+          <a href="/tags/mc/">MC</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3b_chap17-debugbranch_profiletscand_intel_rdt_features/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3B_chqp17-debug,branch_profile,tsc,and_intel_RDT_features</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/3b_chap14-power_and_thermal_management/">
+            <span class="next-text nav-default">3B_chap14-power_and_thermal_management</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

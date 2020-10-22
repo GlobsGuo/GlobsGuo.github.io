@@ -45,7 +45,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://globsguo.github.io/" />
-<meta property="og:updated_time" content="2020-10-13T00:00:00+00:00" />
+<meta property="og:updated_time" content="2020-10-22T00:00:00+00:00" />
 <meta itemprop="name" content="Globs&#39; Catchall">
 <meta itemprop="description" content="">
 <meta name="twitter:card" content="summary"/>
@@ -111,6 +111,69 @@
       <div class="content-wrapper">
         <div id="content" class="content">
           <section id="posts" class="posts">
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/intel-sdm/3a_chap10-apic/">3A_chap10-APIC</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2020-09-30 </span>
+      
+        <span class="more-meta"> 6523 words </span>
+        <span class="more-meta"> 14 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      1. 简介 高级可编程中断控制器 , 本章中称为 local APIC , 向处理器提供两个基本功能 : 从处理器的中断引脚 , 内部源和外部的 IO APIC ( 或其他外部中断控制器 ) 接收中断
+    </div>
+    <div class="read-more">
+      <a href="/post/intel-sdm/3a_chap10-apic/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/intel-sdm/3a_chap9-processor_management_and_initialization/">3A_chap9-processor_management_and_initialization</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2020-09-28 </span>
+      
+        <span class="more-meta"> 3417 words </span>
+        <span class="more-meta"> 7 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      1. 简介 上电或者重启后 , 系统总线上的每个处理器执行硬件初始化和可选的 BIST , 将寄存器初始化为已知状态 , 进入实地址模式 . 并且无效内部 cache , TLB 和 branch target buffer (
+    </div>
+    <div class="read-more">
+      <a href="/post/intel-sdm/3a_chap9-processor_management_and_initialization/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
+    <article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="/post/intel-sdm/3a_chap8-multi-processor_management/">3A_chap8-multi-processor_management</a></h1>
+    <div class="post-meta">
+      <span class="post-time"> 2020-09-25 </span>
+      
+        <span class="more-meta"> 5121 words </span>
+        <span class="more-meta"> 11 mins read </span>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      1. 简介 Intel 提供了管理和提高连接到相同系统总线的多处理器性能的机制 , 包括 : 对系统内存执行原子操作所需的总线锁和 cache 一致性管理 串行化的指令 位于处理器
+    </div>
+    <div class="read-more">
+      <a href="/post/intel-sdm/3a_chap8-multi-processor_management/" class="read-more-link">Read more...</a>
+    </div>
+  </div>
+</article>
+
     <article class="post">
   <header class="post-header">
     <h1 class="post-title"><a class="post-link" href="/post/intel-sdm/3a_chap6-interrupt_and_exception_handling/">3A_chap6-interrupt_and_exception_handling</a></h1>
@@ -254,69 +317,6 @@
     </div>
     <div class="read-more">
       <a href="/post/mm/mm-memory_compaction/" class="read-more-link">Read more...</a>
-    </div>
-  </div>
-</article>
-
-    <article class="post">
-  <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-buddy_allocator_page_allocation-2/">mm-buddy_allocator_page_allocation-2</a></h1>
-    <div class="post-meta">
-      <span class="post-time"> 2019-11-11 </span>
-      
-        <span class="more-meta"> 3626 words </span>
-        <span class="more-meta"> 8 mins read </span>
-    </div>
-  </header>
-  
-  <div class="post-content">
-    <div class="post-summary">
-      如果 __alloc_pages_nodemask 调用 get_page_from_freelist 没有申请到内存页，就会屏蔽掉传递的 gfp 中的 __GPF_IO 标志，调用 __alloc_pages_slowpath 申请内存。 1. __alloc_pages_slowpath 和 __alloc_pages_nodemask 不同， slowpath 不会对 alloc_flags 设置较多限制，而是尽可能的满足分配请求，
-    </div>
-    <div class="read-more">
-      <a href="/post/mm/mm-buddy_allocator_page_allocation-2/" class="read-more-link">Read more...</a>
-    </div>
-  </div>
-</article>
-
-    <article class="post">
-  <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_free/">mm-slab_object_free</a></h1>
-    <div class="post-meta">
-      <span class="post-time"> 2019-10-29 </span>
-      
-        <span class="more-meta"> 6004 words </span>
-        <span class="more-meta"> 12 mins read </span>
-    </div>
-  </header>
-  
-  <div class="post-content">
-    <div class="post-summary">
-      本文仍然以slab cache kmalloc_caches 为例，结合 kfree 函数的实现，说明slab对象的回收过程。 1. kfree 通过 kfree 函数释放 kmalloc 申请的内存时，对应的函数定义在 mm/slub.c 中。 1 2 3 4 5
-    </div>
-    <div class="read-more">
-      <a href="/post/mm/mm-slab_objects_free/" class="read-more-link">Read more...</a>
-    </div>
-  </div>
-</article>
-
-    <article class="post">
-  <header class="post-header">
-    <h1 class="post-title"><a class="post-link" href="/post/mm/mm-slab_objects_allocation/">mm-slab_object_allocation</a></h1>
-    <div class="post-meta">
-      <span class="post-time"> 2019-10-26 </span>
-      
-        <span class="more-meta"> 3986 words </span>
-        <span class="more-meta"> 8 mins read </span>
-    </div>
-  </header>
-  
-  <div class="post-content">
-    <div class="post-summary">
-      slab cache建立后，就可以从中分配对象。以 kmalloc_caches 为例，执行 kmalloc 函数时会从中分配对象。 1. kmalloc 搞内核的肯定对 kmalloc 不会陌生，和 malloc 函数类似，这个函数用来分配内
-    </div>
-    <div class="read-more">
-      <a href="/post/mm/mm-slab_objects_allocation/" class="read-more-link">Read more...</a>
     </div>
   </div>
 </article>

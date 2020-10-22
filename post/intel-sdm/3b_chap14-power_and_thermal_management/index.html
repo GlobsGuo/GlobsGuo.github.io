@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>3B_chap14-power_and_thermal_management - Globs&#39; Catchall</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Globs Guo" /><meta name="description" content="1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.76.3 with theme even" />
+
+
+<link rel="canonical" href="https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="3B_chap14-power_and_thermal_management" />
+<meta property="og:description" content="1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://globsguo.github.io/post/intel-sdm/3b_chap14-power_and_thermal_management/" />
+<meta property="article:published_time" content="2020-10-15T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-10-15T00:00:00+00:00" />
+<meta itemprop="name" content="3B_chap14-power_and_thermal_management">
+<meta itemprop="description" content="1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的">
+<meta itemprop="datePublished" content="2020-10-15T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2020-10-15T00:00:00+00:00" />
+<meta itemprop="wordCount" content="6346">
+
+
+
+<meta itemprop="keywords" content="Intel-SDM,HWP,HDC," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="3B_chap14-power_and_thermal_management"/>
+<meta name="twitter:description" content="1. 增强的 Intel SpeedStep 技术 增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 . 增强的 Intel SpeedStep 技术和之前的"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Globs&#39; Catchall</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Globs&#39; Catchall</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">3B_chap14-power_and_thermal_management</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-10-15 </span>
+        
+          <span class="more-meta"> 6346 words </span>
+          <span class="more-meta"> 13 mins read </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> times read </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-增强的-intel-speedstep-技术">1. 增强的 Intel SpeedStep 技术</a></li>
+    <li><a href="#2-p-state-硬件协调">2. P-State 硬件协调</a></li>
+    <li><a href="#3-系统软件需要考虑的因素以及机会主义的处理器性能操作">3. 系统软件需要考虑的因素以及机会主义的处理器性能操作</a>
+      <ul>
+        <li><a href="#31-机会主义的处理器性能操作的系统软件接口">3.1. 机会主义的处理器性能操作的系统软件接口</a>
+          <ul>
+            <li><a href="#311-bios-和-os-对于机会主义的处理器性能操作的控制接口">3.1.1. BIOS 和 OS 对于机会主义的处理器性能操作的控制接口</a></li>
+            <li><a href="#312-os-功率管理-p-state-策略需要的更改">3.1.2. OS 功率管理 P-State 策略需要的更改</a></li>
+          </ul>
+        </li>
+        <li><a href="#32-intel-睿频技术">3.2. Intel 睿频技术</a></li>
+        <li><a href="#33-性能和能量偏爱线索支持">3.3. 性能和能量偏爱线索支持</a></li>
+      </ul>
+    </li>
+    <li><a href="#4-硬件控制的性能状态--hwp-">4. 硬件控制的性能状态 ( HWP )</a>
+      <ul>
+        <li><a href="#41-hwp-编程接口">4.1. HWP 编程接口</a></li>
+        <li><a href="#42-hwp-反馈">4.2. HWP 反馈</a></li>
+        <li><a href="#43-hwp-通知">4.3. HWP 通知</a></li>
+        <li><a href="#44-空闲逻辑处理器对于核心频率的影响">4.4. 空闲逻辑处理器对于核心频率的影响</a></li>
+        <li><a href="#45-uncore-msr-的快速写">4.5. uncore MSR 的快速写</a></li>
+      </ul>
+    </li>
+    <li><a href="#5-hardware-duty-cycle--hdc-">5. hardware duty cycle ( HDC )</a>
+      <ul>
+        <li><a href="#51-hdc-编程接口">5.1. HDC 编程接口</a></li>
+      </ul>
+    </li>
+    <li><a href="#6-硬件反馈接口">6. 硬件反馈接口</a></li>
+    <li><a href="#7-高级功率管理的-mwait-扩展">7. 高级功率管理的 MWAIT 扩展</a></li>
+    <li><a href="#8-热量监测和保护">8. 热量监测和保护</a></li>
+    <li><a href="#9-封装层的热量控制">9. 封装层的热量控制</a></li>
+    <li><a href="#10-平台相关的功率管理支持">10. 平台相关的功率管理支持</a>
+      <ul>
+        <li><a href="#101-rapl-接口">10.1. RAPL 接口</a></li>
+        <li><a href="#102-rapl-域和平台特征">10.2. RAPL 域和平台特征</a></li>
+        <li><a href="#103-封装级的-rapl-域">10.3. 封装级的 RAPL 域</a></li>
+        <li><a href="#104-pp0--pp1-rapl-域">10.4. PP0 / PP1 RAPL 域</a></li>
+        <li><a href="#105-dram-域">10.5. DRAM 域</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="1-增强的-intel-speedstep-技术">1. 增强的 Intel SpeedStep 技术</h1>
+<p>增强的 Intel SpeedStep 技术通过性能状态切换管理处理器的功耗 , 这些性能状态定义为和不同电压和频率相关联的离散运行点 .</p>
+<p>增强的 Intel SpeedStep 技术和之前的 SpeedStep 技术存在以下差异 :</p>
+<ul>
+<li>通过 MSR 寄存器中心化控制机制和软件接口</li>
+<li>减少硬件开销 , 允许更频繁的性能状态切换</li>
+</ul>
+<p>向 IA32_PERF_CTL 寄存器写入一个 16-bit 的值可以开始状态切换 , 如果已经在进行状态切换 , 切换到新值之后才会生效 .</p>
+<p>读取 IA32_PERF_CTL 确定上次的目标运行点 , 当前的运行点保存在 IA32_PERF_STATUS , 后者动态更新 .</p>
+<p>应用和性能工具不能使用两个寄存器 , 将其作为保留寄存器对待 , 性能监视工具可以访问 model-specific 时间 , 报告发生的状态切换 .</p>
+<h1 id="2-p-state-硬件协调">2. P-State 硬件协调</h1>
+<p>ACPI 定义了性能状态 ( P-state ) , 用于系统软件管理处理器的功耗 , 不同的 P-state 对应处理器执行指令时的不同性能等级 , 增强的 SpeedStep 技术向软件提供控制操作频率和电压的方式来支持 P-state .</p>
+<p>单个物理封装内的多个处理器之间可能存在硬件依赖 , 影响 P-state 切换 , 需要 OS 提供额外的软件支持协调逻辑处理器间的 P-state 切换 .</p>
+<p>Intel 支持多个 P-state 相互依赖的逻辑处理器通过硬件协调 , IA32_MPERF 和 IA32_APERF MSR 提供了硬件协调的反馈机制 .</p>
+<ul>
+<li>使用 <code>CPUID</code> 指令检查是否支持 P-state 硬件协调反馈</li>
+<li>IA32_MPERF MSR 与一个固定频率成比例 , 后者处理器启动时配置</li>
+<li>IA32_APERF MSR 和实际性能成比例 , 负责 P-state 和 TM1 / TM2 的硬件协调 ; 或者软件发起的 throttling</li>
+<li>每个逻辑处理器都有自己的 MSR , 只有目标处理器处于 C0 状态时测量性能</li>
+<li>只有 IA32_APERF / IA32_MPERF 比率是结构定义的 , 软件不应该给两个寄存器的内容附加特殊含义</li>
+<li>MSR 溢出时 , 都会重置为 0 , 继续增加</li>
+<li>两个 MSR 都是 64 位计数器 , 可以独立的写入</li>
+</ul>
+<h1 id="3-系统软件需要考虑的因素以及机会主义的处理器性能操作">3. 系统软件需要考虑的因素以及机会主义的处理器性能操作</h1>
+<p>Intel 64 处理器支持一种形式的处理器操作 , 利用设计的 headroom , 机会主义的提高性能 .<br>
+Intel Turbo Boost 技术转化热量的 headroom , 获得更高的性能 . 如果只有一个线程活跃 , Intel Dynamic Acceleration 技术转化热量的 headroom 为更高的性能 .</p>
+<p>OS 请求更高的性能时 , Intel 动态加速技术利用热量的 headroom , 机会主义的允许单个核心运行在更高一级的性能水平 .</p>
+<h2 id="31-机会主义的处理器性能操作的系统软件接口">3.1. 机会主义的处理器性能操作的系统软件接口</h2>
+<p>适用于动态加速技术和睿频技术的机会主义处理器性能操作 , 有下列特点 :</p>
+<ul>
+<li>从正常的操作状态切换到目标状态没有保证 , 但是可能在对应的开启机制激活后 , headroom 可用后 , 满足一些标准后机会主义的发生 .</li>
+<li>机会主义的处理器性能操作对于大多数软件透明 .</li>
+<li>系统软件 ( BIOS 和 OS ) 必须了解硬件对于机会主义的处理器性能操作的支持 , 需要更加可预测的处理器操作时 , 可能需要临时脱离机会主义的处理器性能操作 .</li>
+<li>使用机会主义的处理器性能操作时 , OS 需要通过硬件协调反馈机制阻止非预期的策略生效 .</li>
+</ul>
+<h3 id="311-bios-和-os-对于机会主义的处理器性能操作的控制接口">3.1.1. BIOS 和 OS 对于机会主义的处理器性能操作的控制接口</h3>
+<p>IA32_MISC_ENABLE[38] 指明硬件是否支持机会主义的处理器性能操作 , 为 1 表示支持 ; 否则表示不支持 . BIOS 据此判断硬件对于机会主义的处理器性能操作的支持 .</p>
+<p>单个物理封装内的所有逻辑处理器共享 IA32_MISC_ENABLE[38] , BIOS 通过这一位开启或关闭机会主义的处理器性能操作 : 设置为 1 关闭 , 设置为 0 开启 .</p>
+<p>系统软件使用一个 read-modify-write sequence 设置 IA32_PERF_CTL MSR 的 bit 32 可以临时脱离机会主义的处理器性能操作 ; 使用一个 read-modify-write sequence 清除这一位可以重新使用 .</p>
+<h3 id="312-os-功率管理-p-state-策略需要的更改">3.1.2. OS 功率管理 P-State 策略需要的更改</h3>
+<p>Intel 动态加速技术和睿频技术可以提供高于处理器基准频率的性能 , 系统软件通过一对 MSR 观测性能反馈 , IA32_APERF 和 IA32_MPERF . 如果不关注性能反馈 , 目标 P-state 评估算法可能导致非最优的 P-state 目标 .</p>
+<p>某些情况下 , OS 功率管理可能想要关闭 Intel 动态加速技术 :</p>
+<ul>
+<li>使用 ACPI 定义的消极热量管理</li>
+<li>用户更偏向于保存电量 , 而不是性能</li>
+</ul>
+<h2 id="32-intel-睿频技术">3.2. Intel 睿频技术</h2>
+<p>睿频技术使用相同的准则利用热量 headroom 动态增加但新城和多线程环境的处理器性能 .</p>
+<h2 id="33-性能和能量偏爱线索支持">3.3. 性能和能量偏爱线索支持</h2>
+<p>Intel 64 处理器支持额外的软件线索 , 指导硬件增加动态性能还是保存能量消耗 .</p>
+<p>IA32_ENERGY_PERF_BIAS MSR 的 bit 0:3 用于指明偏爱的性能等级 , 0 表示性能最高 , 15 表示尽可能保存电量, 7 表示二者平衡 .</p>
+<p>每个逻辑处理器都有自己的 IA32_ENERGY_PERF_BIAS MSR , 在虚拟化场景中十分有用 . 这个寄存器只是一个线索 , 对于性能和能量的真实影响和处理器型号相关 .</p>
+<h1 id="4-硬件控制的性能状态--hwp-">4. 硬件控制的性能状态 ( HWP )</h1>
+<p>Intel 处理器可能支持硬件控制的处理器性能状态 ( HWP ) , 可以使用 OS 提供的性能指导线索自动选择性能状态 . 增强的 SpeedStep 技术向 OS 提供了一种机制 , 通过 IA32_PERF_CTL 和 IA32_PERF_STATUS MSR 控制和监测基于频率的离散操作点 .</p>
+<p>与此相对 , HWP 是 ACPI 定义的 Collaborative Processor Performance Control ( CPPC ) 的一种实现 , 要求平台枚举一个连续的 , 无抽象单位的 , 性能值比例 , 没有绑定到特定的性能状态 / 频率 .<br>
+尽管枚举的比例大体上和传递出的负载性能结果是线性关系 , OS 需要描绘出性能值范围 , 领会负载传递出的性能 .</p>
+<h2 id="41-hwp-编程接口">4.1. HWP 编程接口</h2>
+<p>硬件控制的 P-state 接口由几个寄存器组成 :</p>
+<ol>
+<li>IA32_PM_ENABLE , 设置 bit 0 开启硬件控制的 P-state . 设置后无法再次写入 , 只有 RESET 才能重置这一位 .</li>
+<li>IA32_HWP_CAPABILITIES , OS 读取枚举 HWP 管理的性能范围 , 直接映射到初始的频率目标 .</li>
+<li>IA32_HWP_REQUEST ( 每个逻辑处理器都有 ) , OS 控制每个逻辑处理器的 HWP 操作 , 5 个线索有效位指明处理器可以使用的线索信息 .</li>
+<li>IA32_HWP_REQUEST_PKG ( 每个封装内有 ) , 设置了 IA32_HWP_REQUEST 封装控制位的逻辑处理器都会采用这个 MSR 的设置 .</li>
+<li>IA32_HWP_PECI_REQUEST_INFO , 集成嵌入式系统控制器时 , 控制器可以通过 PECI 机制覆盖部分 OS HWP 请求设置 . PECI 设置优先 IA32_HWP_REQUEST 和 IA32_HWP_REQUEST_PKG 生效 , 无视封装控制位和有效位 .</li>
+</ol>
+<h2 id="42-hwp-反馈">4.2. HWP 反馈</h2>
+<p>处理器提供了 HWP 操作过程中几种反馈给 OS .</p>
+<p>IA32_MPERF 和 IA32_APERF MSR 机制允许 OS 计算一个时间段内传递出的有效频率 , 节能和性能优化直接影响传递出的有效频率 .</p>
+<p>IA32_HWP_STATUS MSR 记录对于 IA32_HWP_CAPABILITIES.Guaranteed_Performance , IA32_HWP_CAPABILITIES.Highest_Performance , IA32_HWP_CAPABILITIES.Minimum_Performance 的更改和 PECI_Override 进入 / 退出事件 .</p>
+<p>OS 可以检测 IA32_THERM_STATUS MSR 中和 IA32_HWP_REQUEST 的 Guaranteed_Performance 和 Minimum_Performance 相关的状态位确定具体原因 , 相关的位参见 SDM .</p>
+<hr>
+<p>non-architectural MSR Productive Performance ( MSR_PPERF ) 从硬件角度提供了负载可测量性 , 粗略估计频率和负载性能之间的关系 .</p>
+<p>MSR_PPERF 只会统计用于指令执行的 cycle , 即使关闭 HWP , 其值依然有效 .</p>
+<h2 id="43-hwp-通知">4.3. HWP 通知</h2>
+<p>处理器可以支持基于中断的 HWP 状态改变通知 , 通知事件通过已有的热量 LVT 项传递 , IA32_HWP_INTERRUPT MSR 用于使能中断通知 .</p>
+<h2 id="44-空闲逻辑处理器对于核心频率的影响">4.4. 空闲逻辑处理器对于核心频率的影响</h2>
+<p>处理器使用下列两种方式设置核心频率 :</p>
+<ol>
+<li>所有的核心共享相同的频率</li>
+<li>每个物理核心设置自己的频率</li>
+</ol>
+<p>两种情况下同一物理核心中的逻辑处理器设置的频率相同 , 因此处理器负责两个逻辑处理器的 IA32_HWP_REQUEST MSR 设置 .</p>
+<p>设置 CPUID[6].EAX[20] , 两个逻辑处理器只有一个活跃 , 另一个空闲 ( 处于任何 C1 子状态或更深度的休眠状态 ) , 只有活跃的逻辑处理器的 IA32_HWP_REQUEST MSR 会被考虑 ; 也就是说 , 处于 C1E 子状态或者更深度睡眠状态的逻辑处理器的 HWP 请求域会被忽略 .</p>
+<p>逻辑处理器位于 C1 状态 , 其 HWP 请求域会被考虑 .</p>
+<h2 id="45-uncore-msr-的快速写">4.5. uncore MSR 的快速写</h2>
+<p>有一些逻辑处理器范围内的 MSR 的值需要从逻辑处理器外观测 , <code>WRMSR</code> 指令花费超过 1000 cycle 完成 . 这个开销强制 OS 避免频繁写入这些寄存器 , 但是很多情况下 OS 需要频繁写入这些寄存器 , 以获得最优的功率 / 性能操作 .</p>
+<p>某些型号的处理器的快速写 MSR 特性减少了这个开销 , 选定集合的 MSR 只需要 100 cycle .</p>
+<p>说明 : 快速写 MSR 的写入操作是 posted , <code>WRMSR</code> 完成后 , 数据可能在处理器内传输 , 软件需要查询处理器 , 保证数据在逻辑处理器外已经可见 .</p>
+<p>三个 MSR 和快速写 MSR 特性相关 , 都是每个逻辑处理器所有 :</p>
+<ol>
+<li>FAST_UNCORE_MSRS_CAPABILITY</li>
+<li>FAST_UNCORE_MSRS_CTL</li>
+<li>FAST_UNCORE_MSRS_STATUS</li>
+</ol>
+<p>从 SDM 看 , 目前支持IA32_HWP_REQUEST MSR 作为快速写 MSR 使用 , 三个寄存器分别用于打开对于快速写 MSR 的支持 , 状态寄存器用于判断写入是否完成 .</p>
+<h1 id="5-hardware-duty-cycle--hdc-">5. hardware duty cycle ( HDC )</h1>
+<p>处理器可以支持硬件占空比 ( HDC ) , 处理器能够自动强制物理封装内的组件进入空闲状态 . 比如处理器可以选择性的强制处理器核心进入空闲状态 .</p>
+<p>支持 HDC 的处理器默认关闭 , 系统软件可以通过一个封装范围内的 MSR 强制组件进入空闲状态或者唤醒组件 .</p>
+<p>HDC 不会推迟事件 , 比如计时器过期 ; 但是可能影响短 ( 少于 1ms ) 软件线程的延迟 .</p>
+<p>HDC 强制的空闲操作可以被视为工作在较低的有效频率 , 软件计算的平均有效频率包括 HDC 强制的空闲 cycle .</p>
+<p>HDC 强制一个逻辑处理器 , 一个处理器核心 , 或一个物理封装进入空闲状态时 , C-state 设置为 C3 或者更深层的状态 .</p>
+<h2 id="51-hdc-编程接口">5.1. HDC 编程接口</h2>
+<p>HDC 提供了一些 non-architectural MSR :</p>
+<ol>
+<li>IA32_PKG_HDC_CTL , 物理封装内的任一逻辑处理器可写 , 开启 HDC 操作 ; 重置后清除 .</li>
+<li>IA32_PM_CTL1 , 每个逻辑处理器都有自己的 IA32_PM_CTL1 , 开启单个逻辑处理器的 HDC 操作 .</li>
+<li>IA32_THREAD_STALL , 追踪每个逻辑处理器的 HDC 驻留期 , 保存累计的 HDC 强制空闲 cycle 计数 . 只有逻辑处理器从强制空闲的 C-state 退出后 , 计数器才会更新 ; 每次更新都添加逻辑处理器空闲的 cycle 数到计数器 .</li>
+<li>MSR_CORE_HDC_RESIDENCY , 记录每个核心的 HDC 驻留期 , 核心处于 C3 或更新的状态时 , 并且至少一个逻辑处理器处于 HDC 强制的空闲状态时 , 计数器增加 . 物理封装内的每个处理器核心都有自己的 MSR .</li>
+<li>MSR_PKG_HDC_SHALLOW_LATENCY , 记录封装位于 C2 状态 , 所有的处理器核心都不活跃 , 至少有一个逻辑处理器由于 HDC 强制进入空闲状态时的 HDC 驻留时间 .</li>
+<li>MSR_PKG_HDC_DEEP_RESIDENCY , 记录封装处于软件指明的封装 Cx 状态 , 封装内的所有处理器核心都不活跃 , 只有一个逻辑处理器被强制进入空闲状态时的 HDC 驻留时间 .</li>
+<li>MSR_PKG_HDC_CONFIG , 配置 MSR_PKG_HDC_DEEP_LATENCY 监视的封装 Cx 状态 , 指明 MSR_HDC_DEEP_RESIDENCY 计数器监视的封装 C-state .</li>
+</ol>
+<p>默认设置下 , IA32_MPERF 计数器在强制的空闲状态下仍然计数 , 就像逻辑处理器处于活跃状态一样 ; IA32_APERF 在强制的空闲状态下不会计数 .</p>
+<h1 id="6-硬件反馈接口">6. 硬件反馈接口</h1>
+<p>硬件指引 OS 调度器通过内存中的硬件反馈接口数据结构执行最优化的负载调度 , 这个数据结构有一个 16-byte 的全局首部 , 后跟 socket 中的每个逻辑处理器的 8-byte 项 .<br>
+首部信息包含的字段指明硬件更新数据结构的时间戳和逻辑处理器的性能 , 能效等级是否发生变化 ; 每个逻辑处理器的 8-byte 项的前两个字节指明自身的性能等级和能效等级 .</p>
+<p>硬件反馈接口数据结构的物理地址由 OS 保存在封装范围内的 MSR IA32_HW_FEEDBACK_PTR , 还有一个有效标志位指明 MSR 内是否保存了有效地物理地址 .</p>
+<p>OS 使用封装范围内的 MSR IA32_HW_FEEDBACK_CONFIG 开启硬件反馈接口 , 开启之前 , OS 必须先设置有效的物理地址到 IA32_HW_FEEDBACK_PTR .<br>
+关闭接口时 , 硬件设置 IA32_PACKAGE_THERM_STATUS bit 26 为 1 , 回应关闭操作 . OS 必须在回收数据结构占用的内存前确保这个 bit 设置为 1 , 硬件不会再对内存进行写入操作 .</p>
+<h1 id="7-高级功率管理的-mwait-扩展">7. 高级功率管理的 MWAIT 扩展</h1>
+<p>MWAIT 扩展定义的特定处理器的 C-state 可以映射到 ACPI 定义的 C-state 类型 , Intel Core Solo 和 Duo 处理器支持更深层的 C-state 和 MWAIT 扩展 , 可以由 OS 用于实现功率管理策略 .</p>
+<p>如果 CPUID.07H.ECX[bit 0] = 1 , 处理器支持 MWAIT 扩展和其枚举 , 支持使用中断作为 WMAIT 的 break-events , 即使关闭中断时 . 这个特性可以用于计算 C-state 驻留时间 :</p>
+<ul>
+<li>发送一个 MWAIT 进入特定处理器的 C-state 或子 C-state 时 , 软件可以写入 0 到 MWAIT 扩展寄存器 ( ECX ) .</li>
+<li>处理器退出 C-state 或子 C-state 时 , 软件可以在执行一个中断服务例程 ( ISR ) 前读取一个时间戳 .</li>
+</ul>
+<p>CPUID.05H.EDX 允许软件枚举 MWAIT 扩展下特定处理器的 C-state 和子 C-state ; 给定一个 C-state 类型 , 处理器可能支持多个 C-state , 称作 <strong>子 C-state</strong> . 数更大的 C-state 更省电 , 延迟更高 .</p>
+<p>CPL = 0 时 , 系统软件可以使用 MWAIT 线索寄存器 ( EAX ) 指明想要的 C-state 和子 C-state ， 处理器不会进入比指明的更深层的 C-state .<br>
+如果 CPL &gt; 0 并且支持 CPL &gt; 0 的 MONITOR / MWAIT , 处理器只会进入 C1-state ( 不管线索寄存器请求的 C-state ) .</p>
+<p>说明 : 如果使用 MWAIT 进入一个高于 C1 的 C-state , 带有 MONITOR 指令的地址范围内的保存操作会导致处理器退出 MWAIT , 如果保存操作由另一个处理器发起 . non-processor 的保存操作不会导致处理器退出 MWAIT .</p>
+<h1 id="8-热量监测和保护">8. 热量监测和保护</h1>
+<p>IA-32 架构提供了下列机制监测温度 ， 控制热量 ：</p>
+<ol>
+<li>
+<p>catastrophic shutdown detector 强制处理器停止执行 , 如果处理器核心的温度超过一个预设值 .<br>
+探测器是一个热量传感器 , 处理器核心的温度达到一个出厂设置值时 , 传感器 trip , 处理器停止执行 , 直到重置 .</p>
+</li>
+<li>
+<p>automatic and adaptive thermal monitoring 机制强制处理器减少电能消耗 , 从而工作在预设的温度限制内 .<br>
+处理器引入第二个温度传感器 , 处理器核心的温度超出推荐的热量设计时 trip , 设置的温度值低于 catastrophic shutdown detector .</p>
+<p>Pentium 4 处理器搭配第二个温度传感器和热量监测器 1 ( TM1 ) 机制使用 , 控制处理器的核心温度 . TM1 调整处理器时钟的占空比控制处理器的温度 .</p>
+<p>额外的自动热量保护机制热量监测器 2 ( TM2 ) 通过减少处理器的操作频率和电压控制核心温度 , 同样等级的功率削减下 , 比 TM1 的性能更高 .<br>
+TM2 和 TM1 由相同的温度传感器触发 .</p>
+<p>系统上电或重启后 , BIOS 需要开启 TM1 或 TM2 . Pentium 4 以后的处理器 , 设置 IA32_MISC_ENABLE 寄存器的 bit 13 为 1 开启 TM2 .<br>
+TM2 触发后的目标操作频率和电压通过 MSR_THERM2_CTL bit 15:0 的值指明 .</p>
+<p>如果 TM1 / TM2 的热量控制电路 ( TCC ) 可用 , 写入 IA32_PERF_CTL 会对新的运行点带来以下影响 :</p>
+<ul>
+<li>如果开启 TM1 , 使用 TCC , P-state 切换在 TCC 脱离前发生 .</li>
+<li>如果开启 TM2 , 使用 TCC , 写入 IA32_PERF_CTL 指明的 P-state 切换在脱离 TCC 后发生 .</li>
+</ul>
+<p>触发 TM1 / TM2 的温度传感器的状态通过 IA32_THERM_STATUS MSR 的热量状态标志和热量状态日志标志指明 .<br>
+处理器处于时钟停止状态时 , 中断会被屏蔽 , 防止打断处理器 . 这个操作会增加中断的延迟 , 但不会导致中断丢失 . 时钟调整完成前 , 未解决的中断会保持挂起状态 .<br>
+可以通过编程 TM 在热量传感器 trip 时产生一个中断给处理器 , 低温中断和高温中断可以通过 IA32_THERM_INTERUPT MSR 的对应位开启 .</p>
+<p>Intel Core 2 Duo 处理器支持增强的热量管理机制 , 称作 adaptive thermal monitor ( adaptive TM ) .<br>
+和 TM2 不同 , 适应性 TM 不限于一个 TM2 切换目标 , thermal trip 事件中 , 适应性 TM 基于当前的操作点是否有效地冷却了处理器选择一个目标操作点 .<br>
+和 TM2 类似 , 适应性 TM 也由 BIOS 开启 , BIOS 需要在平台初始化时测试 TM1 和 TM2 特性标志 , 开启所有可用的热量控制机制 , 包括适应性 TM .<br>
+只有支持 TM2 的处理器才会支持适应性 TM .<br>
+处理器核心内的每个热量传感器独立触发 , 从而引入热量管理特性 ; 适应性 TM 下 , 如果触发一个传感器 , 两个处理器核心 ( Core 2 Duo ) 都会切换到低频或低压状态 .</p>
+</li>
+<li>
+<p>software controlled clock modulation 机制允许 OS 实现功率管理策略 , 减少电能消耗 ; 这个机制不包含在自动热量监控机制提供的削减措施内 .</p>
+<p>软件通过 IA32_CLOCK_MODULATION MSR 开启软件控制的时钟调节 , 选择时钟调节的占空比 , 控制处理器的停止时钟电路 , 从内部调节时钟信号 .<br>
+IA32_THERM_STATUS 的 bit 0 设置时 , TM1 优先 IA32_CLOCK_MODULATION 生效 .<br>
+支持超线程技术的处理器 , 每个逻辑处理器都有一个 IA32_CLOCK_MODULATION MSR ; 如果同一个处理器核心的逻辑处理器设置不同的占空比 , 对于某些特定的处理器 , 处理器时钟会调整到最大的占空比 ; 其他型号的处理器时钟调整为最小的占空比 .</p>
+<p>通过 IA32_CLOCK_MODULATION 的 bit 0 可以将占空比的粒度从 12.5% 扩展为 6.25% .</p>
+</li>
+<li>
+<p>on-die digital thermal sensor and interrupt 机制允许 OS 不依赖 BIOS 或者其他系统板组件本地管理热量条件 .</p>
+<p>on-die 数字热量传感器通过 MSR 读取 , 每个核心有自己的数字传感器 , 位于 die 上最热的区域 , 可以准确获取 die 温度 .</p>
+<p>软件使用 IA32_THERM_INTERRUPT MSR 设置热量阈值 , 使用 IA32_THERM_STATUS MSR 读取数字热量传感器的输出 .<br>
+数字热量传感器的输出是一个相对于处理器支持的最大操作温度的值 , 通常等于或者低于 TCC 的激活温度 .</p>
+<p>温度的改变可以通过两个阈值探测到 , 一个大于当前温度 , 一个小于当前温度 . 两个阈值可以使用核心的 local APIC 产生中断 . Intel Thermal Monitor 使用相同的 local APIC 项 , 中断处理函数需要确定中断源 .</p>
+</li>
+</ol>
+<h1 id="9-封装层的热量控制">9. 封装层的热量控制</h1>
+<p>IA32_THERM_STATUS 和 IA32_TERM_INTERRUPT 是处理器核心粒度的热量管理工具 , 两个结构的 MSR IA32_PACKAGE_THERM_STATUS 和 IA32_PACKAGE_THERM_INTERRUPT 是封装层级的热量管理工具 .<br>
+封装层级的 MSR 和处理器核心粒度的 MSR 使用类似的接口 , 但是在每个物理处理器封装内共享 .</p>
+<hr>
+<p>OS 功率管理可以通过 ACPI 控制方法主动或被动冷却处理器 , 在提供了封装层级的热量管理工具的平台上 , 推荐主动冷却 ( 风扇控制 ) 通过 IA32_PACKAGE_THERM_INTERRUPT MSR 测量封装的温度 .</p>
+<p>被动冷却 ( 频率限制 ) 可以通过测量核心和封装温度控制 , 也可以仅仅通过封装温度 .<br>
+如果一个测量的封装层级的温度导致功率管理选择一个核心执行被动冷却 , 所有的核心都需要执行被动冷却 . 核心温度通过 IA32_THERMAL 和 IA32_THERMAL_INTERRUPT MSR 测量 .</p>
+<h1 id="10-平台相关的功率管理支持">10. 平台相关的功率管理支持</h1>
+<p>这部分内容说明了一些平台相关组建的功率管理需求 , 特别的 , RAPL ( running average power limit ) 接口提供了加强功率消耗限制的机制 . 功率限制在客户端和服务器平台有特定的使用方法 .</p>
+<p>对于客户端平台功率限制控制和数据中心的服务器平台 , 下列功率和热量相关的用法是合意的 :</p>
+<ul>
+<li>平台热量管理</li>
+<li>平台功率管理</li>
+<li>功率 / 性能预算</li>
+</ul>
+<p>服务器和客户端的用法模型通过 RAPL 接口说明 , 后者在每个处理器 socket 内导出多个功率配给量域 , 这些域包括下列层级 :</p>
+<ul>
+<li>封装域时处理器 die</li>
+<li>内存域包括直接连接的 DRAM ; 一个附加的功率平面可以组成一个单独的域</li>
+</ul>
+<h2 id="101-rapl-接口">10.1. RAPL 接口</h2>
+<p>RAPL 由 MSR 组成 , 每个 RAPL 域支持下列可选功能集合 :</p>
+<ul>
+<li>功率限制</li>
+<li>能量状态</li>
+<li>性能状态 ( 可选 )</li>
+<li>功率信息 ( 可选 )</li>
+<li>策略 ( 可选 )</li>
+</ul>
+<p>上述功能都有自己的单位 , 也有放大系数 , 通过 MSR_RAPL_POWER_UNIT 指明 .</p>
+<h2 id="102-rapl-域和平台特征">10.2. RAPL 域和平台特征</h2>
+<p>客户端平台支持下列 RAPL 域层级 :</p>
+<ul>
+<li>封装</li>
+<li>两个功率平面 : PP0 和 PP1</li>
+</ul>
+<p>服务器平台支持下列 RAPL 域层级 :</p>
+<ul>
+<li>封装</li>
+<li>功率平面 : PP0</li>
+<li>DRAM</li>
+</ul>
+<p>每个 RAPL 层级提供了一组 RAPL 接口寄存器 .</p>
+<h2 id="103-封装级的-rapl-域">10.3. 封装级的 RAPL 域</h2>
+<p>封装级的 RAPL MSR 接口包括 ：</p>
+<ul>
+<li>MSR_PKG_POWER_LIMIT ， 供软件设置封装的功率限制</li>
+<li>MSR_PKG_ENERGY_STATUS ， 报告实际测量的能量消耗</li>
+<li>MSR_PKG_POWER_INFO ， 报告 RAPL 使用的封装功率范围信息</li>
+<li>MSR_PKG_PERF_STATUS ， 报告功率限制对于性能的影响</li>
+</ul>
+<h2 id="104-pp0--pp1-rapl-域">10.4. PP0 / PP1 RAPL 域</h2>
+<p>通常 PP0 指处理器核心 ; 对于客户端平台 , PP1 指处理器核心外的特定设备的功率平面 .</p>
+<ul>
+<li>MSR_PP0_POWER_LIMIT / MSR_PP1_POWER_LIMIT , 允许软件设置对应功率平面域的限制</li>
+<li>MSR_PP0_ENERGY_STATUS / MSR_PP1_ENERGY_STATUS , 报告功率平面的实际能量消耗</li>
+<li>MSR_PP0_PERF_STATUS / MSR_PP1_POLICY , 供软件调整对应功率平面的平衡</li>
+<li>MSR_PP0_PERF_STATUS , 报告功率限制对于性能的影响</li>
+</ul>
+<h2 id="105-dram-域">10.5. DRAM 域</h2>
+<p>只有服务器平台支持 DRAM 域 , MSR 接口包括 :</p>
+<ul>
+<li>MSR_DRAM_POWER_LIMIT</li>
+<li>MSR_DRAM_ENERGY_STATUS</li>
+<li>MSR_DRAM_POWER_INFO</li>
+<li>MSR_DRAM_PERF_STATUS</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Globs Guo</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2020-10-15
+        
+    </span>
+  </p>
+  
+  
+</div>
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">Reward</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/wechat.jpg">
+        <span>wechat</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/img/reward/alipay.jpg">
+        <span>alipay</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/intel-sdm/">Intel-SDM</a>
+          <a href="/tags/hwp/">HWP</a>
+          <a href="/tags/hdc/">HDC</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/intel-sdm/3b_chap15-machine_check_architecture/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">3B_chap15-machine_check_architecture</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/intel-sdm/1_chap3-basic_execution_environment/">
+            <span class="next-text nav-default">1_chap3-basic_execution_environment</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="GlobsGuo/utterancesRepo"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="sendtomedivh@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="http://github.com/globsguo" class="iconfont icon-github" title="github"></a>
+  <a href="https://globsguo.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> site pv: <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> site uv: <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2019 - 
+    2020<span class="heart"><i class="iconfont icon-heart"></i></span><span>Globs Guo</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
